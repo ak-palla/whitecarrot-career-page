@@ -23,7 +23,7 @@ export function AboutSection({ heading, body, layout = 'full', background = 'pla
 
   if (background === 'card') {
     return (
-      <section className="prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px]">
+      <section className="prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px]">
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
@@ -42,7 +42,7 @@ export function AboutSection({ heading, body, layout = 'full', background = 'pla
   }
 
   return (
-    <section className="prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px]">
+    <section className="prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-20">
       {content}
     </section>
   );

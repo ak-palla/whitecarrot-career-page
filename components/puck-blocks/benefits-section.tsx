@@ -19,7 +19,7 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
 
   if (isList) {
     return (
-      <section className="px-4 md:px-6 lg:px-[60px]">
+      <section className="px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px]">
         <h2 className="mb-6 text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
           {heading}
         </h2>
@@ -47,7 +47,7 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
   }
 
   return (
-    <section className="px-4 md:px-6 lg:px-[60px]">
+    <section className="px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-20">
       <h2 className="mb-6 text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
         {heading}
       </h2>

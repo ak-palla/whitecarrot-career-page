@@ -93,7 +93,7 @@ export function JobsSection({
 
   if (background === 'card') {
     return (
-      <section id="jobs" className="scroll-mt-20 px-4 md:px-6 lg:px-[60px]">
+      <section id="jobs" className="scroll-mt-20 px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px]">
         <Card>
           <CardContent className="pt-6">
             {sectionContent}
@@ -104,7 +104,7 @@ export function JobsSection({
   }
 
   return (
-    <section id="jobs" className="scroll-mt-20 px-4 md:px-6 lg:px-[60px]">
+    <section id="jobs" className="scroll-mt-20 px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px]">
       {sectionContent}
     </section>
   );

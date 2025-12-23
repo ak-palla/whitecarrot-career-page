@@ -33,7 +33,7 @@ export function TeamSection({ heading, description, background = 'plain', align 
 
   if (background === 'accentStrip') {
     return (
-      <section className={`prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] ${alignmentClasses[align]}`}>
+      <section className={`prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px] ${alignmentClasses[align]}`}>
         <Card className="border-0" style={{ backgroundColor: 'var(--primary-soft)' }}>
           <CardHeader>
             <CardTitle className="text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
@@ -53,7 +53,7 @@ export function TeamSection({ heading, description, background = 'plain', align 
   }
 
   return (
-    <section className={`prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] ${alignmentClasses[align]}`}>
+    <section className={`prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px] ${alignmentClasses[align]}`}>
       {content}
     </section>
   );
