@@ -1,4 +1,7 @@
 import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export interface JobsSectionProps {
   heading: string;
@@ -6,148 +9,190 @@ export interface JobsSectionProps {
   emptyStateMessage: string;
   density?: 'comfortable' | 'compact';
   background?: 'plain' | 'card';
+  buttonVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
+  badgeVariant?: 'default' | 'secondary' | 'outline' | 'destructive';
   // jobs will be injected at render time via PuckRenderer context/props
   jobs?: any;
 }
 
-export function JobsSection({ heading, layout, emptyStateMessage, jobs, density = 'comfortable', background = 'plain' }: JobsSectionProps) {
+export function JobsSection({ 
+  heading, 
+  layout, 
+  emptyStateMessage, 
+  jobs, 
+  density = 'comfortable', 
+  background = 'plain',
+  buttonVariant = 'ghost',
+  badgeVariant = 'secondary',
+}: JobsSectionProps) {
   const jobsArray: any[] = Array.isArray(jobs) ? jobs : [];
 
-  const sectionClasses = background === 'card'
-    ? 'rounded-xl p-6 md:p-8 shadow-sm'
-    : '';
-
-  const sectionStyle = background === 'card'
-    ? {
-        backgroundColor: 'var(--card-bg)',
-        border: '1px solid var(--card-border)',
-      }
-    : {};
-
-  if (!jobsArray || jobsArray.length === 0) {
-    return (
-      <section id="jobs" className={`scroll-mt-20 ${sectionClasses}`} style={sectionStyle}>
+  const sectionContent = (
+    <>
+      {(!jobsArray || jobsArray.length === 0) ? (
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--heading-color)' }}>
             {heading}
           </h2>
           <p style={{ color: 'var(--text-color)' }}>{emptyStateMessage}</p>
         </div>
-      </section>
-    );
-  }
+      ) : (
+        <>
+          {layout === 'team' && (
+            <>
+              <div className="text-center mb-6">
+                <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--heading-color)' }}>
+                  {heading}
+                </h2>
+              </div>
+              {Object.entries(groupBy(jobsArray, (job) => job.team || 'Other')).map(([team, teamJobs]) => (
+                <div key={team} className="space-y-4 mb-8">
+                  <h3 className="text-xl font-semibold" style={{ color: 'var(--heading-color)' }}>
+                    {team}
+                  </h3>
+                  <JobList jobs={teamJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                </div>
+              ))}
+            </>
+          )}
+          {layout === 'location' && (
+            <>
+              <div className="text-center mb-6">
+                <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--heading-color)' }}>
+                  {heading}
+                </h2>
+              </div>
+              {Object.entries(groupBy(jobsArray, (job) => job.location || 'Other')).map(([location, locationJobs]) => (
+                <div key={location} className="space-y-4 mb-8">
+                  <h3 className="text-xl font-semibold" style={{ color: 'var(--heading-color)' }}>
+                    {location}
+                  </h3>
+                  <JobList jobs={locationJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                </div>
+              ))}
+            </>
+          )}
+          {layout !== 'team' && layout !== 'location' && (
+            <>
+              <div className="mb-6 text-center">
+                <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--heading-color)' }}>
+                  {heading}
+                </h2>
+              </div>
+              {layout === 'cards' ? (
+                <JobCards jobs={jobsArray} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+              ) : (
+                <JobList jobs={jobsArray} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+              )}
+            </>
+          )}
+        </>
+      )}
+    </>
+  );
 
-  if (layout === 'team') {
-    const grouped = groupBy(jobsArray, (job) => job.team || 'Other');
+  if (background === 'card') {
     return (
-      <section id="jobs" className={`scroll-mt-20 space-y-8 ${sectionClasses}`} style={sectionStyle}>
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--heading-color)' }}>
-            {heading}
-          </h2>
-        </div>
-        {Object.entries(grouped).map(([team, teamJobs]) => (
-          <div key={team} className="space-y-4">
-            <h3 className="text-xl font-semibold" style={{ color: 'var(--heading-color)' }}>
-              {team}
-            </h3>
-            <JobList jobs={teamJobs} density={density} />
-          </div>
-        ))}
-      </section>
-    );
-  }
-
-  if (layout === 'location') {
-    const grouped = groupBy(jobsArray, (job) => job.location || 'Other');
-    return (
-      <section id="jobs" className={`scroll-mt-20 space-y-8 ${sectionClasses}`} style={sectionStyle}>
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--heading-color)' }}>
-            {heading}
-          </h2>
-        </div>
-        {Object.entries(grouped).map(([location, locationJobs]) => (
-          <div key={location} className="space-y-4">
-            <h3 className="text-xl font-semibold" style={{ color: 'var(--heading-color)' }}>
-              {location}
-            </h3>
-            <JobList jobs={locationJobs} density={density} />
-          </div>
-        ))}
+      <section id="jobs" className="scroll-mt-20 px-4 md:px-6 lg:px-[60px]">
+        <Card>
+          <CardContent className="pt-6">
+            {sectionContent}
+          </CardContent>
+        </Card>
       </section>
     );
   }
 
   return (
-    <section id="jobs" className={`scroll-mt-20 ${sectionClasses}`} style={sectionStyle}>
-      <div className="mb-6 text-center">
-        <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--heading-color)' }}>
-          {heading}
-        </h2>
-      </div>
-      {layout === 'cards' ? <JobCards jobs={jobsArray} density={density} /> : <JobList jobs={jobsArray} density={density} />}
+    <section id="jobs" className="scroll-mt-20 px-4 md:px-6 lg:px-[60px]">
+      {sectionContent}
     </section>
   );
 }
 
-function JobList({ jobs, density = 'comfortable' }: { jobs: any[]; density?: 'comfortable' | 'compact' }) {
-  const paddingClasses = density === 'compact' ? 'px-4 py-2' : 'px-4 py-3';
-  
+function JobList({ 
+  jobs, 
+  density = 'comfortable',
+  buttonVariant = 'ghost',
+  badgeVariant = 'secondary',
+}: { 
+  jobs: any[]; 
+  density?: 'comfortable' | 'compact';
+  buttonVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
+  badgeVariant?: 'default' | 'secondary' | 'outline' | 'destructive';
+}) {
   return (
     <div className="space-y-3">
       {jobs.map((job) => (
-        <div
-          key={job.id}
-          className={`flex items-center justify-between rounded-lg border ${paddingClasses} text-sm`}
-          style={{
-            backgroundColor: 'var(--card-bg)',
-            borderColor: 'var(--card-border)',
-          }}
-        >
-          <div>
-            <p className="font-medium" style={{ color: 'var(--heading-color)' }}>
-              {job.title}
-            </p>
-            <p className="text-xs" style={{ color: 'var(--text-color)', opacity: 0.7 }}>
-              {job.location} • {job.job_type?.replace('-', ' ')}
-            </p>
+        <Card key={job.id} className={density === 'compact' ? 'p-3' : 'p-4'}>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <CardTitle className="text-base font-medium mb-1" style={{ color: 'var(--heading-color)' }}>
+                {job.title}
+              </CardTitle>
+              <div className="flex gap-2 flex-wrap">
+                {job.location && (
+                  <Badge variant={badgeVariant} className="text-xs">
+                    {job.location}
+                  </Badge>
+                )}
+                {job.job_type && (
+                  <Badge variant={badgeVariant} className="text-xs">
+                    {job.job_type.replace('-', ' ')}
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <Button variant={buttonVariant} size="sm" asChild>
+              <a href={`#job-${job.id}`}>View details</a>
+            </Button>
           </div>
-          <span className="text-xs font-medium" style={{ color: 'var(--primary)' }}>
-            View details
-          </span>
-        </div>
+        </Card>
       ))}
     </div>
   );
 }
 
-function JobCards({ jobs, density = 'comfortable' }: { jobs: any[]; density?: 'comfortable' | 'compact' }) {
-  const paddingClasses = density === 'compact' ? 'p-4' : 'p-5';
-  
+function JobCards({ 
+  jobs, 
+  density = 'comfortable',
+  buttonVariant = 'ghost',
+  badgeVariant = 'secondary',
+}: { 
+  jobs: any[]; 
+  density?: 'comfortable' | 'compact';
+  buttonVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
+  badgeVariant?: 'default' | 'secondary' | 'outline' | 'destructive';
+}) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {jobs.map((job) => (
-        <article
-          key={job.id}
-          className={`relative rounded-xl border ${paddingClasses} shadow-sm`}
-          style={{
-            backgroundColor: 'var(--card-bg)',
-            borderColor: 'var(--card-border)',
-          }}
-        >
-          <h3 className="text-base font-semibold" style={{ color: 'var(--heading-color)' }}>
-            {job.title}
-          </h3>
-          <p className="mt-1 text-xs" style={{ color: 'var(--text-color)', opacity: 0.7 }}>
-            {job.location} • {job.job_type?.replace('-', ' ')}
-          </p>
-          <div className="mt-4 flex justify-end">
-            <span className="text-xs font-medium" style={{ color: 'var(--primary)' }}>
-              View details
-            </span>
-          </div>
-        </article>
+        <Card key={job.id} className={density === 'compact' ? 'p-4' : 'p-5'}>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold" style={{ color: 'var(--heading-color)' }}>
+              {job.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-3">
+            <div className="flex gap-2 flex-wrap">
+              {job.location && (
+                <Badge variant={badgeVariant} className="text-xs">
+                  {job.location}
+                </Badge>
+              )}
+              {job.job_type && (
+                <Badge variant={badgeVariant} className="text-xs">
+                  {job.job_type.replace('-', ' ')}
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter className="pt-0 justify-end">
+            <Button variant={buttonVariant} size="sm" asChild>
+              <a href={`#job-${job.id}`}>View details</a>
+            </Button>
+          </CardFooter>
+        </Card>
       ))}
     </div>
   );

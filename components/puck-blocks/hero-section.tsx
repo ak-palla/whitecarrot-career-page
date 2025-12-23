@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
 
 export interface HeroSectionProps {
   title: string;
@@ -11,6 +12,8 @@ export interface HeroSectionProps {
   alignment?: 'left' | 'center' | 'right';
   size?: 'compact' | 'tall';
   backgroundStyle?: 'solid' | 'image' | 'gradient';
+  primaryCtaVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
+  primaryCtaSize?: 'default' | 'sm' | 'lg' | 'icon' | 'icon-sm' | 'icon-lg';
 }
 
 export function HeroSection({
@@ -22,6 +25,8 @@ export function HeroSection({
   alignment = 'center',
   size = 'tall',
   backgroundStyle = 'solid',
+  primaryCtaVariant = 'secondary',
+  primaryCtaSize = 'default',
 }: HeroSectionProps) {
   const alignmentClasses = {
     left: 'items-start text-left',
@@ -46,10 +51,11 @@ export function HeroSection({
   };
 
   return (
-    <header
-      className={`relative overflow-hidden rounded-3xl px-6 md:px-10 ${sizeClasses[size]}`}
-      style={getBackgroundStyle()}
-    >
+    <div className="px-4 md:px-6 lg:px-[60px]">
+      <header
+        className={`relative overflow-hidden rounded-3xl px-6 md:px-10 ${sizeClasses[size]}`}
+        style={getBackgroundStyle()}
+      >
       {backgroundImageUrl && backgroundStyle === 'image' && (
         <div
           className="pointer-events-none absolute inset-0 opacity-20"
@@ -66,19 +72,24 @@ export function HeroSection({
           </p>
         )}
         {primaryCtaLabel && primaryCtaHref && (
-          <a
-            href={primaryCtaHref}
-            className="mt-4 inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-medium shadow-sm transition hover:opacity-90"
+          <Button
+            asChild
+            variant={primaryCtaVariant}
+            size={primaryCtaSize}
+            className="mt-4 rounded-full"
             style={{
-              backgroundColor: 'var(--secondary)',
-              color: 'var(--primary)',
+              backgroundColor: primaryCtaVariant === 'secondary' ? 'var(--secondary)' : undefined,
+              color: primaryCtaVariant === 'secondary' ? 'var(--primary)' : undefined,
             }}
           >
-            {primaryCtaLabel}
-          </a>
+            <a href={primaryCtaHref}>
+              {primaryCtaLabel}
+            </a>
+          </Button>
         )}
       </div>
     </header>
+    </div>
   );
 }
 

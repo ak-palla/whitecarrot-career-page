@@ -65,6 +65,26 @@ export const careersPageConfig: Config<PuckProps> = {
             { label: 'Gradient', value: 'gradient' },
           ],
         },
+        primaryCtaVariant: {
+          type: 'select',
+          label: 'Button Variant',
+          options: [
+            { label: 'Default', value: 'default' },
+            { label: 'Secondary', value: 'secondary' },
+            { label: 'Outline', value: 'outline' },
+            { label: 'Ghost', value: 'ghost' },
+            { label: 'Link', value: 'link' },
+          ],
+        },
+        primaryCtaSize: {
+          type: 'select',
+          label: 'Button Size',
+          options: [
+            { label: 'Small', value: 'sm' },
+            { label: 'Default', value: 'default' },
+            { label: 'Large', value: 'lg' },
+          ],
+        },
       },
       defaultProps: {
         title: 'Join our team',
@@ -75,6 +95,8 @@ export const careersPageConfig: Config<PuckProps> = {
         alignment: 'center',
         size: 'tall',
         backgroundStyle: 'solid',
+        primaryCtaVariant: 'secondary',
+        primaryCtaSize: 'default',
       },
       render: (props) => <HeroSection {...props} />,
     },
@@ -224,6 +246,27 @@ export const careersPageConfig: Config<PuckProps> = {
           type: 'text',
           label: 'Empty state message',
         },
+        buttonVariant: {
+          type: 'select',
+          label: 'Button Variant',
+          options: [
+            { label: 'Default', value: 'default' },
+            { label: 'Secondary', value: 'secondary' },
+            { label: 'Outline', value: 'outline' },
+            { label: 'Ghost', value: 'ghost' },
+            { label: 'Link', value: 'link' },
+          ],
+        },
+        badgeVariant: {
+          type: 'select',
+          label: 'Badge Variant',
+          options: [
+            { label: 'Default', value: 'default' },
+            { label: 'Secondary', value: 'secondary' },
+            { label: 'Outline', value: 'outline' },
+            { label: 'Destructive', value: 'destructive' },
+          ],
+        },
       },
       defaultProps: {
         heading: 'Open positions',
@@ -231,6 +274,8 @@ export const careersPageConfig: Config<PuckProps> = {
         density: 'comfortable',
         background: 'plain',
         emptyStateMessage: 'No open positions at the moment. Check back soon!',
+        buttonVariant: 'ghost',
+        badgeVariant: 'secondary',
       },
       render: (props) => <JobsSection {...props} />,
     },

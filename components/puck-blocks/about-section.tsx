@@ -1,4 +1,5 @@
 import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export interface AboutSectionProps {
   heading: string;
@@ -8,19 +9,8 @@ export interface AboutSectionProps {
 }
 
 export function AboutSection({ heading, body, layout = 'full', background = 'plain' }: AboutSectionProps) {
-  const sectionClasses = background === 'card' 
-    ? 'rounded-xl p-6 md:p-8 shadow-sm'
-    : '';
-
-  const sectionStyle = background === 'card' 
-    ? {
-        backgroundColor: 'var(--card-bg)',
-        border: '1px solid var(--card-border)',
-      }
-    : {};
-
-  return (
-    <section className={`prose prose-lg max-w-none ${sectionClasses}`} style={sectionStyle}>
+  const content = (
+    <>
       <h2 className="mb-4 text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
         {heading}
       </h2>
@@ -28,6 +18,32 @@ export function AboutSection({ heading, body, layout = 'full', background = 'pla
         style={{ color: 'var(--text-color)' }}
         dangerouslySetInnerHTML={{ __html: body || '' }}
       />
+    </>
+  );
+
+  if (background === 'card') {
+    return (
+      <section className="prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px]">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
+              {heading}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              style={{ color: 'var(--text-color)' }}
+              dangerouslySetInnerHTML={{ __html: body || '' }}
+            />
+          </CardContent>
+        </Card>
+      </section>
+    );
+  }
+
+  return (
+    <section className="prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px]">
+      {content}
     </section>
   );
 }

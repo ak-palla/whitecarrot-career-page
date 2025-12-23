@@ -1,4 +1,6 @@
 import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 export interface ContentSectionProps {
   title: string;
@@ -8,20 +10,21 @@ export interface ContentSectionProps {
 
 export function ContentSection({ title, content }: ContentSectionProps) {
   return (
-    <section className="prose prose-lg max-w-none">
-      <h2
-        className="text-3xl font-bold mb-6 border-b pb-4"
-        style={{
-          color: 'var(--heading-color)',
-          borderColor: 'var(--card-border)',
-        }}
-      >
-        {title}
-      </h2>
-      <div
-        style={{ color: 'var(--text-color)' }}
-        dangerouslySetInnerHTML={{ __html: content || '' }}
-      />
+    <section className="prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px]">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
+            {title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Separator className="mb-4" />
+          <div
+            style={{ color: 'var(--text-color)' }}
+            dangerouslySetInnerHTML={{ __html: content || '' }}
+          />
+        </CardContent>
+      </Card>
     </section>
   );
 }
