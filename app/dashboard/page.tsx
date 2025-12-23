@@ -8,31 +8,38 @@ export default async function DashboardPage() {
     const companies = await getCompanies();
 
     return (
-        <div className="container mx-auto py-10">
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Your Companies</h1>
-                    <p className="text-muted-foreground mt-2">Manage your career pages and job postings.</p>
+        <div className="flex flex-1 flex-col gap-8">
+            <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                    <h1 className="text-2xl font-semibold tracking-tight">Your Companies</h1>
+                    <p className="text-sm text-muted-foreground">Manage your career pages and job postings.</p>
                 </div>
+                {/* Create Dialog on top right as well, for convenience */}
                 <CreateCompanyDialog />
             </div>
 
             {companies.length === 0 ? (
-                <div className="text-center py-20 border rounded-lg bg-gray-50 border-dashed">
-                    <h2 className="text-xl font-semibold mb-2">No companies yet</h2>
-                    <p className="text-muted-foreground mb-4">Create your first company to get started.</p>
-                    {/* The dialog button is already above, but we could put one here too if we wanted contextually. */}
+                <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm py-20 bg-muted/20">
+                    <div className="flex flex-col items-center gap-1 text-center">
+                        <h3 className="text-lg font-bold tracking-tight">No companies created</h3>
+                        <p className="text-sm text-muted-foreground mb-4">You have not created any companies yet.</p>
+                        <CreateCompanyDialog />
+                    </div>
                 </div>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {companies.map((company) => (
                         <Link key={company.id} href={`/${company.slug}/edit`}>
-                            <Card className="hover:bg-accent/50 transition-colors cursor-pointer h-full">
-                                <CardHeader>
-                                    <CardTitle>{company.name}</CardTitle>
+                            <Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/20 cursor-pointer">
+                                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-muted/50 opacity-0 transition-opacity group-hover:opacity-100" />
+                                <CardHeader className="relative">
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle className="text-lg">{company.name}</CardTitle>
+                                        <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Live</span>
+                                    </div>
                                 </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm text-muted-foreground">/{company.slug}</p>
+                                <CardContent className="relative">
+                                    <p className="text-sm text-muted-foreground font-mono">/{company.slug}</p>
                                 </CardContent>
                             </Card>
                         </Link>

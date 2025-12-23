@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
-import { notFound } from 'next/navigation';
 import { CareerPageRenderer } from '@/components/candidate/career-page-renderer';
+import { PuckRenderer } from '@/components/candidate/puck-renderer';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +32,22 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
     const { companySlug } = await params;
     const supabase = await createClient();
 
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            sessionId: 'debug-session',
+            runId: 'pre-fix-1',
+            hypothesisId: 'H1',
+            location: 'career-page/app/[companySlug]/careers/page.tsx:32',
+            message: 'CareersPage entry',
+            data: { companySlug },
+            timestamp: Date.now(),
+        }),
+    }).catch(() => { });
+    // #endregion agent log
+
     // Fetch all necessary data
     const { data: company } = await supabase
         .from('companies')
@@ -39,17 +55,83 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
         .eq('slug', companySlug)
         .single();
 
-    if (!company) notFound();
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            sessionId: 'debug-session',
+            runId: 'pre-fix-1',
+            hypothesisId: 'H1',
+            location: 'career-page/app/[companySlug]/careers/page.tsx:36',
+            message: 'CareersPage company fetch result',
+            data: {
+                companyExists: !!company,
+                companyId: company?.id ?? null,
+                companyName: company?.name ?? null,
+                careerPagesCount: Array.isArray(company?.career_pages) ? company.career_pages.length : null,
+            },
+            timestamp: Date.now(),
+        }),
+    }).catch(() => { });
+    // #endregion agent log
 
-    const careerPage = company.career_pages?.[0];
-
-    // Public page requires published status
-    if (!careerPage || !careerPage.published) {
-        notFound();
-        // Or return a custom "Not published" component
+    if (!company) {
+        // Instead of triggering a Next.js 404, render a friendly message.
+        // This avoids the generic 404 page when data is misconfigured.
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-gray-600">
+                    Company profile for <span className="font-semibold">{companySlug}</span> is not available.
+                </p>
+            </div>
+        );
     }
 
-    // Fetch sections
+    let careerPage = company.career_pages?.[0];
+
+    // If the joined relation didn't return anything (likely due to RLS on the relation),
+    // fall back to an explicit query like the preview/edit pages do.
+    if (!careerPage) {
+        const { data: existingPage } = await supabase
+            .from('career_pages')
+            .select('*')
+            .eq('company_id', company.id)
+            .single();
+
+        careerPage = existingPage;
+    }
+
+    // If there is still no career page at all, render a soft error instead of a 404.
+    if (!careerPage) {
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: 'debug-session',
+                runId: 'pre-fix-1',
+                hypothesisId: 'H4',
+                location: 'career-page/app/[companySlug]/careers/page.tsx:56',
+                message: 'CareersPage no careerPage even after fallback',
+                data: {
+                    companyId: company.id,
+                    companyName: company.name,
+                },
+                timestamp: Date.now(),
+            }),
+        }).catch(() => { });
+        // #endregion agent log
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-gray-600">
+                    Career page has not been set up yet for <span className="font-semibold">{company.name}</span>.
+                </p>
+            </div>
+        );
+    }
+
+    // Fetch sections (for legacy fallback)
     const { data: sections } = await supabase
         .from('page_sections')
         .select('*')
@@ -57,7 +139,6 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
         .eq('visible', true)
         .order('order', { ascending: true });
 
-    // Fetch published jobs
     // Fetch published jobs
     const { data: jobs } = await supabase
         .from('jobs')
@@ -74,18 +155,44 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
         "url": `https://whitecarrot.com/${companySlug}/careers`,
     };
 
+    const puckData = careerPage.puck_data || careerPage.draft_puck_data;
+
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            sessionId: 'debug-session',
+            runId: 'pre-fix-2',
+            hypothesisId: 'H5',
+            location: 'career-page/app/[companySlug]/careers/page.tsx:146',
+            message: 'CareersPage rendering choice',
+            data: {
+                hasPuckData: !!careerPage.puck_data,
+                hasDraftPuckData: !!careerPage.draft_puck_data,
+                usingDraftAsFallback: !careerPage.puck_data && !!careerPage.draft_puck_data,
+            },
+            timestamp: Date.now(),
+        }),
+    }).catch(() => { });
+    // #endregion agent log
+
     return (
         <>
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
-            <CareerPageRenderer
-                company={company}
-                careerPage={careerPage}
-                sections={sections || []}
-                jobs={jobs || []}
-            />
+            {puckData ? (
+                <PuckRenderer data={puckData} theme={careerPage.theme} jobs={jobs || []} />
+            ) : (
+                <CareerPageRenderer
+                    company={company}
+                    careerPage={careerPage}
+                    sections={sections || []}
+                    jobs={jobs || []}
+                />
+            )}
         </>
     );
 }

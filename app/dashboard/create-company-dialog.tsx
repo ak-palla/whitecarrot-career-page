@@ -16,7 +16,7 @@ import { useState } from 'react';
 import { createCompany } from '@/app/actions/companies';
 import { useFormStatus } from 'react-dom';
 
-export function CreateCompanyDialog() {
+export function CreateCompanyDialog({ children }: { children?: React.ReactNode }) {
     const [open, setOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +33,7 @@ export function CreateCompanyDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>Create Company</Button>
+                {children || <Button>Create Company</Button>}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

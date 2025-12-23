@@ -60,24 +60,8 @@ export default async function EditorPage({ params }: { params: Promise<{ company
     }
 
     return (
-        <div className="flex h-screen flex-col bg-background">
-            <header className="border-b px-6 py-3 flex items-center justify-between bg-white">
-                <div className="flex items-center gap-4">
-                    <Link href="/dashboard" className="text-sm text-gray-500 hover:text-black">← Back</Link>
-                    <h1 className="font-semibold">{company.name}</h1>
-                    <span className="text-xs text-muted-foreground px-2 py-1 bg-gray-100 rounded-full">Editor</span>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" asChild>
-                        <Link href={`/${company.slug}/preview`} target="_blank">Preview</Link>
-                    </Button>
-                    {/* We'll implement Publish action later */}
-                    <Button>Publish</Button>
-                </div>
-            </header>
-            <div className="flex-1 overflow-hidden flex">
-                <EditorMain company={company} careerPage={careerPage || null} />
-            </div>
+        <div className="h-screen w-full bg-background overflow-hidden">
+            <EditorMain company={company} careerPage={careerPage || null} />
         </div>
     );
 }

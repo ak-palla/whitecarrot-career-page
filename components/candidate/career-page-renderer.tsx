@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { PuckRenderer } from '@/components/candidate/puck-renderer';
+import { sectionsToPuckData } from '@/lib/puck/migrate-sections';
 
 export function CareerPageRenderer({
     company,
@@ -62,17 +64,27 @@ export function CareerPageRenderer({
             </header>
 
             <main className="container mx-auto py-16 px-4 space-y-24 max-w-5xl">
-                {/* Dynamic Sections */}
-                {sections.length > 0 && (
-                    <div className="space-y-16">
-                        {sections.map((section: any) => (
-                            <section key={section.id} className="prose prose-lg max-w-none">
-                                <h2 className="text-3xl font-bold mb-6 text-gray-900 border-b pb-4">{section.title}</h2>
-                                <div dangerouslySetInnerHTML={{ __html: section.content || '' }} />
-                            </section>
-                        ))}
-                    </div>
-                )}
+                {/* Dynamic Sections - Use Puck if available, fallback to old sections */}
+                {(() => {
+                    // In preview mode, use draft_puck_data; in production, use puck_data
+                    const puckData = preview ? careerPage?.draft_puck_data : careerPage?.puck_data;
+
+                    if (puckData) {
+                        return <PuckRenderer data={puckData} theme={theme} />;
+                    } else if (sections.length > 0) {
+                        return (
+                            <div className="space-y-16">
+                                {sections.map((section: any) => (
+                                    <section key={section.id} className="prose prose-lg max-w-none">
+                                        <h2 className="text-3xl font-bold mb-6 text-gray-900 border-b pb-4">{section.title}</h2>
+                                        <div dangerouslySetInnerHTML={{ __html: section.content || '' }} />
+                                    </section>
+                                ))}
+                            </div>
+                        );
+                    }
+                    return null;
+                })()}
 
                 {/* Jobs Section */}
                 <section id="jobs" className="scroll-mt-20">
