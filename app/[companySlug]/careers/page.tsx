@@ -32,22 +32,6 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
     const { companySlug } = await params;
     const supabase = await createClient();
 
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            sessionId: 'debug-session',
-            runId: 'pre-fix-1',
-            hypothesisId: 'H1',
-            location: 'career-page/app/[companySlug]/careers/page.tsx:32',
-            message: 'CareersPage entry',
-            data: { companySlug },
-            timestamp: Date.now(),
-        }),
-    }).catch(() => { });
-    // #endregion agent log
-
     // Fetch all necessary data
     const { data: company } = await supabase
         .from('companies')
@@ -55,26 +39,6 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
         .eq('slug', companySlug)
         .single();
 
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            sessionId: 'debug-session',
-            runId: 'pre-fix-1',
-            hypothesisId: 'H1',
-            location: 'career-page/app/[companySlug]/careers/page.tsx:36',
-            message: 'CareersPage company fetch result',
-            data: {
-                companyExists: !!company,
-                companyId: company?.id ?? null,
-                companyName: company?.name ?? null,
-                careerPagesCount: Array.isArray(company?.career_pages) ? company.career_pages.length : null,
-            },
-            timestamp: Date.now(),
-        }),
-    }).catch(() => { });
-    // #endregion agent log
 
     if (!company) {
         // Instead of triggering a Next.js 404, render a friendly message.
@@ -104,24 +68,6 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
 
     // If there is still no career page at all, render a soft error instead of a 404.
     if (!careerPage) {
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: 'debug-session',
-                runId: 'pre-fix-1',
-                hypothesisId: 'H4',
-                location: 'career-page/app/[companySlug]/careers/page.tsx:56',
-                message: 'CareersPage no careerPage even after fallback',
-                data: {
-                    companyId: company.id,
-                    companyName: company.name,
-                },
-                timestamp: Date.now(),
-            }),
-        }).catch(() => { });
-        // #endregion agent log
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <p className="text-gray-600">
@@ -157,25 +103,6 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
 
     const puckData = careerPage.puck_data || careerPage.draft_puck_data;
 
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            sessionId: 'debug-session',
-            runId: 'pre-fix-2',
-            hypothesisId: 'H5',
-            location: 'career-page/app/[companySlug]/careers/page.tsx:146',
-            message: 'CareersPage rendering choice',
-            data: {
-                hasPuckData: !!careerPage.puck_data,
-                hasDraftPuckData: !!careerPage.draft_puck_data,
-                usingDraftAsFallback: !careerPage.puck_data && !!careerPage.draft_puck_data,
-            },
-            timestamp: Date.now(),
-        }),
-    }).catch(() => { });
-    // #endregion agent log
 
     return (
         <>

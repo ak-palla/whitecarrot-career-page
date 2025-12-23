@@ -8,22 +8,6 @@ export default async function PreviewPage({ params }: { params: Promise<{ compan
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            sessionId: 'debug-session',
-            runId: 'pre-fix-1',
-            hypothesisId: 'H2',
-            location: 'career-page/app/[companySlug]/preview/page.tsx:6',
-            message: 'PreviewPage entry',
-            data: { companySlug, hasUser: !!user },
-            timestamp: Date.now(),
-        }),
-    }).catch(() => { });
-    // #endregion agent log
-
     if (!user) {
         // Preview requires auth for now
         redirect('/login');
@@ -36,26 +20,6 @@ export default async function PreviewPage({ params }: { params: Promise<{ compan
         .eq('slug', companySlug)
         .single();
 
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            sessionId: 'debug-session',
-            runId: 'pre-fix-1',
-            hypothesisId: 'H2',
-            location: 'career-page/app/[companySlug]/preview/page.tsx:16',
-            message: 'PreviewPage company fetch result',
-            data: {
-                companyExists: !!company,
-                companyId: company?.id ?? null,
-                companyName: company?.name ?? null,
-                careerPagesCount: Array.isArray(company?.career_pages) ? company.career_pages.length : null,
-            },
-            timestamp: Date.now(),
-        }),
-    }).catch(() => { });
-    // #endregion agent log
     if (!company) notFound();
 
     // Verify ownership
@@ -103,26 +67,6 @@ export default async function PreviewPage({ params }: { params: Promise<{ compan
         return <div>Career page not initialized.</div>;
     }
 
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            sessionId: 'debug-session',
-            runId: 'pre-fix-1',
-            hypothesisId: 'H2',
-            location: 'career-page/app/[companySlug]/preview/page.tsx:65',
-            message: 'PreviewPage resolved careerPage',
-            data: {
-                companyId: company.id,
-                careerPageId: careerPage.id,
-                hasDraftPuckData: !!careerPage.draft_puck_data,
-                hasPuckData: !!careerPage.puck_data,
-            },
-            timestamp: Date.now(),
-        }),
-    }).catch(() => { });
-    // #endregion agent log
 
     // Fetch visible sections for backward compatibility (used only if no Puck data)
     const { data: sections } = await supabase

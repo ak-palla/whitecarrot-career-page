@@ -77,27 +77,6 @@ export async function publishPuckPage(pageId: string, companySlug: string) {
         })
         .eq('id', pageId);
 
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            sessionId: 'debug-session',
-            runId: 'pre-fix-1',
-            hypothesisId: 'H3',
-            location: 'career-page/app/actions/career-pages.ts:70',
-            message: 'publishPuckPage update result',
-            data: {
-                pageId,
-                companySlug,
-                hasDraftPuckData: !!careerPage.draft_puck_data,
-                errorMessage: error?.message ?? null,
-            },
-            timestamp: Date.now(),
-        }),
-    }).catch(() => { });
-    // #endregion agent log
-
     if (error) return { error: error.message };
 
     revalidatePath(`/${companySlug}/careers`);

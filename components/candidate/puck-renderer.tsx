@@ -1,6 +1,10 @@
+'use client';
+
+import React from 'react';
 import { Render, type Config } from '@measured/puck';
 import { careersPageConfig, PuckData, type PuckProps } from '@/lib/puck/config';
 import { JobsSection } from '@/components/puck-blocks/jobs-section';
+import { generatePalette, paletteToCSSVariables } from '@/lib/theme/palette';
 
 interface PuckRendererProps {
   data: PuckData | null;
@@ -14,11 +18,9 @@ export function PuckRenderer({ data, theme, jobs }: PuckRendererProps) {
     return null;
   }
 
-  // Apply theme styles
-  const themeStyle = {
-    '--primary': theme?.primaryColor || '#000000',
-    '--secondary': theme?.secondaryColor || '#ffffff',
-  } as React.CSSProperties;
+  // Apply theme styles using palette helper
+  const palette = generatePalette(theme || {});
+  const themeStyle = paletteToCSSVariables(palette);
 
   const runtimeConfig: Config<PuckProps> = {
     ...careersPageConfig,

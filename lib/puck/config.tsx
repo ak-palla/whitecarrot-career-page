@@ -39,6 +39,32 @@ export const careersPageConfig: Config<PuckProps> = {
           type: 'text',
           label: 'Primary CTA Link',
         },
+        alignment: {
+          type: 'select',
+          label: 'Content Alignment',
+          options: [
+            { label: 'Left', value: 'left' },
+            { label: 'Center', value: 'center' },
+            { label: 'Right', value: 'right' },
+          ],
+        },
+        size: {
+          type: 'select',
+          label: 'Section Size',
+          options: [
+            { label: 'Compact', value: 'compact' },
+            { label: 'Tall', value: 'tall' },
+          ],
+        },
+        backgroundStyle: {
+          type: 'select',
+          label: 'Background Style',
+          options: [
+            { label: 'Solid Color', value: 'solid' },
+            { label: 'Background Image', value: 'image' },
+            { label: 'Gradient', value: 'gradient' },
+          ],
+        },
       },
       defaultProps: {
         title: 'Join our team',
@@ -46,6 +72,9 @@ export const careersPageConfig: Config<PuckProps> = {
         backgroundImageUrl: '',
         primaryCtaLabel: 'View open roles',
         primaryCtaHref: '#jobs',
+        alignment: 'center',
+        size: 'tall',
+        backgroundStyle: 'solid',
       },
       render: (props) => <HeroSection {...props} />,
     },
@@ -59,10 +88,28 @@ export const careersPageConfig: Config<PuckProps> = {
           type: 'textarea',
           label: 'Content',
         },
+        layout: {
+          type: 'select',
+          label: 'Layout',
+          options: [
+            { label: 'Full Width', value: 'full' },
+            { label: 'Two Column', value: 'twoColumn' },
+          ],
+        },
+        background: {
+          type: 'select',
+          label: 'Background Style',
+          options: [
+            { label: 'Plain', value: 'plain' },
+            { label: 'Card', value: 'card' },
+          ],
+        },
       },
       defaultProps: {
         heading: 'About the company',
         body: 'Share your mission, vision, and what makes your team unique.',
+        layout: 'full',
+        background: 'plain',
       },
       render: (props) => <AboutSection {...props} />,
     },
@@ -86,6 +133,15 @@ export const careersPageConfig: Config<PuckProps> = {
             },
           },
         },
+        styleVariant: {
+          type: 'select',
+          label: 'Style Variant',
+          options: [
+            { label: 'Cards (neutral background)', value: 'cards' },
+            { label: 'Panels (colored background)', value: 'panels' },
+            { label: 'List', value: 'list' },
+          ],
+        },
       },
       defaultProps: {
         heading: 'Benefits & perks',
@@ -93,6 +149,7 @@ export const careersPageConfig: Config<PuckProps> = {
           { title: 'Competitive salary', description: 'We pay at or above market for great talent.' },
           { title: 'Flexible work', description: 'Work remotely or from our office – your choice.' },
         ],
+        styleVariant: 'cards',
       },
       render: (props) => <BenefitsSection {...props} />,
     },
@@ -106,10 +163,28 @@ export const careersPageConfig: Config<PuckProps> = {
           type: 'textarea',
           label: 'Description',
         },
+        background: {
+          type: 'select',
+          label: 'Background Style',
+          options: [
+            { label: 'Plain', value: 'plain' },
+            { label: 'Accent Strip', value: 'accentStrip' },
+          ],
+        },
+        align: {
+          type: 'select',
+          label: 'Text Alignment',
+          options: [
+            { label: 'Left', value: 'left' },
+            { label: 'Center', value: 'center' },
+          ],
+        },
       },
       defaultProps: {
         heading: 'Meet the team',
         description: 'Introduce key teams or share what it feels like to work here.',
+        background: 'plain',
+        align: 'left',
       },
       render: (props) => <TeamSection {...props} />,
     },
@@ -129,6 +204,22 @@ export const careersPageConfig: Config<PuckProps> = {
             { label: 'Grouped by location', value: 'location' },
           ],
         },
+        density: {
+          type: 'select',
+          label: 'Density',
+          options: [
+            { label: 'Comfortable', value: 'comfortable' },
+            { label: 'Compact', value: 'compact' },
+          ],
+        },
+        background: {
+          type: 'select',
+          label: 'Background Style',
+          options: [
+            { label: 'Plain', value: 'plain' },
+            { label: 'Card', value: 'card' },
+          ],
+        },
         emptyStateMessage: {
           type: 'text',
           label: 'Empty state message',
@@ -137,6 +228,8 @@ export const careersPageConfig: Config<PuckProps> = {
       defaultProps: {
         heading: 'Open positions',
         layout: 'list',
+        density: 'comfortable',
+        background: 'plain',
         emptyStateMessage: 'No open positions at the moment. Check back soon!',
       },
       render: (props) => <JobsSection {...props} />,

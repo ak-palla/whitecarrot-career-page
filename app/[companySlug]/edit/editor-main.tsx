@@ -12,12 +12,14 @@ import { ThemeCustomizer } from '@/components/recruiter/theme-customizer';
 import { PuckEditor } from '@/components/recruiter/puck-editor';
 import { JobManager } from '@/components/recruiter/jobs/job-manager';
 import { CompanySettings } from '@/components/recruiter/company-settings';
+import { InlineThemeControls } from '@/components/recruiter/inline-theme-controls';
 import { savePuckDraft, publishPuckPage } from '@/app/actions/career-pages';
 
 type TabId = 'theme' | 'pageBuilder' | 'jobs' | 'settings';
 
 export function EditorMain({ company, careerPage }: { company: any; careerPage: any }) {
-    const [activeTab, setActiveTab] = useState<TabId>('theme');
+    const [activeTab, setActiveTab] = useState<TabId>('pageBuilder');
+    const [currentTheme, setCurrentTheme] = useState(careerPage?.theme || { primaryColor: '#000000', secondaryColor: '#ffffff' });
 
     return (
         <div className="flex h-full w-full flex-col bg-muted/10">
@@ -73,9 +75,17 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
                                         publish.
                                     </p>
                                 </div>
+                                <InlineThemeControls
+                                    company={company}
+                                    careerPage={careerPage}
+                                    onThemeChange={(theme) => {
+                                        setCurrentTheme(theme);
+                                    }}
+                                />
                                 <PuckEditor
                                     careerPage={careerPage}
                                     companySlug={company.slug}
+                                    themeOverride={currentTheme}
                                     onSave={async (data) => {
                                         const result = await savePuckDraft(careerPage.id, data, company.slug);
                                         if (result.error) throw new Error(result.error);

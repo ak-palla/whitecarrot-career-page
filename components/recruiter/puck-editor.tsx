@@ -7,15 +7,17 @@ import { careersPageConfig, PuckData } from '@/lib/puck/config';
 import '@measured/puck/puck.css';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { generatePalette, paletteToCSSVariables } from '@/lib/theme/palette';
 
 interface PuckEditorProps {
   careerPage: any;
   companySlug: string;
   onSave?: (data: PuckData) => Promise<void>;
   onPublish?: (data: PuckData) => Promise<void>;
+  themeOverride?: any;
 }
 
-export function PuckEditor({ careerPage, companySlug, onSave, onPublish }: PuckEditorProps) {
+export function PuckEditor({ careerPage, companySlug, onSave, onPublish, themeOverride }: PuckEditorProps) {
   const [data, setData] = useState<PuckData>(
     careerPage.draft_puck_data || { content: [], root: { props: {} } }
   );
@@ -28,12 +30,10 @@ export function PuckEditor({ careerPage, companySlug, onSave, onPublish }: PuckE
       careerPage.draft_puck_data.content.length === 0
   );
 
-  // Apply theme styles
-  const theme = careerPage?.theme || {};
-  const themeStyle = {
-    '--primary': theme.primaryColor || '#000000',
-    '--secondary': theme.secondaryColor || '#ffffff',
-  } as CSSProperties;
+  // Apply theme styles using palette helper - use themeOverride if provided
+  const theme = themeOverride || careerPage?.theme || {};
+  const palette = generatePalette(theme);
+  const themeStyle = paletteToCSSVariables(palette);
 
   const handleSave = async (newData: PuckData) => {
     if (!onSave) return;
