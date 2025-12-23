@@ -1,0 +1,68 @@
+'use client';
+import { useState } from 'react';
+import { uploadImage } from '@/app/actions/upload';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+export function ImageUploader({
+    label,
+    bucket,
+    currentImageUrl,
+    onUpload
+}: {
+    label: string,
+    bucket: string,
+    currentImageUrl?: string,
+    onUpload: (url: string) => void
+}) {
+    const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        setError(null);
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const result = await uploadImage(formData, bucket);
+
+        if (result.error) {
+            setError(result.error);
+        } else if (result.url) {
+            onUpload(result.url);
+        }
+        setUploading(false);
+    }
+
+    return (
+        <div className="space-y-2">
+            <Label>{label}</Label>
+            <div className="flex items-center gap-4">
+                {currentImageUrl ? (
+                    <div className="relative group">
+                        <img src={currentImageUrl} alt="Preview" className="h-16 w-16 object-cover rounded border" />
+                    </div>
+                ) : (
+                    <div className="h-16 w-16 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-400">
+                        None
+                    </div>
+                )}
+                <div className="flex-1">
+                    <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        disabled={uploading}
+                    />
+                    {uploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
+                    {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+                </div>
+            </div>
+        </div>
+    )
+}
