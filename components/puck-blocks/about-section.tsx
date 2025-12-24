@@ -1,5 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
+import { SECTION_TYPOGRAPHY } from '@/lib/section-layout/constants';
 
 export interface AboutSectionProps {
   heading: string;
@@ -11,11 +13,12 @@ export interface AboutSectionProps {
 export function AboutSection({ heading, body, layout = 'full', background = 'plain' }: AboutSectionProps) {
   const content = (
     <>
-      <h2 className="mb-4 text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
+      <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing}`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
         {heading}
       </h2>
       <div
-        style={{ color: 'var(--text-color)' }}
+        className={SECTION_TYPOGRAPHY.body.spacing}
+        style={{ color: SECTION_TYPOGRAPHY.body.color }}
         dangerouslySetInnerHTML={{ __html: body || '' }}
       />
     </>
@@ -23,29 +26,29 @@ export function AboutSection({ heading, body, layout = 'full', background = 'pla
 
   if (background === 'card') {
     return (
-      <section className="prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px]">
+      <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
+            <CardTitle className={SECTION_TYPOGRAPHY.heading.base} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
               {heading}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div
-              style={{ color: 'var(--text-color)' }}
+              style={{ color: SECTION_TYPOGRAPHY.body.color }}
               dangerouslySetInnerHTML={{ __html: body || '' }}
             />
           </CardContent>
         </Card>
-      </section>
+      </SectionWrapper>
     );
   }
 
   return (
-    <section className="prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-20">
-      {content}
-    </section>
+    <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
+      <div className="prose prose-lg max-w-none">
+        {content}
+      </div>
+    </SectionWrapper>
   );
 }
-
-

@@ -119,10 +119,22 @@ function darken(hex: string, amount: number): string {
 
 /**
  * Generates a complete color palette from primary and secondary colors
+ * If secondaryColor is not provided, auto-generates a contrasting color from primary
  */
 export function generatePalette(theme: ThemeColors): ColorPalette {
   const primary = theme.primaryColor || '#000000';
-  const secondary = theme.secondaryColor || '#ffffff';
+  
+  // Auto-generate secondary color if not provided
+  let secondary: string;
+  if (theme.secondaryColor) {
+    // Use provided secondary color (backward compatibility)
+    secondary = theme.secondaryColor;
+  } else {
+    // Auto-generate contrasting color based on primary luminance
+    const [primaryH, primaryS, primaryL] = hexToHsl(primary);
+    // If primary is dark (luminance < 50%), use white; otherwise use dark
+    secondary = primaryL < 50 ? '#ffffff' : '#000000';
+  }
 
   // Derive complementary colors from primary
   const primarySoft = lighten(primary, 0.92); // Very light version for backgrounds

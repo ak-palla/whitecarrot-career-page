@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
+import { SECTION_PADDING } from '@/lib/section-layout/constants';
 
 export interface HeroSectionProps {
   title: string;
@@ -51,7 +53,7 @@ export function HeroSection({
   };
 
   return (
-    <div className="px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px]">
+    <SectionWrapper contentMaxWidth="full" verticalPadding={size === 'tall' ? 'lg' : 'md'}>
       <header
         className={`relative overflow-hidden rounded-3xl px-6 md:px-10 ${sizeClasses[size]}`}
         style={getBackgroundStyle()}
@@ -89,7 +91,7 @@ export function HeroSection({
         )}
       </div>
     </header>
-    </div>
+    </SectionWrapper>
   );
 }
 

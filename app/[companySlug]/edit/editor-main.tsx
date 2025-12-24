@@ -19,7 +19,7 @@ type TabId = 'theme' | 'pageBuilder' | 'jobs' | 'settings';
 
 export function EditorMain({ company, careerPage }: { company: any; careerPage: any }) {
     const [activeTab, setActiveTab] = useState<TabId>('pageBuilder');
-    const [currentTheme, setCurrentTheme] = useState(careerPage?.theme || { primaryColor: '#000000', secondaryColor: '#ffffff' });
+    const [currentTheme, setCurrentTheme] = useState(careerPage?.theme || { primaryColor: '#000000' });
 
     return (
         <div className="flex h-full w-full flex-col bg-muted/10">

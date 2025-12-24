@@ -43,9 +43,7 @@ export default async function EditorPage({ params }: { params: Promise<{ company
             .insert({
                 company_id: company.id,
                 theme: {
-                    primaryColor: '#000000',
-                    secondaryColor: '#ffffff',
-                    accentColor: '#3b82f6'
+                    primaryColor: '#000000'
                 },
                 published: false
             })

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
+import { SECTION_TYPOGRAPHY, GRID_LAYOUTS } from '@/lib/section-layout/constants';
 
 export interface BenefitItem {
   title: string;
@@ -19,8 +21,8 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
 
   if (isList) {
     return (
-      <section className="px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px]">
-        <h2 className="mb-6 text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
+      <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
+        <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing}`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
           {heading}
         </h2>
         <div className="space-y-3">
@@ -28,11 +30,11 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
             <div key={index}>
               <div className="flex items-start gap-4 pb-3">
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold" style={{ color: 'var(--heading-color)' }}>
+                  <h3 className="text-base font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
                     {benefit.title}
                   </h3>
                   {benefit.description && (
-                    <p className="mt-1 text-sm" style={{ color: 'var(--text-color)' }}>
+                    <p className="mt-1 text-sm" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
                       {benefit.description}
                     </p>
                   )}
@@ -42,16 +44,16 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
             </div>
           ))}
         </div>
-      </section>
+      </SectionWrapper>
     );
   }
 
   return (
-    <section className="px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-20">
-      <h2 className="mb-6 text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
+    <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
+      <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing}`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
         {heading}
       </h2>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className={GRID_LAYOUTS.twoColumn}>
         {benefits?.map((benefit, index) => {
           if (isPanels) {
             return (
@@ -63,13 +65,13 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
                 }}
               >
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base font-semibold" style={{ color: 'var(--heading-color)' }}>
+                  <CardTitle className="text-base font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
                     {benefit.title}
                   </CardTitle>
                 </CardHeader>
                 {benefit.description && (
                   <CardContent className="pt-0">
-                    <p className="text-sm" style={{ color: 'var(--text-color)' }}>
+                    <p className="text-sm" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
                       {benefit.description}
                     </p>
                   </CardContent>
@@ -81,13 +83,13 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
           return (
             <Card key={index}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold" style={{ color: 'var(--heading-color)' }}>
+                <CardTitle className="text-base font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
                   {benefit.title}
                 </CardTitle>
               </CardHeader>
               {benefit.description && (
                 <CardContent className="pt-0">
-                  <p className="text-sm" style={{ color: 'var(--text-color)' }}>
+                  <p className="text-sm" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
                     {benefit.description}
                   </p>
                 </CardContent>
@@ -96,7 +98,7 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
           );
         })}
       </div>
-    </section>
+    </SectionWrapper>
   );
 }
 

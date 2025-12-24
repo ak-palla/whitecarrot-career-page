@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Search } from 'lucide-react';
+import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
+import { SECTION_TYPOGRAPHY } from '@/lib/section-layout/constants';
 
 export interface JobsSectionProps {
   heading: string;
@@ -169,15 +171,15 @@ export function JobsSection({
     <>
       {(!jobsArray || jobsArray.length === 0) ? (
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--heading-color)' }}>
+          <h2 className={`${SECTION_TYPOGRAPHY.heading.base} mb-2`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
             {heading}
           </h2>
-          <p style={{ color: 'var(--text-color)' }}>{emptyStateMessage}</p>
+          <p style={{ color: SECTION_TYPOGRAPHY.body.color }}>{emptyStateMessage}</p>
         </div>
       ) : (
         <>
           <div className="mb-6 text-center">
-          <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--heading-color)' }}>
+          <h2 className={`${SECTION_TYPOGRAPHY.heading.base} mb-2`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
             {heading}
           </h2>
         </div>
@@ -327,7 +329,7 @@ export function JobsSection({
                 <>
                   {Object.entries(groupBy(filteredJobs, (job) => job.team || 'Other')).map(([team, teamJobs]) => (
                     <div key={team} className="space-y-4 mb-8">
-            <h3 className="text-xl font-semibold" style={{ color: 'var(--heading-color)' }}>
+            <h3 className="text-xl font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
               {team}
             </h3>
                       <JobList jobs={teamJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
@@ -339,7 +341,7 @@ export function JobsSection({
                 <>
                   {Object.entries(groupBy(filteredJobs, (job) => job.location || 'Other')).map(([location, locationJobs]) => (
                     <div key={location} className="space-y-4 mb-8">
-            <h3 className="text-xl font-semibold" style={{ color: 'var(--heading-color)' }}>
+            <h3 className="text-xl font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
               {location}
             </h3>
                       <JobList jobs={locationJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
@@ -365,20 +367,24 @@ export function JobsSection({
 
   if (background === 'card') {
     return (
-      <section id="jobs" className="scroll-mt-20 px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px]">
-        <Card>
-          <CardContent className="pt-6">
-            {sectionContent}
-          </CardContent>
-        </Card>
-      </section>
+      <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
+        <section id="jobs" className="scroll-mt-20">
+          <Card>
+            <CardContent className="pt-6">
+              {sectionContent}
+            </CardContent>
+          </Card>
+        </section>
+      </SectionWrapper>
     );
   }
 
   return (
-    <section id="jobs" className="scroll-mt-20 px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px]">
-      {sectionContent}
-    </section>
+    <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
+      <section id="jobs" className="scroll-mt-20">
+        {sectionContent}
+      </section>
+    </SectionWrapper>
   );
 }
 
@@ -399,7 +405,7 @@ function JobList({
         <Card key={job.id} className={density === 'compact' ? 'p-3' : 'p-4'}>
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              <CardTitle className="text-base font-medium mb-1" style={{ color: 'var(--heading-color)' }}>
+              <CardTitle className="text-base font-medium mb-1" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
               {job.title}
               </CardTitle>
               <div className="flex gap-2 flex-wrap">
@@ -441,7 +447,7 @@ function JobCards({
       {jobs.map((job) => (
         <Card key={job.id} className={density === 'compact' ? 'p-4' : 'p-5'}>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold" style={{ color: 'var(--heading-color)' }}>
+            <CardTitle className="text-base font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
             {job.title}
             </CardTitle>
           </CardHeader>

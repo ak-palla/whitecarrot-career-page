@@ -13,7 +13,7 @@ export function ThemeCustomizer({
     company: any,
     careerPage: any
 }) {
-    const [theme, setTheme] = useState(careerPage?.theme || { primaryColor: '#000000', secondaryColor: '#ffffff' });
+    const [theme, setTheme] = useState(careerPage?.theme || { primaryColor: '#000000' });
     const [logoUrl, setLogoUrl] = useState(careerPage?.logo_url);
     const [bannerUrl, setBannerUrl] = useState(careerPage?.banner_url);
     const [saving, setSaving] = useState(false);
@@ -42,43 +42,26 @@ export function ThemeCustomizer({
         <div className="space-y-8 max-w-lg p-1">
             <div>
                 <h2 className="text-lg font-semibold mb-4 text-foreground">Brand Colors</h2>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>Primary Color</Label>
-                        <div className="flex gap-2 items-center">
-                            <div className="relative">
-                                <Input
-                                    type="color"
-                                    value={theme.primaryColor}
-                                    onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })}
-                                    className="w-12 h-10 p-1 cursor-pointer"
-                                />
-                            </div>
+                <div className="space-y-2">
+                    <Label>Primary Color</Label>
+                    <div className="flex gap-2 items-center">
+                        <div className="relative">
                             <Input
-                                value={theme.primaryColor}
+                                type="color"
+                                value={theme.primaryColor || '#000000'}
                                 onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })}
-                                className="font-mono"
+                                className="w-12 h-10 p-1 cursor-pointer"
                             />
                         </div>
+                        <Input
+                            value={theme.primaryColor || '#000000'}
+                            onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })}
+                            className="font-mono"
+                        />
                     </div>
-                    <div className="space-y-2">
-                        <Label>Secondary Color</Label>
-                        <div className="flex gap-2 items-center">
-                            <div className="relative">
-                                <Input
-                                    type="color"
-                                    value={theme.secondaryColor}
-                                    onChange={(e) => setTheme({ ...theme, secondaryColor: e.target.value })}
-                                    className="w-12 h-10 p-1 cursor-pointer"
-                                />
-                            </div>
-                            <Input
-                                value={theme.secondaryColor}
-                                onChange={(e) => setTheme({ ...theme, secondaryColor: e.target.value })}
-                                className="font-mono"
-                            />
-                        </div>
-                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">
+                        Secondary color is automatically generated from your primary color for optimal contrast.
+                    </p>
                 </div>
             </div>
 

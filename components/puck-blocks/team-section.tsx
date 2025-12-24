@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
+import { SECTION_TYPOGRAPHY } from '@/lib/section-layout/constants';
 
 export interface TeamSectionProps {
   heading: string;
@@ -17,13 +19,13 @@ export function TeamSection({ heading, description, background = 'plain', align 
 
   const content = (
     <>
-      <h2 className="mb-4 text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
+      <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing}`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
         {heading}
       </h2>
       {description && (
         <>
           <Separator className="mb-4" />
-          <p style={{ color: 'var(--text-color)' }}>
+          <p style={{ color: SECTION_TYPOGRAPHY.body.color }}>
             {description}
           </p>
         </>
@@ -33,29 +35,29 @@ export function TeamSection({ heading, description, background = 'plain', align 
 
   if (background === 'accentStrip') {
     return (
-      <section className={`prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px] ${alignmentClasses[align]}`}>
-        <Card className="border-0" style={{ backgroundColor: 'var(--primary-soft)' }}>
+      <SectionWrapper contentMaxWidth="3xl" verticalPadding="md" className={alignmentClasses[align]}>
+        <Card className="border-0 w-full" style={{ backgroundColor: 'var(--primary-soft)' }}>
           <CardHeader>
-            <CardTitle className="text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
+            <CardTitle className={SECTION_TYPOGRAPHY.heading.base} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
               {heading}
             </CardTitle>
           </CardHeader>
           {description && (
             <CardContent>
-              <p style={{ color: 'var(--text-color)' }}>
+              <p style={{ color: SECTION_TYPOGRAPHY.body.color }}>
                 {description}
               </p>
             </CardContent>
           )}
         </Card>
-      </section>
+      </SectionWrapper>
     );
   }
 
   return (
-    <section className={`prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px] ${alignmentClasses[align]}`}>
+    <SectionWrapper contentMaxWidth="3xl" verticalPadding="md" className={`prose prose-lg max-w-none ${alignmentClasses[align]}`}>
       {content}
-    </section>
+    </SectionWrapper>
   );
 }
 

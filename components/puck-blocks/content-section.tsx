@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
+import { SECTION_TYPOGRAPHY } from '@/lib/section-layout/constants';
 
 export interface ContentSectionProps {
   title: string;
@@ -10,21 +12,21 @@ export interface ContentSectionProps {
 
 export function ContentSection({ title, content }: ContentSectionProps) {
   return (
-    <section className="prose prose-lg max-w-none px-4 md:px-6 lg:px-[60px] py-8 md:py-12 lg:py-[50px]">
+    <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
       <Card>
         <CardHeader>
-          <CardTitle className="text-3xl font-bold" style={{ color: 'var(--heading-color)' }}>
+          <CardTitle className={SECTION_TYPOGRAPHY.heading.base} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Separator className="mb-4" />
           <div
-            style={{ color: 'var(--text-color)' }}
+            style={{ color: SECTION_TYPOGRAPHY.body.color }}
             dangerouslySetInnerHTML={{ __html: content || '' }}
           />
         </CardContent>
       </Card>
-    </section>
+    </SectionWrapper>
   );
 }

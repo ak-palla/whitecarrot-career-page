@@ -13,7 +13,7 @@ interface InlineThemeControlsProps {
 }
 
 export function InlineThemeControls({ company, careerPage, onThemeChange }: InlineThemeControlsProps) {
-  const [theme, setTheme] = useState(careerPage?.theme || { primaryColor: '#000000', secondaryColor: '#ffffff' });
+  const [theme, setTheme] = useState(careerPage?.theme || { primaryColor: '#000000' });
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -43,42 +43,24 @@ export function InlineThemeControls({ company, careerPage, onThemeChange }: Inli
           {saving ? 'Saving...' : 'Save'}
         </Button>
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-xs">Primary Color</Label>
-          <div className="flex gap-2 items-center">
-            <Input
-              type="color"
-              value={theme.primaryColor}
-              onChange={(e) => handleThemeUpdate({ ...theme, primaryColor: e.target.value })}
-              className="w-10 h-8 p-1 cursor-pointer"
-            />
-            <Input
-              value={theme.primaryColor}
-              onChange={(e) => handleThemeUpdate({ ...theme, primaryColor: e.target.value })}
-              className="font-mono text-xs h-8"
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label className="text-xs">Secondary Color</Label>
-          <div className="flex gap-2 items-center">
-            <Input
-              type="color"
-              value={theme.secondaryColor}
-              onChange={(e) => handleThemeUpdate({ ...theme, secondaryColor: e.target.value })}
-              className="w-10 h-8 p-1 cursor-pointer"
-            />
-            <Input
-              value={theme.secondaryColor}
-              onChange={(e) => handleThemeUpdate({ ...theme, secondaryColor: e.target.value })}
-              className="font-mono text-xs h-8"
-            />
-          </div>
+      <div className="space-y-2">
+        <Label className="text-xs">Primary Color</Label>
+        <div className="flex gap-2 items-center">
+          <Input
+            type="color"
+            value={theme.primaryColor || '#000000'}
+            onChange={(e) => handleThemeUpdate({ ...theme, primaryColor: e.target.value })}
+            className="w-10 h-8 p-1 cursor-pointer"
+          />
+          <Input
+            value={theme.primaryColor || '#000000'}
+            onChange={(e) => handleThemeUpdate({ ...theme, primaryColor: e.target.value })}
+            className="font-mono text-xs h-8"
+          />
         </div>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Colors are automatically applied across all sections. Use variants in each section to control styling.
+        Primary color is automatically applied across all sections. Secondary color is auto-generated for optimal contrast. Use variants in each section to control styling.
       </p>
     </div>
   );
