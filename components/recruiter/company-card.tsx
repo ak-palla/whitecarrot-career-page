@@ -31,32 +31,14 @@ export function CompanyCard({ company }: { company: Company }) {
     const [open, setOpen] = useState(false);
     
     const handleDelete = async () => {
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'career-page/components/recruiter/company-card.tsx:33',message:'handleDelete called from company card',data:{companyId:company.id,companyName:company.name},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A,F,G'})}).catch(()=>{});
-        // #endregion
-
         const result = await deleteCompany(company.id);
-
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'career-page/components/recruiter/company-card.tsx:39',message:'deleteCompany result received',data:{companyId:company.id,result:JSON.stringify(result)},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A,F,G'})}).catch(()=>{});
-        // #endregion
-
         if (result?.error) {
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'career-page/components/recruiter/company-card.tsx:44',message:'Showing error toast',data:{companyId:company.id,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
             toast.error(result.error);
         } else if (result?.success) {
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'career-page/components/recruiter/company-card.tsx:48',message:'Showing success toast and refreshing',data:{companyId:company.id},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'F'})}).catch(()=>{});
-            // #endregion
             setOpen(false);
             toast.success('Company deleted successfully');
             router.refresh();
         } else {
-            // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'career-page/components/recruiter/company-card.tsx:55',message:'Showing generic error toast',data:{companyId:company.id,result:JSON.stringify(result)},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
             toast.error('Failed to delete company. Please try again.');
         }
     };

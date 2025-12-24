@@ -1,25 +1,21 @@
-/* Simple top-tab layout: Theme, Sections (Puck), Jobs, Settings */
+/* Simple top-tab layout: Theme, Jobs, Settings */
 
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Palette, Layers, Briefcase, Settings, ArrowLeft, LayoutTemplate } from 'lucide-react';
+import { Palette, Briefcase, Settings, ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ThemeCustomizer } from '@/components/recruiter/theme-customizer';
-import { PuckEditor } from '@/components/recruiter/puck-editor';
 import { JobManager } from '@/components/recruiter/jobs/job-manager';
 import { CompanySettings } from '@/components/recruiter/company-settings';
-import { InlineThemeControls } from '@/components/recruiter/inline-theme-controls';
-import { savePuckDraft, publishPuckPage } from '@/app/actions/career-pages';
 
-type TabId = 'theme' | 'pageBuilder' | 'jobs' | 'settings';
+type TabId = 'theme' | 'jobs' | 'settings';
 
 export function EditorMain({ company, careerPage }: { company: any; careerPage: any }) {
-    const [activeTab, setActiveTab] = useState<TabId>('pageBuilder');
-    const [currentTheme, setCurrentTheme] = useState(careerPage?.theme || { primaryColor: '#000000' });
+    const [activeTab, setActiveTab] = useState<TabId>('theme');
 
     return (
         <div className="flex h-full w-full flex-col bg-muted/10">
@@ -35,12 +31,6 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
                     <Separator orientation="vertical" className="h-6" />
                     <div className="inline-flex gap-1 rounded-lg bg-muted p-1">
                         <TabButton icon={Palette} label="Theme" active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} />
-                        <TabButton
-                            icon={LayoutTemplate}
-                            label="Page Builder"
-                            active={activeTab === 'pageBuilder'}
-                            onClick={() => setActiveTab('pageBuilder')}
-                        />
                         <TabButton icon={Briefcase} label="Jobs" active={activeTab === 'jobs'} onClick={() => setActiveTab('jobs')} />
                         <TabButton icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
                     </div>
@@ -61,50 +51,6 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
                         <h2 className="mb-2 text-lg font-semibold tracking-tight">Theme Customization</h2>
                         <p className="mb-6 text-sm text-muted-foreground">Manage your brand colors, logo, and banner.</p>
                         <ThemeCustomizer company={company} careerPage={careerPage} />
-                    </div>
-                )}
-
-                {activeTab === 'pageBuilder' && (
-                    <div className="h-full w-full">
-                        {careerPage ? (
-                            <div className="space-y-4">
-                                <div className="rounded-lg border bg-card px-4 py-3 text-sm text-muted-foreground">
-                                    <p className="font-medium text-foreground">Career Page Builder</p>
-                                    <p className="mt-1">
-                                        Start with a recommended layout or a blank page inside the editor. Changes are saved as a draft until you
-                                        publish.
-                                    </p>
-                                </div>
-                                <InlineThemeControls
-                                    company={company}
-                                    careerPage={careerPage}
-                                    onThemeChange={(theme) => {
-                                        setCurrentTheme(theme);
-                                    }}
-                                />
-                                <PuckEditor
-                                    careerPage={careerPage}
-                                    companySlug={company.slug}
-                                    themeOverride={currentTheme}
-                                    onSave={async (data) => {
-                                        const result = await savePuckDraft(careerPage.id, data, company.slug);
-                                        if (result.error) throw new Error(result.error);
-                                    }}
-                                    onPublish={async (data) => {
-                                        await savePuckDraft(careerPage.id, data, company.slug);
-                                        const result = await publishPuckPage(careerPage.id, company.slug);
-                                        if (result.error) throw new Error(result.error);
-                                    }}
-                                />
-                            </div>
-                        ) : (
-                            <div className="flex h-full items-center justify-center">
-                                <div className="flex max-w-md flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/10 p-8 text-center text-muted-foreground">
-                                    <LayoutTemplate className="mb-2 h-8 w-8 opacity-50" />
-                                    <p className="text-sm">Career page not initialized.</p>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 )}
 

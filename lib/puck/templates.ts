@@ -23,6 +23,7 @@ const modernMinimal: PageTemplate = {
     content: [
       {
         type: 'HeroSection',
+        id: 'hero-1',
         props: {
           title: 'Join Our Mission to Build the Future',
           subtitle: 'We\'re looking for talented, passionate people to help us shape the next generation of technology. Join a team that values innovation, creativity, and collaboration.',
@@ -39,6 +40,7 @@ const modernMinimal: PageTemplate = {
       },
       {
         type: 'AboutSection',
+        id: 'about-1',
         props: {
           heading: 'About Our Company',
           body: 'We\'re more than just a company. We\'re a community of innovators, creators, and problem-solvers working together to build something extraordinary.',
@@ -54,6 +56,7 @@ const modernMinimal: PageTemplate = {
       },
       {
         type: 'BenefitsSection',
+        id: 'benefits-1',
         props: {
           heading: 'Benefits & Perks',
           benefits: [
@@ -69,6 +72,7 @@ const modernMinimal: PageTemplate = {
       },
       {
         type: 'JobsSection',
+        id: 'jobs-1',
         props: {
           heading: 'Open Positions',
           layout: 'cards',
@@ -97,6 +101,7 @@ const corporateClassic: PageTemplate = {
     content: [
       {
         type: 'HeroSection',
+        id: 'hero-1',
         props: {
           title: 'Build Your Career With Us',
           subtitle: 'Join a team that values excellence, integrity, and innovation.',
@@ -113,6 +118,7 @@ const corporateClassic: PageTemplate = {
       },
       {
         type: 'AboutSection',
+        id: 'about-1',
         props: {
           heading: 'About the company',
           body: 'Share your mission, vision, and what makes your team unique.',
@@ -122,6 +128,7 @@ const corporateClassic: PageTemplate = {
       },
       {
         type: 'BenefitsSection',
+        id: 'benefits-1',
         props: {
           heading: 'Benefits & Perks',
           benefits: [
@@ -135,6 +142,7 @@ const corporateClassic: PageTemplate = {
       },
       {
         type: 'JobsSection',
+        id: 'jobs-1',
         props: {
           heading: 'Open Positions',
           layout: 'list',
@@ -163,6 +171,7 @@ const startupBold: PageTemplate = {
     content: [
       {
         type: 'HeroSection',
+        id: 'hero-1',
         props: {
           title: 'Join the Revolution',
           subtitle: 'We\'re building something amazing. Come help us change the world.',
@@ -179,6 +188,7 @@ const startupBold: PageTemplate = {
       },
       {
         type: 'AboutSection',
+        id: 'about-1',
         props: {
           heading: 'Why Join Us',
           body: 'We\'re a diverse group of builders, creators, and problem-solvers working together to make an impact.',
@@ -194,6 +204,7 @@ const startupBold: PageTemplate = {
       },
       {
         type: 'BenefitsSection',
+        id: 'benefits-1',
         props: {
           heading: 'Benefits & Perks',
           benefits: [
@@ -207,6 +218,7 @@ const startupBold: PageTemplate = {
       },
       {
         type: 'TeamSection',
+        id: 'team-1',
         props: {
           heading: 'Meet Our Leadership Team',
           description: 'Our experienced leadership team is committed to creating an environment where everyone can thrive and do their best work.',
@@ -222,6 +234,7 @@ const startupBold: PageTemplate = {
       },
       {
         type: 'JobsSection',
+        id: 'jobs-1',
         props: {
           heading: 'Open Positions',
           layout: 'cards',
@@ -250,6 +263,7 @@ const creativeShowcase: PageTemplate = {
     content: [
       {
         type: 'HeroSection',
+        id: 'hero-1',
         props: {
           title: 'Create with us',
           subtitle: 'Join a team of creative minds pushing boundaries and shaping the future.',
@@ -264,6 +278,7 @@ const creativeShowcase: PageTemplate = {
       },
       {
         type: 'AboutSection',
+        id: 'about-1',
         props: {
           heading: 'About the company',
           body: 'Share your mission, vision, and what makes your team unique.',
@@ -273,6 +288,7 @@ const creativeShowcase: PageTemplate = {
       },
       {
         type: 'BenefitsSection',
+        id: 'benefits-1',
         props: {
           heading: 'What we offer',
           benefits: [
@@ -286,6 +302,7 @@ const creativeShowcase: PageTemplate = {
       },
       {
         type: 'TeamSection',
+        id: 'team-1',
         props: {
           heading: 'Our team',
           description: 'Meet the talented individuals who bring creativity to everything we do.',
@@ -295,6 +312,7 @@ const creativeShowcase: PageTemplate = {
       },
       {
         type: 'JobsSection',
+        id: 'jobs-1',
         props: {
           heading: 'Open positions',
           layout: 'cards',
@@ -323,6 +341,7 @@ const balancedProfessional: PageTemplate = {
     content: [
       {
         type: 'HeroSection',
+        id: 'hero-1',
         props: {
           title: 'Welcome to our careers',
           subtitle: 'Discover opportunities to grow your career with us.',
@@ -337,6 +356,7 @@ const balancedProfessional: PageTemplate = {
       },
       {
         type: 'AboutSection',
+        id: 'about-1',
         props: {
           heading: 'About the company',
           body: 'Share your mission, vision, and what makes your team unique.',
@@ -346,6 +366,7 @@ const balancedProfessional: PageTemplate = {
       },
       {
         type: 'BenefitsSection',
+        id: 'benefits-1',
         props: {
           heading: 'Benefits & perks',
           benefits: [
@@ -359,6 +380,7 @@ const balancedProfessional: PageTemplate = {
       },
       {
         type: 'TeamSection',
+        id: 'team-1',
         props: {
           heading: 'Our team',
           description: 'Learn about our culture and the people who make it great.',
@@ -368,6 +390,7 @@ const balancedProfessional: PageTemplate = {
       },
       {
         type: 'JobsSection',
+        id: 'jobs-1',
         props: {
           heading: 'Open positions',
           layout: 'list',
@@ -398,6 +421,10 @@ export function getTemplateById(id: string): PageTemplate | undefined {
 
 /**
  * Apply a template and customize it with company name
+ * @param templateId - The ID of the template to apply
+ * @param companyName - Optional company name to customize template content
+ * @returns PuckData with template content applied
+ * @throws Error if template is not found
  */
 export function applyTemplate(templateId: string, companyName?: string): PuckData {
   const template = getTemplateById(templateId);
@@ -417,13 +444,25 @@ export function applyTemplate(templateId: string, companyName?: string): PuckDat
     puckData.content = [];
   }
 
+  // Ensure all content items have IDs
+  puckData.content = puckData.content.map((item, index) => {
+    if (!item.id) {
+      return {
+        ...item,
+        id: `${item.type}-${index}-${Date.now()}`,
+      };
+    }
+    return item;
+  });
+
   // Replace placeholder text with company name if provided
   if (companyName && Array.isArray(puckData.content)) {
-    puckData.content.forEach((item: any) => {
-      if (item && item.type === 'HeroSection' && item.props && item.props.title) {
+    puckData.content.forEach((item) => {
+      if (item && item.type === 'HeroSection' && item.props && typeof item.props === 'object') {
+        const props = item.props as { title?: string };
         // Replace generic titles with company-specific ones
-        if (item.props.title.includes('our team') || item.props.title.includes('Join')) {
-          item.props.title = `${companyName} careers`;
+        if (props.title && (props.title.includes('our team') || props.title.includes('Join'))) {
+          props.title = `${companyName} careers`;
         }
       }
     });

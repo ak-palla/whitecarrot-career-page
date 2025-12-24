@@ -24,10 +24,10 @@ export function sectionsToPuckData(sections: PageSection[]): PuckData {
   const content = sections
     .filter(s => s.visible)
     .sort((a, b) => a.order - b.order)
-    .map(section => ({
-      type: 'ContentSection',
+    .map((section, index) => ({
+      type: 'ContentSection' as const,
+      id: `section-${section.id}-${index}`,
       props: {
-        id: `section-${section.id}`,
         title: section.title,
         content: section.content,
         sectionType: section.type as any,
@@ -53,9 +53,9 @@ export function puckDataToSections(
 
   return puckData.content.map((item, index) => ({
     career_page_id: careerPageId,
-    type: item.props.sectionType || 'custom',
-    title: item.props.title || 'Untitled Section',
-    content: item.props.content || '',
+    type: (item.props.sectionType as string) || 'custom',
+    title: (item.props.title as string) || 'Untitled Section',
+    content: (item.props.content as string) || '',
     order: index,
     visible: true,
   }));

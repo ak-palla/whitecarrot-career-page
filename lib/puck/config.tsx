@@ -6,6 +6,10 @@ import { BenefitsSection, BenefitsSectionProps } from '@/components/puck-blocks/
 import { TeamSection, TeamSectionProps } from '@/components/puck-blocks/team-section';
 import { JobsSection, JobsSectionProps } from '@/components/puck-blocks/jobs-section';
 
+/**
+ * Type definition for all Puck component props
+ * Maps component names to their respective prop interfaces
+ */
 export type PuckProps = {
   ContentSection: ContentSectionProps;
   HeroSection: HeroSectionProps;
@@ -378,7 +382,32 @@ export const careersPageConfig: Config<PuckProps> = {
         buttonVariant: 'ghost',
         badgeVariant: 'secondary',
       },
-      render: (props) => <JobsSection {...props} />,
+      render: (props) => {
+        // JobsSection uses Next.js hooks that may not work in editor context
+        // Wrap in error boundary and provide fallback
+        try {
+          // Check if we're in editor context (no router available)
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/careers')) {
+            // Editor context - show simplified preview
+            return (
+              <div className="p-6 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                <h2 className="text-2xl font-bold mb-2">{props.heading || 'Open Positions'}</h2>
+                <p className="text-gray-600">{props.emptyStateMessage || 'No open positions at the moment. Check back soon!'}</p>
+                <p className="text-xs text-gray-400 mt-2">(Jobs will appear on published page)</p>
+              </div>
+            );
+          }
+          return <JobsSection {...props} jobs={[]} />;
+        } catch (error) {
+          console.error('Error rendering JobsSection:', error);
+          return (
+            <div className="p-4 border border-gray-300 bg-gray-50 rounded">
+              <p className="font-semibold">{props.heading || 'Open Positions'}</p>
+              <p className="text-sm text-gray-600 mt-1">{props.emptyStateMessage || 'No open positions at the moment.'}</p>
+            </div>
+          );
+        }
+      },
     },
     ContentSection: {
       fields: {
@@ -415,8 +444,21 @@ export const careersPageConfig: Config<PuckProps> = {
   },
 };
 
-// Type for Puck data structure
+/**
+ * Puck content item structure
+ * Note: Props are loosely typed to match Puck's flexible structure
+ */
+export interface PuckContentItem {
+  type: keyof PuckProps;
+  id: string;
+  props: Record<string, unknown>;
+}
+
+/**
+ * Puck data structure
+ * Contains the root configuration and array of content items
+ */
 export interface PuckData {
-  content: any[];
-  root: { props?: Record<string, any> };
+  content: PuckContentItem[];
+  root: { props?: Record<string, unknown> };
 }
