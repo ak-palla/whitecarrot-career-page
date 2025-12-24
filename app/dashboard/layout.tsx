@@ -10,17 +10,30 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
-export default function DashboardLayout({
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
+
+export default async function DashboardLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const supabase = await createClient()
+
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+        return redirect("/sign-in")
+    }
+
     return (
         <SidebarProvider>
-            <AppSidebar />
+            <AppSidebar user={user} />
             <SidebarInset>
                 <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                    <SidebarTrigger className="-ml-1" />
+                    <SidebarTrigger className="-ml-1 md:hidden" />
                     <Separator orientation="vertical" className="mr-2 h-4" />
                     <Breadcrumb>
                         <BreadcrumbList>
