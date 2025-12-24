@@ -21,8 +21,8 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
     return (
         <div className="flex h-full w-full flex-col bg-muted/10">
             {/* Header with Back + Tabs */}
-            <header className="flex items-center justify-between border-b bg-card px-4 py-3">
-                <div className="flex items-center gap-3">
+            <header className="flex items-center border-b bg-card px-4 py-3">
+                <div className="flex items-center gap-3 flex-1">
                     <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                         <Link href="/dashboard">
                             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -30,15 +30,16 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
                         </Link>
                     </Button>
                     <Separator orientation="vertical" className="h-6" />
-                    <div className="inline-flex gap-1 rounded-lg bg-muted p-1">
-                        <TabButton icon={Palette} label="Theme" active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} />
-                        <TabButton icon={Layout} label="Page Builder" active={activeTab === 'builder'} onClick={() => setActiveTab('builder')} />
-                        <TabButton icon={Briefcase} label="Jobs" active={activeTab === 'jobs'} onClick={() => setActiveTab('jobs')} />
-                        <TabButton icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
-                    </div>
+                </div>
+                
+                <div className="inline-flex gap-1 rounded-lg bg-muted p-1">
+                    <TabButton icon={Palette} label="Theme" active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} />
+                    <TabButton icon={Layout} label="Page Builder" active={activeTab === 'builder'} onClick={() => setActiveTab('builder')} />
+                    <TabButton icon={Briefcase} label="Jobs" active={activeTab === 'jobs'} onClick={() => setActiveTab('jobs')} />
+                    <TabButton icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
                 </div>
 
-                <div className="hidden text-xs text-muted-foreground md:flex items-center gap-2">
+                <div className="hidden text-xs text-muted-foreground md:flex items-center gap-2 flex-1 justify-end">
                     <span className="truncate max-w-[160px] font-medium">{company.name}</span>
                     <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] border border-border/50">
                         /{company.slug}
