@@ -1,21 +1,18 @@
 import { getCompanies } from '@/app/actions/companies';
 import { CreateCompanyDialog } from './create-company-dialog';
-import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { CompanyCard } from '@/components/recruiter/company-card';
+
 
 export default async function DashboardPage() {
     const companies = await getCompanies();
 
     return (
         <div className="flex flex-1 flex-col gap-8">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pt-4">
                 <div className="space-y-1">
                     <h1 className="text-2xl font-semibold tracking-tight">Your Companies</h1>
                     <p className="text-sm text-muted-foreground">Manage your career pages and job postings.</p>
                 </div>
-                {/* Create Dialog on top right as well, for convenience */}
-                <CreateCompanyDialog />
             </div>
 
             {companies.length === 0 ? (
@@ -29,20 +26,7 @@ export default async function DashboardPage() {
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {companies.map((company) => (
-                        <Link key={company.id} href={`/${company.slug}/edit`}>
-                            <Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/20 cursor-pointer">
-                                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-muted/50 opacity-0 transition-opacity group-hover:opacity-100" />
-                                <CardHeader className="relative">
-                                    <div className="flex items-center justify-between">
-                                        <CardTitle className="text-lg">{company.name}</CardTitle>
-                                        <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Live</span>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="relative">
-                                    <p className="text-sm text-muted-foreground font-mono">/{company.slug}</p>
-                                </CardContent>
-                            </Card>
-                        </Link>
+                        <CompanyCard key={company.id} company={company} />
                     ))}
                 </div>
             )}

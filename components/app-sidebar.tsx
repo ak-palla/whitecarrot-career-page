@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Calendar, Home, Inbox, Search, Settings, Plus, Briefcase, ChevronsUpDown, LogOut, User as UserIcon } from "lucide-react"
+import { Calendar, Home, Inbox, Search, Plus, Briefcase, ChevronsUpDown, LogOut, User as UserIcon } from "lucide-react"
 
 import {
     Sidebar,
@@ -23,8 +23,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -34,14 +32,9 @@ import { useRouter } from "next/navigation"
 // Menu items.
 const items = [
     {
-        title: "Dashboard",
+        title: "Companies",
         url: "/dashboard",
         icon: Home,
-    },
-    {
-        title: "Settings",
-        url: "/settings", // Placeholder for now
-        icon: Settings,
     },
 ]
 
@@ -147,19 +140,6 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
                                 align="end"
                                 sideOffset={4}
                             >
-                                <DropdownMenuLabel className="p-0 font-normal">
-                                    <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                        <Avatar className="h-8 w-8 rounded-lg">
-                                            <AvatarImage src={avatarUrl} alt={name} />
-                                            <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="grid flex-1 text-left text-sm leading-tight">
-                                            <span className="truncate font-semibold">{name}</span>
-                                            <span className="truncate text-xs">{email}</span>
-                                        </div>
-                                    </div>
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={handleSignOut}>
                                     <LogOut />
                                     Log out
