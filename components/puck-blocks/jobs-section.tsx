@@ -171,15 +171,15 @@ export function JobsSection({
     <>
       {(!jobsArray || jobsArray.length === 0) ? (
         <div className="text-center mb-6">
-          <h2 className={`${SECTION_TYPOGRAPHY.heading.base} mb-2`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+          <h2 className={`${SECTION_TYPOGRAPHY.heading.base} mb-2 text-black`}>
             {heading}
           </h2>
-          <p style={{ color: SECTION_TYPOGRAPHY.body.color }}>{emptyStateMessage}</p>
+          <p className="text-black">{emptyStateMessage}</p>
         </div>
       ) : (
         <>
           <div className="mb-6 text-center">
-          <h2 className={`${SECTION_TYPOGRAPHY.heading.base} mb-2`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+          <h2 className={`${SECTION_TYPOGRAPHY.heading.base} mb-2 text-black`}>
             {heading}
           </h2>
         </div>
@@ -191,7 +191,7 @@ export function JobsSection({
                 <div className="space-y-4">
                   {/* Search Input */}
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-color)', opacity: 0.5 }} />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-black opacity-50" />
                     <Input
                       type="text"
                       placeholder="Search jobs..."
@@ -206,7 +206,7 @@ export function JobsSection({
                         className="absolute right-3 top-1/2 transform -translate-y-1/2"
                         aria-label="Clear search"
                       >
-                        <X className="h-4 w-4" style={{ color: 'var(--text-color)', opacity: 0.5 }} />
+                        <X className="h-4 w-4 text-black opacity-50" />
                       </button>
                     )}
                   </div>
@@ -216,7 +216,7 @@ export function JobsSection({
                     {/* Location Filter */}
                     {filterOptions.locations.length > 0 && (
                       <div className="space-y-2">
-                        <Label htmlFor="location-filter" style={{ color: 'var(--heading-color)' }}>
+                        <Label htmlFor="location-filter" className="text-black">
                           Location
                         </Label>
                         <Select value={selectedLocation} onValueChange={setSelectedLocation}>
@@ -238,7 +238,7 @@ export function JobsSection({
                     {/* Job Type Filter */}
                     {filterOptions.jobTypes.length > 0 && (
                       <div className="space-y-2">
-                        <Label htmlFor="job-type-filter" style={{ color: 'var(--heading-color)' }}>
+                        <Label htmlFor="job-type-filter" className="text-black">
                           Job Type
                         </Label>
                         <Select value={selectedJobType} onValueChange={setSelectedJobType}>
@@ -260,7 +260,7 @@ export function JobsSection({
                     {/* Team Filter */}
                     {filterOptions.teams.length > 0 && (
                       <div className="space-y-2">
-                        <Label htmlFor="team-filter" style={{ color: 'var(--heading-color)' }}>
+                        <Label htmlFor="team-filter" className="text-black">
                           Department/Team
                         </Label>
                         <Select value={selectedTeam} onValueChange={setSelectedTeam}>
@@ -283,7 +283,7 @@ export function JobsSection({
                   {/* Clear Filters Button */}
                   {hasActiveFilters && (
                     <div className="flex items-center justify-between pt-2">
-                      <p className="text-sm" style={{ color: 'var(--text-color)' }}>
+                      <p className="text-sm text-black">
                         {filteredJobs.length === 0 ? (
                           'No jobs match your filters'
                         ) : (
@@ -304,7 +304,7 @@ export function JobsSection({
 
                   {/* Result count when no filters active */}
                   {!hasActiveFilters && (
-                    <p className="text-sm pt-2" style={{ color: 'var(--text-color)' }}>
+                    <p className="text-sm pt-2 text-black">
                       {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} available
                     </p>
                   )}
@@ -316,7 +316,7 @@ export function JobsSection({
           {/* Job Listings */}
           {filteredJobs.length === 0 && hasActiveFilters ? (
             <div className="text-center py-12">
-              <p className="text-lg mb-4" style={{ color: 'var(--text-color)' }}>
+              <p className="text-lg mb-4 text-black">
                 No jobs match your filters
               </p>
               <Button variant="outline" onClick={clearFilters}>
@@ -329,7 +329,7 @@ export function JobsSection({
                 <>
                   {Object.entries(groupBy(filteredJobs, (job) => job.team || 'Other')).map(([team, teamJobs]) => (
                     <div key={team} className="space-y-4 mb-8">
-            <h3 className="text-xl font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+            <h3 className="text-xl font-semibold text-black">
               {team}
             </h3>
                       <JobList jobs={teamJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
@@ -341,7 +341,7 @@ export function JobsSection({
                 <>
                   {Object.entries(groupBy(filteredJobs, (job) => job.location || 'Other')).map(([location, locationJobs]) => (
                     <div key={location} className="space-y-4 mb-8">
-            <h3 className="text-xl font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+            <h3 className="text-xl font-semibold text-black">
               {location}
             </h3>
                       <JobList jobs={locationJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
@@ -405,10 +405,10 @@ function JobList({
         <Card key={job.id} className={`${density === 'compact' ? 'p-3' : 'p-4'} hover:border-primary transition-colors`}>
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              <CardTitle className="text-base font-medium mb-2" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+              <CardTitle className="text-base font-medium mb-2 text-black">
                 {job.title}
               </CardTitle>
-              <div className="flex gap-3 flex-wrap items-center text-sm" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+              <div className="flex gap-3 flex-wrap items-center text-sm text-black">
                 {job.location && (
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
@@ -451,10 +451,10 @@ function JobCards({
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-2">
-                <CardTitle className="text-xl" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+                <CardTitle className="text-xl text-black">
                   {job.title}
                 </CardTitle>
-                <div className="flex flex-wrap items-center gap-3 text-sm" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-black">
                   {job.location && (
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
@@ -476,7 +476,7 @@ function JobCards({
           </CardHeader>
           <CardContent>
             {job.description && (
-              <p className="text-sm mb-4 leading-relaxed" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+              <p className="text-sm mb-4 leading-relaxed text-black">
                 {job.description}
               </p>
             )}

@@ -15,14 +15,14 @@ export function ContentSection({ title, content }: ContentSectionProps) {
     <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
       <Card>
         <CardHeader>
-          <CardTitle className={SECTION_TYPOGRAPHY.heading.base} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+          <CardTitle className={`${SECTION_TYPOGRAPHY.heading.base} text-black`}>
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Separator className="mb-4" />
           <div
-            style={{ color: SECTION_TYPOGRAPHY.body.color }}
+            className="text-black prose prose-lg max-w-none"
             dangerouslySetInnerHTML={{ __html: content || '' }}
           />
         </CardContent>

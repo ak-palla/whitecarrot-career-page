@@ -35,6 +35,10 @@ export const careersPageConfig: Config<PuckProps> = {
           type: 'text',
           label: 'Background Image URL',
         },
+        cultureVideoUrl: {
+          type: 'text',
+          label: 'Culture Video URL (YouTube, Vimeo, or direct video)',
+        },
         primaryCtaLabel: {
           type: 'text',
           label: 'Primary CTA Label',
@@ -102,6 +106,7 @@ export const careersPageConfig: Config<PuckProps> = {
         title: 'Join our team',
         subtitle: 'Help us build the future of work.',
         backgroundImageUrl: '',
+        cultureVideoUrl: '',
         primaryCtaLabel: 'View open roles',
         primaryCtaHref: '#jobs',
         secondaryCtaLabel: '',

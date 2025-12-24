@@ -98,29 +98,33 @@ export function initializePuckData(draftData: unknown): PuckData {
 }
 
 /**
- * Converts our PuckData (array format) to Puck's Data format (object map)
+ * Converts our PuckData (array format) to Puck's Data format
+ * Note: In Puck v0.20+, Data uses arrays, so this is mostly a passthrough
  */
 export function puckDataToPuckFormat(puckData: PuckData): Data<PuckProps> {
-  const contentMap: Record<string, any> = {};
-  
-  puckData.content.forEach((item) => {
-    contentMap[item.id] = {
-      type: item.type,
-      props: item.props,
-    };
-  });
-
   return {
-    content: contentMap as any,
-    root: puckData.root,
+    content: puckData.content as any,
+    root: puckData.root && typeof puckData.root === 'object'
+      ? { props: puckData.root.props || {} }
+      : { props: {} },
   };
 }
 
 /**
- * Converts Puck's Data format (object map) to our PuckData format (array)
+ * Converts Puck's Data format to our PuckData format
+ * Note: In Puck v0.20+, both use arrays, so this is mostly a passthrough with normalization
  */
 export function puckFormatToPuckData(data: Data<PuckProps>): PuckData {
-  const content: PuckContentItem[] = Object.entries(data.content).map(([id, item]) => ({
+  // If content is already an array, use it directly
+  if (Array.isArray(data.content)) {
+    return {
+      content: data.content as PuckContentItem[],
+      root: { props: data.root?.props || {} },
+    };
+  }
+
+  // Fallback for object format (shouldn't happen in v0.20+)
+  const content: PuckContentItem[] = Object.entries(data.content || {}).map(([id, item]) => ({
     type: item.type as keyof PuckProps,
     id: id,
     props: item.props as Record<string, unknown>,

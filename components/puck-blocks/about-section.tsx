@@ -39,11 +39,11 @@ export function AboutSection({ heading, body, values, layout = 'full', backgroun
     return (
       <SectionWrapper contentMaxWidth="full" verticalPadding="md">
         <div className="flex flex-col items-center text-center space-y-4 mb-12">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl text-balance" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl text-balance text-black">
             {heading}
           </h2>
           {body && (
-            <p className="text-lg max-w-2xl leading-relaxed" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+            <p className="text-lg max-w-2xl leading-relaxed text-black">
               {body}
             </p>
           )}
@@ -67,10 +67,10 @@ export function AboutSection({ heading, body, values, layout = 'full', backgroun
                       </div>
                     )}
                     <div className="space-y-2">
-                      <h3 className="font-semibold text-lg" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+                      <h3 className="font-semibold text-lg text-black">
                         {value.title}
                       </h3>
-                      <p className="text-sm leading-relaxed" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+                      <p className="text-sm leading-relaxed text-black">
                         {value.description}
                       </p>
                     </div>
@@ -87,13 +87,12 @@ export function AboutSection({ heading, body, values, layout = 'full', backgroun
   // Original text-based layouts
   const content = (
     <>
-      <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing}`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+      <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing} text-black`}>
         {heading}
       </h2>
       {body && (
         <div
-          className={SECTION_TYPOGRAPHY.body.spacing}
-          style={{ color: SECTION_TYPOGRAPHY.body.color }}
+          className={`${SECTION_TYPOGRAPHY.body.spacing} text-black prose prose-lg max-w-none`}
           dangerouslySetInnerHTML={{ __html: body }}
         />
       )}
@@ -105,14 +104,14 @@ export function AboutSection({ heading, body, values, layout = 'full', backgroun
       <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
         <Card>
           <CardHeader>
-            <CardTitle className={SECTION_TYPOGRAPHY.heading.base} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+            <CardTitle className={`${SECTION_TYPOGRAPHY.heading.base} text-black`}>
               {heading}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {body && (
               <div
-                style={{ color: SECTION_TYPOGRAPHY.body.color }}
+                className="text-black prose prose-lg max-w-none"
                 dangerouslySetInnerHTML={{ __html: body }}
               />
             )}

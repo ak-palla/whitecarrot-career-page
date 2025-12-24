@@ -10,6 +10,7 @@ export interface HeroSectionProps {
   title: string;
   subtitle?: string;
   backgroundImageUrl?: string;
+  cultureVideoUrl?: string;
   primaryCtaLabel?: string;
   primaryCtaHref?: string;
   secondaryCtaLabel?: string;
@@ -25,6 +26,7 @@ export function HeroSection({
   title,
   subtitle,
   backgroundImageUrl,
+  cultureVideoUrl,
   primaryCtaLabel,
   primaryCtaHref,
   secondaryCtaLabel,
@@ -116,6 +118,39 @@ export function HeroSection({
           </div>
         ) : null}
       </div>
+      {cultureVideoUrl && (
+        <div className="relative z-10 mx-auto mt-8 max-w-4xl">
+          <div className="aspect-video rounded-lg overflow-hidden bg-black">
+            {cultureVideoUrl.includes('youtube.com') || cultureVideoUrl.includes('youtu.be') ? (
+              <iframe
+                src={cultureVideoUrl.includes('youtu.be') 
+                  ? `https://www.youtube.com/embed/${cultureVideoUrl.split('/').pop()}`
+                  : cultureVideoUrl.replace('watch?v=', 'embed/').split('&')[0]}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="Culture Video"
+              />
+            ) : cultureVideoUrl.includes('vimeo.com') ? (
+              <iframe
+                src={`https://player.vimeo.com/video/${cultureVideoUrl.split('/').pop()}`}
+                className="w-full h-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title="Culture Video"
+              />
+            ) : (
+              <video
+                src={cultureVideoUrl}
+                controls
+                className="w-full h-full"
+              >
+                Your browser does not support the video tag.
+              </video>
+            )}
+          </div>
+        </div>
+      )}
     </header>
     </SectionWrapper>
   );

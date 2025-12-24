@@ -33,11 +33,11 @@ export function TeamSection({ heading, description, members, background = 'plain
     return (
       <SectionWrapper contentMaxWidth="full" verticalPadding="md">
         <div className="flex flex-col items-center text-center space-y-4 mb-12">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl text-balance" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl text-balance text-black">
             {heading}
           </h2>
           {description && (
-            <p className="text-lg max-w-2xl leading-relaxed" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+            <p className="text-lg max-w-2xl leading-relaxed text-black">
               {description}
             </p>
           )}
@@ -58,14 +58,14 @@ export function TeamSection({ heading, description, members, background = 'plain
                   </AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
-                  <h3 className="font-semibold text-lg" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+                  <h3 className="font-semibold text-lg text-black">
                     {member.name}
                   </h3>
                   <p className="text-sm font-medium" style={{ color: 'var(--primary)' }}>
                     {member.role}
                   </p>
                   {member.bio && (
-                    <p className="text-sm leading-relaxed" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+                    <p className="text-sm leading-relaxed text-black">
                       {member.bio}
                     </p>
                   )}
@@ -90,13 +90,13 @@ export function TeamSection({ heading, description, members, background = 'plain
   // Original simple text layout (backward compatibility)
   const content = (
     <>
-      <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing}`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+      <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing} text-black`}>
         {heading}
       </h2>
       {description && (
         <>
           <Separator className="mb-4" />
-          <p style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+          <p className="text-black">
             {description}
           </p>
         </>
@@ -109,13 +109,13 @@ export function TeamSection({ heading, description, members, background = 'plain
       <SectionWrapper contentMaxWidth="3xl" verticalPadding="md" className={alignmentClasses[align]}>
         <Card className="border-0 w-full" style={{ backgroundColor: 'var(--primary-soft)' }}>
           <CardHeader>
-            <CardTitle className={SECTION_TYPOGRAPHY.heading.base} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+            <CardTitle className={`${SECTION_TYPOGRAPHY.heading.base} text-black`}>
               {heading}
             </CardTitle>
           </CardHeader>
           {description && (
             <CardContent>
-              <p style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+              <p className="text-black">
                 {description}
               </p>
             </CardContent>

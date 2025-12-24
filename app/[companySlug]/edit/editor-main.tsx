@@ -4,15 +4,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Palette, Briefcase, Settings, ArrowLeft } from 'lucide-react';
+import { Palette, Briefcase, Settings, ArrowLeft, Layout } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ThemeCustomizer } from '@/components/recruiter/theme-customizer';
 import { JobManager } from '@/components/recruiter/jobs/job-manager';
 import { CompanySettings } from '@/components/recruiter/company-settings';
+import { PuckEditor } from '@/components/recruiter/puck-editor';
 
-type TabId = 'theme' | 'jobs' | 'settings';
+type TabId = 'theme' | 'builder' | 'jobs' | 'settings';
 
 export function EditorMain({ company, careerPage }: { company: any; careerPage: any }) {
     const [activeTab, setActiveTab] = useState<TabId>('theme');
@@ -31,6 +32,7 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
                     <Separator orientation="vertical" className="h-6" />
                     <div className="inline-flex gap-1 rounded-lg bg-muted p-1">
                         <TabButton icon={Palette} label="Theme" active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} />
+                        <TabButton icon={Layout} label="Page Builder" active={activeTab === 'builder'} onClick={() => setActiveTab('builder')} />
                         <TabButton icon={Briefcase} label="Jobs" active={activeTab === 'jobs'} onClick={() => setActiveTab('jobs')} />
                         <TabButton icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
                     </div>
@@ -45,24 +47,34 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
             </header>
 
             {/* Main content area */}
-            <main className="flex-1 overflow-auto bg-muted/20 p-4 md:p-6">
+            <main className="flex-1 overflow-hidden bg-muted/20">
                 {activeTab === 'theme' && (
-                    <div className="mx-auto max-w-4xl">
-                        <h2 className="mb-2 text-lg font-semibold tracking-tight">Theme Customization</h2>
-                        <p className="mb-6 text-sm text-muted-foreground">Manage your brand colors, logo, and banner.</p>
-                        <ThemeCustomizer company={company} careerPage={careerPage} />
+                    <div className="h-full overflow-auto p-4 md:p-6">
+                        <div className="mx-auto max-w-4xl">
+                            <h2 className="mb-2 text-lg font-semibold tracking-tight">Theme Customization</h2>
+                            <p className="mb-6 text-sm text-muted-foreground">Manage your brand colors, logo, and banner.</p>
+                            <ThemeCustomizer company={company} careerPage={careerPage} />
+                        </div>
                     </div>
                 )}
 
+                {activeTab === 'builder' && (
+                    <PuckEditor careerPage={careerPage} companySlug={company.slug} />
+                )}
+
                 {activeTab === 'jobs' && (
-                    <div className="mx-auto max-w-4xl">
-                        {company && <JobManager companyId={company.id} />}
+                    <div className="h-full overflow-auto p-4 md:p-6">
+                        <div className="mx-auto max-w-4xl">
+                            {company && <JobManager companyId={company.id} />}
+                        </div>
                     </div>
                 )}
 
                 {activeTab === 'settings' && (
-                    <div className="mx-auto max-w-4xl">
-                        <CompanySettings company={company} />
+                    <div className="h-full overflow-auto p-4 md:p-6">
+                        <div className="mx-auto max-w-4xl">
+                            <CompanySettings company={company} />
+                        </div>
                     </div>
                 )}
             </main>

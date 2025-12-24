@@ -405,11 +405,26 @@ const balancedProfessional: PageTemplate = {
   },
 };
 
-// Export only 3 templates as requested
+/**
+ * Blank template - empty page for users to build from scratch
+ */
+const blankTemplate: PageTemplate = {
+  id: 'blank',
+  name: 'Blank Page',
+  description: 'Start with an empty page and build your own layout',
+  suggestedPrimaryColor: '#000000',
+  puckData: {
+    root: { props: {} },
+    content: [],
+  },
+};
+
+// Export templates including blank
 export const templates: PageTemplate[] = [
   modernMinimal,
   corporateClassic,
   startupBold,
+  blankTemplate,
 ];
 
 /**
