@@ -39,6 +39,14 @@ export const careersPageConfig: Config<PuckProps> = {
           type: 'text',
           label: 'Primary CTA Link',
         },
+        secondaryCtaLabel: {
+          type: 'text',
+          label: 'Secondary CTA Label (optional)',
+        },
+        secondaryCtaHref: {
+          type: 'text',
+          label: 'Secondary CTA Link (optional)',
+        },
         alignment: {
           type: 'select',
           label: 'Content Alignment',
@@ -92,6 +100,8 @@ export const careersPageConfig: Config<PuckProps> = {
         backgroundImageUrl: '',
         primaryCtaLabel: 'View open roles',
         primaryCtaHref: '#jobs',
+        secondaryCtaLabel: '',
+        secondaryCtaHref: '',
         alignment: 'center',
         size: 'tall',
         backgroundStyle: 'solid',
@@ -110,12 +120,47 @@ export const careersPageConfig: Config<PuckProps> = {
           type: 'textarea',
           label: 'Content',
         },
+        values: {
+          type: 'array',
+          label: 'Value Cards (for cards layout)',
+          arrayFields: {
+            icon: {
+              type: 'select',
+              label: 'Icon',
+              options: [
+                { label: 'Target', value: 'Target' },
+                { label: 'Users', value: 'Users' },
+                { label: 'Zap', value: 'Zap' },
+                { label: 'Globe', value: 'Globe' },
+                { label: 'Heart', value: 'Heart' },
+                { label: 'Briefcase', value: 'Briefcase' },
+                { label: 'Award', value: 'Award' },
+                { label: 'Lightbulb', value: 'Lightbulb' },
+                { label: 'Rocket', value: 'Rocket' },
+                { label: 'Shield', value: 'Shield' },
+              ],
+            },
+            title: {
+              type: 'text',
+              label: 'Title',
+            },
+            description: {
+              type: 'textarea',
+              label: 'Description',
+            },
+            iconColor: {
+              type: 'text',
+              label: 'Icon Color (optional, e.g., #2563eb)',
+            },
+          },
+        },
         layout: {
           type: 'select',
           label: 'Layout',
           options: [
             { label: 'Full Width', value: 'full' },
             { label: 'Two Column', value: 'twoColumn' },
+            { label: 'Value Cards', value: 'cards' },
           ],
         },
         background: {
@@ -130,6 +175,7 @@ export const careersPageConfig: Config<PuckProps> = {
       defaultProps: {
         heading: 'About the company',
         body: 'Share your mission, vision, and what makes your team unique.',
+        values: [],
         layout: 'full',
         background: 'plain',
       },
@@ -145,6 +191,24 @@ export const careersPageConfig: Config<PuckProps> = {
           type: 'array',
           label: 'Benefits',
           arrayFields: {
+            icon: {
+              type: 'select',
+              label: 'Icon',
+              options: [
+                { label: 'Heart', value: 'Heart' },
+                { label: 'Briefcase', value: 'Briefcase' },
+                { label: 'GraduationCap', value: 'GraduationCap' },
+                { label: 'Home', value: 'Home' },
+                { label: 'Coffee', value: 'Coffee' },
+                { label: 'Plane', value: 'Plane' },
+                { label: 'Shield', value: 'Shield' },
+                { label: 'Award', value: 'Award' },
+                { label: 'Users', value: 'Users' },
+                { label: 'Zap', value: 'Zap' },
+                { label: 'DollarSign', value: 'DollarSign' },
+                { label: 'Sparkles', value: 'Sparkles' },
+              ],
+            },
             title: {
               type: 'text',
               label: 'Benefit title',
@@ -152,6 +216,10 @@ export const careersPageConfig: Config<PuckProps> = {
             description: {
               type: 'textarea',
               label: 'Short description',
+            },
+            iconColor: {
+              type: 'text',
+              label: 'Icon Color (optional, e.g., #ef4444)',
             },
           },
         },
@@ -168,8 +236,8 @@ export const careersPageConfig: Config<PuckProps> = {
       defaultProps: {
         heading: 'Benefits & perks',
         benefits: [
-          { title: 'Competitive salary', description: 'We pay at or above market for great talent.' },
-          { title: 'Flexible work', description: 'Work remotely or from our office – your choice.' },
+          { title: 'Competitive salary', description: 'We pay at or above market for great talent.', icon: 'DollarSign', iconColor: '' },
+          { title: 'Flexible work', description: 'Work remotely or from our office – your choice.', icon: 'Home', iconColor: '' },
         ],
         styleVariant: 'cards',
       },
@@ -184,6 +252,38 @@ export const careersPageConfig: Config<PuckProps> = {
         description: {
           type: 'textarea',
           label: 'Description',
+        },
+        members: {
+          type: 'array',
+          label: 'Team Members (optional)',
+          arrayFields: {
+            name: {
+              type: 'text',
+              label: 'Name',
+            },
+            role: {
+              type: 'text',
+              label: 'Role/Title',
+            },
+            image: {
+              type: 'text',
+              label: 'Image URL (optional)',
+            },
+            bio: {
+              type: 'textarea',
+              label: 'Short Bio (optional)',
+            },
+            skills: {
+              type: 'array',
+              label: 'Skills/Tags (optional)',
+              arrayFields: {
+                skill: {
+                  type: 'text',
+                  label: 'Skill',
+                },
+              },
+            },
+          },
         },
         background: {
           type: 'select',
@@ -205,6 +305,7 @@ export const careersPageConfig: Config<PuckProps> = {
       defaultProps: {
         heading: 'Meet the team',
         description: 'Introduce key teams or share what it feels like to work here.',
+        members: [],
         background: 'plain',
         align: 'left',
       },

@@ -20,19 +20,30 @@ interface PuckEditorProps {
 }
 
 export function PuckEditor({ careerPage, companySlug, onSave, onPublish, themeOverride }: PuckEditorProps) {
-  // Ensure data is always properly initialized
-  const getInitialData = (): PuckData => {
+  // Ensure data is always properly initialized with IDs - use useMemo to prevent re-computation
+  const initialData = useMemo((): PuckData => {
     if (careerPage?.draft_puck_data) {
       const draft = careerPage.draft_puck_data;
+      const content = Array.isArray(draft.content)
+        ? draft.content.map((item: any, index: number) => {
+            // Ensure every item has a unique ID
+            if (!item || typeof item !== 'object') return null;
+            return {
+              ...item,
+              id: item.id || `initial-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            };
+          }).filter(Boolean)
+        : [];
       return {
-        content: Array.isArray(draft.content) ? draft.content : [],
+        content,
         root: draft.root || { props: {} },
       };
     }
     return { content: [], root: { props: {} } };
-  };
+  }, []); // Empty deps - only compute once on mount
 
-  const [data, setData] = useState<PuckData>(getInitialData());
+  const [data, setData] = useState<PuckData>(initialData);
+  const [puckKey, setPuckKey] = useState(0); // Key to force Puck re-render when template is applied
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -50,22 +61,68 @@ export function PuckEditor({ careerPage, companySlug, onSave, onPublish, themeOv
 
   // Helper to normalize Puck data structure
   const normalizePuckData = (puckData: PuckData | null | undefined): PuckData => {
-    if (!puckData) {
+    try {
+      if (!puckData) {
+        return { content: [], root: { props: {} } };
+      }
+
+      // Ensure root exists and is an object
+      const root = puckData.root && typeof puckData.root === 'object'
+        ? { props: puckData.root.props || {} }
+        : { props: {} };
+
+      // Track used IDs to prevent duplicates
+      const usedIds = new Set<string>();
+
+      // Safely filter content array and ensure each item has a unique ID
+      const content = Array.isArray(puckData.content)
+        ? puckData.content
+            .filter((item: any) => {
+              if (!item || typeof item !== 'object') {
+                return false;
+              }
+              // Ensure item has required properties
+              return (
+                item.type &&
+                typeof item.type === 'string' &&
+                item.props &&
+                typeof item.props === 'object'
+              );
+            })
+            .map((item: any, index: number) => {
+              // Ensure every item has a unique ID for Puck's internal tracking
+              let itemId = item.id;
+
+              // Generate new ID if missing, empty, or duplicate
+              if (!itemId || typeof itemId !== 'string' || itemId.trim() === '' || usedIds.has(itemId)) {
+                // Create a truly unique ID using timestamp and crypto-random
+                itemId = `${item.type}-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+                // Ensure this new ID is also unique (unlikely collision but safe)
+                while (usedIds.has(itemId)) {
+                  itemId = `${item.type}-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                }
+              }
+
+              usedIds.add(itemId);
+
+              return {
+                ...item,
+                id: itemId,
+              };
+            })
+        : [];
+
+      return {
+        root,
+        content,
+      };
+    } catch (error) {
+      console.error('Error normalizing Puck data:', error);
+      console.error('Input data:', puckData);
+      // Return safe default on error
       return { content: [], root: { props: {} } };
     }
-    
-    return {
-      root: puckData.root || { props: {} },
-      content: Array.isArray(puckData.content) 
-        ? puckData.content.filter((item: any) => 
-            item && 
-            typeof item === 'object' && 
-            item.type && 
-            item.props &&
-            typeof item.type === 'string'
-          )
-        : [],
-    };
   };
 
   const handleSave = async (newData: PuckData) => {
@@ -88,30 +145,24 @@ export function PuckEditor({ careerPage, companySlug, onSave, onPublish, themeOv
     try {
       const companyName = careerPage?.company_name || 'Your company';
       const templateData = applyTemplate(templateId, companyName);
-      
-      // Ensure the data structure is correct for Puck
+
+      const baseTimestamp = Date.now();
       const normalizedData: PuckData = {
         root: templateData.root || { props: {} },
-        content: Array.isArray(templateData.content) ? templateData.content : [],
+        content: Array.isArray(templateData.content)
+          ? templateData.content.map((item: any, index: number) => ({
+              ...item,
+              id: item.id || `template-${templateId}-${index}-${baseTimestamp}`,
+            }))
+          : [],
       };
-      
-      // Validate content items structure
-      normalizedData.content = normalizedData.content.map((item: any) => {
-        if (!item || typeof item !== 'object') {
-          return null;
-        }
-        return {
-          type: item.type || 'ContentSection',
-          props: item.props || {},
-        };
-      }).filter(Boolean); // Remove any null items
-      
-      // Update data
+
+      // Update all state in one batch
       setData(normalizedData);
       setHasUnsavedChanges(true);
       setShowStarter(false);
-      
-      toast.success(`Template "${templateId}" applied successfully`);
+      setPuckKey(prev => prev + 1); // Force remount AFTER data is set
+      toast.success(`Template applied successfully`);
     } catch (error) {
       console.error('Failed to apply template:', error);
       toast.error('Failed to apply template');
@@ -140,6 +191,9 @@ export function PuckEditor({ careerPage, companySlug, onSave, onPublish, themeOv
     }
   };
 
+  // Memoize normalized data to ensure stable reference and prevent unnecessary re-renders
+  const normalizedPuckData = useMemo(() => normalizePuckData(data), [data]);
+
   return (
     <div style={themeStyle} className="relative">
       {hasUnsavedChanges && (
@@ -157,21 +211,35 @@ export function PuckEditor({ careerPage, companySlug, onSave, onPublish, themeOv
         </div>
       )}
 
-      {data && (
+      {data && typeof data === 'object' && data.content && Array.isArray(data.content) && (
         <Puck
+          key={puckKey}
           config={careersPageConfig}
-          data={normalizePuckData(data)}
+          data={normalizedPuckData}
         onPublish={async (newData: PuckData) => {
-          // Validate and normalize data before saving
-          const normalized = normalizePuckData(newData);
-          setData(normalized);
-          await handleSave(normalized);
+          try {
+            // Validate data before saving
+            if (!newData) {
+              console.warn('Puck onPublish received undefined data');
+              return;
+            }
+
+            setData(newData);
+            await handleSave(newData);
+          } catch (error) {
+            console.error('Error in onPublish handler:', error);
+            console.error('Received data:', newData);
+            toast.error('Failed to save changes');
+          }
         }}
         onChange={(newData: PuckData) => {
-          // Validate and normalize data structure to prevent errors when deleting
-          const normalized = normalizePuckData(newData);
-          setData(normalized);
-          setHasUnsavedChanges(true);
+          try {
+            if (!newData) return;
+            setData(newData);
+            setHasUnsavedChanges(true);
+          } catch (error) {
+            console.error('Error in onChange handler:', error);
+          }
         }}
         overrides={{
           header: ({ children, actions }) => (

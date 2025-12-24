@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
 import { SECTION_PADDING } from '@/lib/section-layout/constants';
+import { ArrowRight } from 'lucide-react';
 
 export interface HeroSectionProps {
   title: string;
@@ -11,6 +12,8 @@ export interface HeroSectionProps {
   backgroundImageUrl?: string;
   primaryCtaLabel?: string;
   primaryCtaHref?: string;
+  secondaryCtaLabel?: string;
+  secondaryCtaHref?: string;
   alignment?: 'left' | 'center' | 'right';
   size?: 'compact' | 'tall';
   backgroundStyle?: 'solid' | 'image' | 'gradient';
@@ -24,6 +27,8 @@ export function HeroSection({
   backgroundImageUrl,
   primaryCtaLabel,
   primaryCtaHref,
+  secondaryCtaLabel,
+  secondaryCtaHref,
   alignment = 'center',
   size = 'tall',
   backgroundStyle = 'solid',
@@ -64,31 +69,52 @@ export function HeroSection({
           style={{ backgroundImage: `url(${backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
         />
       )}
-      <div className={`relative z-10 mx-auto flex max-w-3xl flex-col gap-4 ${alignmentClasses[alignment]}`}>
-        <h1 className="text-3xl font-bold tracking-tight md:text-4xl" style={{ color: 'var(--text-on-primary)' }}>
+      <div className={`relative z-10 mx-auto flex max-w-3xl flex-col gap-6 ${alignmentClasses[alignment]}`}>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-balance" style={{ color: 'var(--text-on-primary)' }}>
           {title}
         </h1>
         {subtitle && (
-          <p className="text-sm md:text-base" style={{ color: 'var(--text-on-primary)', opacity: 0.9 }}>
+          <p className="text-lg md:text-xl leading-relaxed text-balance" style={{ color: 'var(--text-on-primary)', opacity: 0.9 }}>
             {subtitle}
           </p>
         )}
-        {primaryCtaLabel && primaryCtaHref && (
-          <Button
-            asChild
-            variant={primaryCtaVariant}
-            size={primaryCtaSize}
-            className="mt-4 rounded-full"
-            style={{
-              backgroundColor: primaryCtaVariant === 'secondary' ? 'var(--secondary)' : undefined,
-              color: primaryCtaVariant === 'secondary' ? 'var(--primary)' : undefined,
-            }}
-          >
-            <a href={primaryCtaHref}>
-              {primaryCtaLabel}
-            </a>
-          </Button>
-        )}
+        {(primaryCtaLabel && primaryCtaHref) || (secondaryCtaLabel && secondaryCtaHref) ? (
+          <div className="flex flex-col sm:flex-row gap-4 mt-2">
+            {primaryCtaLabel && primaryCtaHref && (
+              <Button
+                asChild
+                variant={primaryCtaVariant}
+                size={primaryCtaSize}
+                className="rounded-full gap-2"
+                style={{
+                  backgroundColor: primaryCtaVariant === 'secondary' ? 'var(--secondary)' : undefined,
+                  color: primaryCtaVariant === 'secondary' ? 'var(--primary)' : undefined,
+                }}
+              >
+                <a href={primaryCtaHref}>
+                  {primaryCtaLabel}
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </Button>
+            )}
+            {secondaryCtaLabel && secondaryCtaHref && (
+              <Button
+                asChild
+                variant="outline"
+                size={primaryCtaSize}
+                className="rounded-full"
+                style={{
+                  borderColor: 'var(--secondary)',
+                  color: 'var(--text-on-primary)',
+                }}
+              >
+                <a href={secondaryCtaHref}>
+                  {secondaryCtaLabel}
+                </a>
+              </Button>
+            )}
+          </div>
+        ) : null}
       </div>
     </header>
     </SectionWrapper>

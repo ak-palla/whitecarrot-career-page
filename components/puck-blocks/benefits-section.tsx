@@ -3,10 +3,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
 import { SECTION_TYPOGRAPHY, GRID_LAYOUTS } from '@/lib/section-layout/constants';
+import { Heart, Briefcase, GraduationCap, Home, Coffee, Plane, Shield, Award, Users, Zap, DollarSign, Sparkles } from 'lucide-react';
 
 export interface BenefitItem {
   title: string;
   description?: string;
+  icon?: string;
+  iconColor?: string;
 }
 
 export interface BenefitsSectionProps {
@@ -14,6 +17,22 @@ export interface BenefitsSectionProps {
   benefits: BenefitItem[];
   styleVariant?: 'cards' | 'panels' | 'list';
 }
+
+// Map icon names to icon components
+const iconMap: Record<string, any> = {
+  Heart,
+  Briefcase,
+  GraduationCap,
+  Home,
+  Coffee,
+  Plane,
+  Shield,
+  Award,
+  Users,
+  Zap,
+  DollarSign,
+  Sparkles,
+};
 
 export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: BenefitsSectionProps) {
   const isPanels = styleVariant === 'panels';
@@ -49,12 +68,16 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
   }
 
   return (
-    <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
-      <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing}`} style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
-        {heading}
-      </h2>
-      <div className={GRID_LAYOUTS.twoColumn}>
+    <SectionWrapper contentMaxWidth="full" verticalPadding="md">
+      <div className="flex flex-col items-center text-center space-y-4 mb-12">
+        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl text-balance" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+          {heading}
+        </h2>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {benefits?.map((benefit, index) => {
+          const IconComponent = benefit.icon ? iconMap[benefit.icon] : null;
+
           if (isPanels) {
             return (
               <Card
@@ -64,14 +87,27 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
                   backgroundColor: 'var(--primary-soft)',
                 }}
               >
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
-                    {benefit.title}
-                  </CardTitle>
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    {IconComponent && (
+                      <div
+                        className="h-10 w-10 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: 'var(--background)' }}
+                      >
+                        <IconComponent
+                          className="h-5 w-5"
+                          style={{ color: benefit.iconColor || 'var(--primary)' }}
+                        />
+                      </div>
+                    )}
+                    <CardTitle className="text-xl" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+                      {benefit.title}
+                    </CardTitle>
+                  </div>
                 </CardHeader>
                 {benefit.description && (
-                  <CardContent className="pt-0">
-                    <p className="text-sm" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+                  <CardContent>
+                    <p className="text-sm leading-relaxed" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
                       {benefit.description}
                     </p>
                   </CardContent>
@@ -82,14 +118,27 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
 
           return (
             <Card key={index}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
-                  {benefit.title}
-                </CardTitle>
+              <CardHeader>
+                <div className="flex items-center gap-4">
+                  {IconComponent && (
+                    <div
+                      className="h-10 w-10 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: 'var(--muted)' }}
+                    >
+                      <IconComponent
+                        className="h-5 w-5"
+                        style={{ color: benefit.iconColor || 'var(--primary)' }}
+                      />
+                    </div>
+                  )}
+                  <CardTitle className="text-xl" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+                    {benefit.title}
+                  </CardTitle>
+                </div>
               </CardHeader>
               {benefit.description && (
-                <CardContent className="pt-0">
-                  <p className="text-sm" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+                <CardContent>
+                  <p className="text-sm leading-relaxed" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
                     {benefit.description}
                   </p>
                 </CardContent>

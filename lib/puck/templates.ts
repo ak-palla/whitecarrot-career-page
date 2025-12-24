@@ -24,35 +24,45 @@ const modernMinimal: PageTemplate = {
       {
         type: 'HeroSection',
         props: {
-          title: 'Join our team',
-          subtitle: 'Help us build the future of work.',
-          primaryCtaLabel: 'View open roles',
+          title: 'Join Our Mission to Build the Future',
+          subtitle: 'We\'re looking for talented, passionate people to help us shape the next generation of technology. Join a team that values innovation, creativity, and collaboration.',
+          primaryCtaLabel: 'View Open Positions',
           primaryCtaHref: '#jobs',
+          secondaryCtaLabel: 'Learn More About Us',
+          secondaryCtaHref: '#about',
           alignment: 'center',
           size: 'tall',
           backgroundStyle: 'solid',
           primaryCtaVariant: 'secondary',
-          primaryCtaSize: 'default',
+          primaryCtaSize: 'lg',
         },
       },
       {
         type: 'AboutSection',
         props: {
-          heading: 'About the company',
-          body: 'Share your mission, vision, and what makes your team unique.',
-          layout: 'full',
+          heading: 'About Our Company',
+          body: 'We\'re more than just a company. We\'re a community of innovators, creators, and problem-solvers working together to build something extraordinary.',
+          values: [
+            { icon: 'Target', title: 'Mission-Driven', description: 'We are committed to making a positive impact through innovative technology solutions.', iconColor: '' },
+            { icon: 'Users', title: 'Collaborative Culture', description: 'We believe in the power of teamwork and diverse perspectives to solve complex problems.', iconColor: '' },
+            { icon: 'Zap', title: 'Innovation First', description: 'We encourage experimentation and embrace new ideas to stay ahead of the curve.', iconColor: '' },
+            { icon: 'Globe', title: 'Global Impact', description: 'Our work reaches millions of users worldwide, making a difference every day.', iconColor: '' },
+          ],
+          layout: 'cards',
           background: 'plain',
         },
       },
       {
         type: 'BenefitsSection',
         props: {
-          heading: 'Benefits & perks',
+          heading: 'Benefits & Perks',
           benefits: [
-            { title: 'Competitive salary', description: 'We pay at or above market for great talent.' },
-            { title: 'Flexible work', description: 'Work remotely or from our office – your choice.' },
-            { title: 'Health & wellness', description: 'Comprehensive health insurance and wellness programs.' },
-            { title: 'Learning & growth', description: 'Continuous learning opportunities and career development.' },
+            { title: 'Health & Wellness', description: 'Comprehensive health, dental, and vision insurance for you and your family.', icon: 'Heart', iconColor: '#ef4444' },
+            { title: 'Competitive Salary', description: 'Industry-leading compensation packages with equity options.', icon: 'DollarSign', iconColor: '#3b82f6' },
+            { title: 'Learning & Development', description: 'Annual learning budget and access to courses, conferences, and workshops.', icon: 'GraduationCap', iconColor: '#8b5cf6' },
+            { title: 'Flexible Work', description: 'Remote-first culture with flexible hours and work-from-anywhere options.', icon: 'Home', iconColor: '#10b981' },
+            { title: 'Team Events', description: 'Regular team outings, happy hours, and company-wide celebrations.', icon: 'Coffee', iconColor: '#f59e0b' },
+            { title: 'Generous PTO', description: 'Unlimited paid time off and company-wide holiday breaks.', icon: 'Plane', iconColor: '#06b6d4' },
           ],
           styleVariant: 'cards',
         },
@@ -60,7 +70,7 @@ const modernMinimal: PageTemplate = {
       {
         type: 'JobsSection',
         props: {
-          heading: 'Open positions',
+          heading: 'Open Positions',
           layout: 'cards',
           density: 'comfortable',
           background: 'plain',
@@ -88,12 +98,14 @@ const corporateClassic: PageTemplate = {
       {
         type: 'HeroSection',
         props: {
-          title: 'Build your career with us',
+          title: 'Build Your Career With Us',
           subtitle: 'Join a team that values excellence, integrity, and innovation.',
-          primaryCtaLabel: 'Explore opportunities',
+          primaryCtaLabel: 'Explore Opportunities',
           primaryCtaHref: '#jobs',
-          alignment: 'left',
-          size: 'compact',
+          secondaryCtaLabel: 'About Us',
+          secondaryCtaHref: '#about',
+          alignment: 'center',
+          size: 'tall',
           backgroundStyle: 'solid',
           primaryCtaVariant: 'secondary',
           primaryCtaSize: 'default',
@@ -111,12 +123,12 @@ const corporateClassic: PageTemplate = {
       {
         type: 'BenefitsSection',
         props: {
-          heading: 'Benefits & perks',
+          heading: 'Benefits & Perks',
           benefits: [
-            { title: 'Competitive compensation', description: 'Market-leading salary and benefits package.' },
-            { title: 'Professional development', description: 'Training programs and career advancement opportunities.' },
-            { title: 'Work-life balance', description: 'Flexible schedules and generous time off policies.' },
-            { title: 'Comprehensive benefits', description: 'Health, dental, vision, and retirement plans.' },
+            { title: 'Competitive Compensation', description: 'Market-leading salary and benefits package.', icon: 'DollarSign', iconColor: '#1e40af' },
+            { title: 'Professional Development', description: 'Training programs and career advancement opportunities.', icon: 'GraduationCap', iconColor: '#7c3aed' },
+            { title: 'Work-Life Balance', description: 'Flexible schedules and generous time off policies.', icon: 'Home', iconColor: '#059669' },
+            { title: 'Comprehensive Benefits', description: 'Health, dental, vision, and retirement plans.', icon: 'Shield', iconColor: '#dc2626' },
           ],
           styleVariant: 'panels',
         },
@@ -124,7 +136,7 @@ const corporateClassic: PageTemplate = {
       {
         type: 'JobsSection',
         props: {
-          heading: 'Open positions',
+          heading: 'Open Positions',
           layout: 'list',
           density: 'comfortable',
           background: 'plain',
@@ -152,10 +164,12 @@ const startupBold: PageTemplate = {
       {
         type: 'HeroSection',
         props: {
-          title: 'Join the revolution',
+          title: 'Join the Revolution',
           subtitle: 'We\'re building something amazing. Come help us change the world.',
-          primaryCtaLabel: 'See open roles',
+          primaryCtaLabel: 'See Open Roles',
           primaryCtaHref: '#jobs',
+          secondaryCtaLabel: 'Meet the Team',
+          secondaryCtaHref: '#team',
           alignment: 'center',
           size: 'tall',
           backgroundStyle: 'gradient',
@@ -166,21 +180,27 @@ const startupBold: PageTemplate = {
       {
         type: 'AboutSection',
         props: {
-          heading: 'About the company',
-          body: 'Share your mission, vision, and what makes your team unique.',
-          layout: 'full',
+          heading: 'Why Join Us',
+          body: 'We\'re a diverse group of builders, creators, and problem-solvers working together to make an impact.',
+          values: [
+            { icon: 'Rocket', title: 'Fast Growth', description: 'Join a rapidly scaling team and grow your career at lightning speed.', iconColor: '' },
+            { icon: 'Zap', title: 'Innovation First', description: 'Work on cutting-edge technology that pushes boundaries.', iconColor: '' },
+            { icon: 'Users', title: 'Amazing Team', description: 'Collaborate with talented, passionate people who care deeply.', iconColor: '' },
+            { icon: 'Award', title: 'Make Impact', description: 'Your work will directly influence millions of users.', iconColor: '' },
+          ],
+          layout: 'cards',
           background: 'plain',
         },
       },
       {
         type: 'BenefitsSection',
         props: {
-          heading: 'Why join us',
+          heading: 'Benefits & Perks',
           benefits: [
-            { title: 'Equity participation', description: 'Own a piece of what we\'re building together.' },
-            { title: 'Fast-paced growth', description: 'Rapid career advancement in a dynamic environment.' },
-            { title: 'Innovation first', description: 'Work on cutting-edge projects that make an impact.' },
-            { title: 'Amazing team', description: 'Collaborate with talented, passionate people.' },
+            { title: 'Equity Participation', description: 'Own a piece of what we\'re building together.', icon: 'Briefcase', iconColor: '#dc2626' },
+            { title: 'Fast-Paced Growth', description: 'Rapid career advancement in a dynamic environment.', icon: 'Zap', iconColor: '#f59e0b' },
+            { title: 'Innovation First', description: 'Work on cutting-edge projects that make an impact.', icon: 'Sparkles', iconColor: '#8b5cf6' },
+            { title: 'Amazing Team', description: 'Collaborate with talented, passionate people.', icon: 'Users', iconColor: '#3b82f6' },
           ],
           styleVariant: 'cards',
         },
@@ -188,16 +208,22 @@ const startupBold: PageTemplate = {
       {
         type: 'TeamSection',
         props: {
-          heading: 'Meet the team',
-          description: 'We\'re a diverse group of builders, creators, and problem-solvers.',
-          background: 'accentStrip',
+          heading: 'Meet Our Leadership Team',
+          description: 'Our experienced leadership team is committed to creating an environment where everyone can thrive and do their best work.',
+          members: [
+            { name: 'Sarah Johnson', role: 'CEO & Founder', image: '', bio: 'Leading the company vision with 15+ years in tech.', skills: ['Leadership', 'Strategy'] },
+            { name: 'Michael Chen', role: 'CTO', image: '', bio: 'Driving technical innovation and engineering excellence.', skills: ['Engineering', 'Architecture'] },
+            { name: 'Emily Rodriguez', role: 'Head of Design', image: '', bio: 'Creating beautiful, user-centered experiences.', skills: ['UX/UI', 'Product Design'] },
+            { name: 'David Kim', role: 'VP of Engineering', image: '', bio: 'Building scalable systems and empowering teams.', skills: ['Management', 'Systems'] },
+          ],
+          background: 'plain',
           align: 'center',
         },
       },
       {
         type: 'JobsSection',
         props: {
-          heading: 'Open positions',
+          heading: 'Open Positions',
           layout: 'cards',
           density: 'comfortable',
           background: 'plain',

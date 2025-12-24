@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, Search } from 'lucide-react';
+import { X, Search, MapPin, Clock } from 'lucide-react';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
 import { SECTION_TYPOGRAPHY } from '@/lib/section-layout/constants';
 
@@ -388,13 +388,13 @@ export function JobsSection({
   );
 }
 
-function JobList({ 
-  jobs, 
+function JobList({
+  jobs,
   density = 'comfortable',
   buttonVariant = 'ghost',
   badgeVariant = 'secondary',
-}: { 
-  jobs: any[]; 
+}: {
+  jobs: any[];
   density?: 'comfortable' | 'compact';
   buttonVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
   badgeVariant?: 'default' | 'secondary' | 'outline' | 'destructive';
@@ -402,22 +402,24 @@ function JobList({
   return (
     <div className="space-y-3">
       {jobs.map((job) => (
-        <Card key={job.id} className={density === 'compact' ? 'p-3' : 'p-4'}>
+        <Card key={job.id} className={`${density === 'compact' ? 'p-3' : 'p-4'} hover:border-primary transition-colors`}>
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              <CardTitle className="text-base font-medium mb-1" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
-              {job.title}
+              <CardTitle className="text-base font-medium mb-2" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+                {job.title}
               </CardTitle>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-3 flex-wrap items-center text-sm" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
                 {job.location && (
-                  <Badge variant={badgeVariant} className="text-xs">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
                     {job.location}
-                  </Badge>
+                  </span>
                 )}
                 {job.job_type && (
-                  <Badge variant={badgeVariant} className="text-xs">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
                     {job.job_type.replace('-', ' ')}
-                  </Badge>
+                  </span>
                 )}
               </div>
             </div>
@@ -431,45 +433,57 @@ function JobList({
   );
 }
 
-function JobCards({ 
-  jobs, 
+function JobCards({
+  jobs,
   density = 'comfortable',
   buttonVariant = 'ghost',
   badgeVariant = 'secondary',
-}: { 
-  jobs: any[]; 
+}: {
+  jobs: any[];
   density?: 'comfortable' | 'compact';
   buttonVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
   badgeVariant?: 'default' | 'secondary' | 'outline' | 'destructive';
 }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-6 md:grid-cols-2">
       {jobs.map((job) => (
-        <Card key={job.id} className={density === 'compact' ? 'p-4' : 'p-5'}>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
-            {job.title}
-            </CardTitle>
+        <Card key={job.id} className="hover:border-primary transition-colors">
+          <CardHeader>
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-2">
+                <CardTitle className="text-xl" style={{ color: SECTION_TYPOGRAPHY.heading.color }}>
+                  {job.title}
+                </CardTitle>
+                <div className="flex flex-wrap items-center gap-3 text-sm" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+                  {job.location && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {job.location}
+                    </span>
+                  )}
+                  {job.job_type && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {job.job_type.replace('-', ' ')}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {job.team && (
+                <Badge variant={badgeVariant}>{job.team}</Badge>
+              )}
+            </div>
           </CardHeader>
-          <CardContent className="pb-3">
-            <div className="flex gap-2 flex-wrap">
-              {job.location && (
-                <Badge variant={badgeVariant} className="text-xs">
-                  {job.location}
-                </Badge>
-              )}
-              {job.job_type && (
-                <Badge variant={badgeVariant} className="text-xs">
-                  {job.job_type.replace('-', ' ')}
-                </Badge>
-              )}
-          </div>
-          </CardContent>
-          <CardFooter className="pt-0 justify-end">
-            <Button variant={buttonVariant} size="sm" asChild>
-              <a href={`#job-${job.id}`}>View details</a>
+          <CardContent>
+            {job.description && (
+              <p className="text-sm mb-4 leading-relaxed" style={{ color: SECTION_TYPOGRAPHY.body.color }}>
+                {job.description}
+              </p>
+            )}
+            <Button variant={buttonVariant} className="w-full" asChild>
+              <a href={`#job-${job.id}`}>Apply Now</a>
             </Button>
-          </CardFooter>
+          </CardContent>
         </Card>
       ))}
     </div>
