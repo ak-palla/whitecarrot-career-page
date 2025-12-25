@@ -21,7 +21,7 @@ export const CONTENT_MAX_WIDTH = {
   '3xl': 'max-w-3xl',
   '4xl': 'max-w-4xl',
   '5xl': 'max-w-5xl',
-  full: 'max-w-[1400px]', // Constrained full width
+  full: 'max-w-5xl', // Constrained full width (1152px)
 } as const;
 
 export const SECTION_TYPOGRAPHY = {

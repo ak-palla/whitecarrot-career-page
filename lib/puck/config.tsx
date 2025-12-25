@@ -170,6 +170,14 @@ export const careersPageConfig: Config<PuckProps> = {
             { label: 'List', value: 'list' },
           ],
         },
+        align: {
+          type: 'select',
+          label: 'Text Alignment',
+          options: [
+            { label: 'Left', value: 'left' },
+            { label: 'Center', value: 'center' },
+          ],
+        },
       },
       defaultProps: {
         heading: 'Benefits & perks',
@@ -178,6 +186,7 @@ export const careersPageConfig: Config<PuckProps> = {
           { title: 'Flexible work', description: 'Work remotely or from our office – your choice.', icon: 'Home', iconColor: '' },
         ],
         styleVariant: 'cards',
+        align: 'left',
       },
       render: (props) => <BenefitsSection {...props} />,
     },
@@ -436,7 +445,7 @@ export const careersPageConfig: Config<PuckProps> = {
         },
       },
       defaultProps: {
-        title: '',
+        title: 'Message from Us',
         videoUrl: '',
         description: '',
         align: 'center',

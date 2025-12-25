@@ -56,7 +56,7 @@ export function TeamSection({ heading, description, members, background = 'plain
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-8 justify-items-center">
           {members.map((member, index) => {
             const name = member.name || 'Team Member';
             const initials = name
@@ -66,7 +66,7 @@ export function TeamSection({ heading, description, members, background = 'plain
 
             return (
               <div key={index} className="flex flex-col text-left group">
-                <div className="relative mb-6 overflow-hidden rounded-sm aspect-square bg-muted">
+                <div className="relative mb-4 overflow-hidden rounded-sm aspect-[4/3] bg-muted">
                   {member.image ? (
                     <img
                       src={member.image}
@@ -80,7 +80,7 @@ export function TeamSection({ heading, description, members, background = 'plain
                   )}
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div>
                     <h3 className="text-xl font-bold text-black mb-1">
                       {name}
