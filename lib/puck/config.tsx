@@ -31,14 +31,6 @@ export const careersPageConfig: Config<PuckProps> = {
           type: 'textarea',
           label: 'Subheadline',
         },
-        backgroundImageUrl: {
-          type: 'text',
-          label: 'Background Image URL',
-        },
-        cultureVideoUrl: {
-          type: 'text',
-          label: 'Culture Video URL (YouTube, Vimeo, or direct video)',
-        },
         primaryCtaLabel: {
           type: 'text',
           label: 'Primary CTA Label',
@@ -46,14 +38,6 @@ export const careersPageConfig: Config<PuckProps> = {
         primaryCtaHref: {
           type: 'text',
           label: 'Primary CTA Link',
-        },
-        secondaryCtaLabel: {
-          type: 'text',
-          label: 'Secondary CTA Label (optional)',
-        },
-        secondaryCtaHref: {
-          type: 'text',
-          label: 'Secondary CTA Link (optional)',
         },
         alignment: {
           type: 'select',
@@ -105,12 +89,8 @@ export const careersPageConfig: Config<PuckProps> = {
       defaultProps: {
         title: 'Join our team',
         subtitle: 'Help us build the future of work.',
-        backgroundImageUrl: '',
-        cultureVideoUrl: '',
         primaryCtaLabel: 'View open roles',
         primaryCtaHref: '#jobs',
-        secondaryCtaLabel: '',
-        secondaryCtaHref: '',
         alignment: 'center',
         size: 'tall',
         backgroundStyle: 'solid',

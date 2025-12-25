@@ -67,6 +67,15 @@ export function PuckEditor({
   const handlePublish = async () => {
     setPublishing(true);
     try {
+      // First, save the current draft state to ensure all changes are saved
+      const saveResult = await savePuckDraft(careerPage.id, data, companySlug);
+      if (saveResult.error) {
+        toast.error(`Failed to save draft: ${saveResult.error}`);
+        setPublishing(false);
+        return;
+      }
+
+      // Then publish the saved draft
       const result = await publishPuckPage(careerPage.id, companySlug);
       if (result.error) {
         toast.error(result.error);
