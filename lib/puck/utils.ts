@@ -115,20 +115,29 @@ export function puckDataToPuckFormat(puckData: PuckData): Data<PuckProps> {
  * Note: In Puck v0.20+, both use arrays, so this is mostly a passthrough with normalization
  */
 export function puckFormatToPuckData(data: Data<PuckProps>): PuckData {
-  // If content is already an array, use it directly
+  // If content is already an array, map it to ensure all items have ids
   if (Array.isArray(data.content)) {
+    const content: PuckContentItem[] = (data.content as unknown as Array<{ type: keyof PuckProps; props: Record<string, unknown>; id?: string }>).map((item, index) => ({
+      type: item.type,
+      id: item.id || generatePuckId(item.type as string, index),
+      props: item.props || {},
+    }));
+    
     return {
-      content: data.content as PuckContentItem[],
+      content,
       root: { props: data.root?.props || {} },
     };
   }
 
   // Fallback for object format (shouldn't happen in v0.20+)
-  const content: PuckContentItem[] = Object.entries(data.content || {}).map(([id, item]) => ({
-    type: item.type as keyof PuckProps,
-    id: id,
-    props: item.props as Record<string, unknown>,
-  }));
+  const content: PuckContentItem[] = Object.entries(data.content || {}).map(([id, item]) => {
+    const itemObj = item as { type: keyof PuckProps; props: Record<string, unknown> };
+    return {
+      type: itemObj.type,
+      id: id,
+      props: itemObj.props,
+    };
+  });
 
   return {
     content,
