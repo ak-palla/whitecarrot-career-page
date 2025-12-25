@@ -48,64 +48,66 @@ export function CompanySettings({ company }: { company: any }) {
     }
 
     return (
-        <div className="space-y-6 ">
+        <div className="space-y-6">
             <h2 className="text-lg font-semibold">General Settings</h2>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Company Details</CardTitle>
-                    <CardDescription>Update your company information.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Label>Company Name</Label>
-                        <Input value={name} onChange={e => setName(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Slug (URL)</Label>
-                        <Input value={company.slug} disabled className="bg-muted" />
-                        <p className="text-xs text-muted-foreground">Slug cannot be changed once created.</p>
-                    </div>
-                </CardContent>
-                <CardFooter>
-                    <Button onClick={handleSave} disabled={saving}>Save Changes</Button>
-                </CardFooter>
-            </Card>
+            <div className="grid gap-6 md:grid-cols-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Company Details</CardTitle>
+                        <CardDescription>Update your company information.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Company Name</Label>
+                            <Input value={name} onChange={e => setName(e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Slug (URL)</Label>
+                            <Input value={company.slug} disabled className="bg-muted" />
+                            <p className="text-xs text-muted-foreground">Slug cannot be changed once created.</p>
+                        </div>
+                    </CardContent>
+                    <CardFooter>
+                        <Button onClick={handleSave} disabled={saving}>Save Changes</Button>
+                    </CardFooter>
+                </Card>
 
-            <Card className="border-red-200">
-                <CardHeader>
-                    <CardTitle className="text-red-500">Danger Zone</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">Deleting your company will remove all career pages and job listings. This action cannot be undone.</p>
-                </CardContent>
-                <CardFooter>
-                    <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive">Delete Company</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete the company
-                                    <span className="font-semibold text-foreground"> {company.name} </span>
-                                    and all its data.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    onClick={handleDelete}
-                                >
-                                    Delete
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </CardFooter>
-            </Card>
+                <Card className="border-red-200 h-fit">
+                    <CardHeader>
+                        <CardTitle className="text-red-500">Danger Zone</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">Deleting your company will remove all career pages and job listings. This action cannot be undone.</p>
+                    </CardContent>
+                    <CardFooter>
+                        <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive">Delete Company</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the company
+                                        <span className="font-semibold text-foreground"> {company.name} </span>
+                                        and all its data.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={handleDelete}
+                                    >
+                                        Delete
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </CardFooter>
+                </Card>
+            </div>
         </div>
     )
 }

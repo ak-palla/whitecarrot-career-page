@@ -55,7 +55,7 @@ export function InlineThemeControls({ company, careerPage, onThemeChange }: Inli
           <Input
             value={theme.primaryColor || '#000000'}
             onChange={(e) => handleThemeUpdate({ ...theme, primaryColor: e.target.value })}
-            className="font-mono text-xs h-8"
+            className="font-mono text-xs h-8 w-24"
           />
         </div>
       </div>

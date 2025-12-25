@@ -70,7 +70,7 @@ export function ImageUploader({
                         None
                     </div>
                 )}
-                <div className="flex-1">
+                <div className="flex-1 max-w-xs">
                     <Input
                         type="file"
                         accept="image/*"

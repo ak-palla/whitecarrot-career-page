@@ -56,7 +56,7 @@ export function ThemeCustomizer({
                         <Input
                             value={theme.primaryColor || '#000000'}
                             onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })}
-                            className="font-mono"
+                            className="font-mono w-24"
                         />
                     </div>
                     <p className="text-sm text-muted-foreground mt-2">
