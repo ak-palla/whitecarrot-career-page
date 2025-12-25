@@ -39,22 +39,6 @@ const modernMinimal: PageTemplate = {
         },
       },
       {
-        type: 'AboutSection',
-        id: 'about-1',
-        props: {
-          heading: 'About Our Company',
-          body: 'We\'re more than just a company. We\'re a community of innovators, creators, and problem-solvers working together to build something extraordinary.',
-          values: [
-            { icon: 'Target', title: 'Mission-Driven', description: 'We are committed to making a positive impact through innovative technology solutions.', iconColor: '' },
-            { icon: 'Users', title: 'Collaborative Culture', description: 'We believe in the power of teamwork and diverse perspectives to solve complex problems.', iconColor: '' },
-            { icon: 'Zap', title: 'Innovation First', description: 'We encourage experimentation and embrace new ideas to stay ahead of the curve.', iconColor: '' },
-            { icon: 'Globe', title: 'Global Impact', description: 'Our work reaches millions of users worldwide, making a difference every day.', iconColor: '' },
-          ],
-          layout: 'cards',
-          background: 'plain',
-        },
-      },
-      {
         type: 'BenefitsSection',
         id: 'benefits-1',
         props: {
@@ -117,16 +101,6 @@ const corporateClassic: PageTemplate = {
         },
       },
       {
-        type: 'AboutSection',
-        id: 'about-1',
-        props: {
-          heading: 'About the company',
-          body: 'Share your mission, vision, and what makes your team unique.',
-          layout: 'twoColumn',
-          background: 'card',
-        },
-      },
-      {
         type: 'BenefitsSection',
         id: 'benefits-1',
         props: {
@@ -184,22 +158,6 @@ const startupBold: PageTemplate = {
           backgroundStyle: 'gradient',
           primaryCtaVariant: 'secondary',
           primaryCtaSize: 'lg',
-        },
-      },
-      {
-        type: 'AboutSection',
-        id: 'about-1',
-        props: {
-          heading: 'Why Join Us',
-          body: 'We\'re a diverse group of builders, creators, and problem-solvers working together to make an impact.',
-          values: [
-            { icon: 'Rocket', title: 'Fast Growth', description: 'Join a rapidly scaling team and grow your career at lightning speed.', iconColor: '' },
-            { icon: 'Zap', title: 'Innovation First', description: 'Work on cutting-edge technology that pushes boundaries.', iconColor: '' },
-            { icon: 'Users', title: 'Amazing Team', description: 'Collaborate with talented, passionate people who care deeply.', iconColor: '' },
-            { icon: 'Award', title: 'Make Impact', description: 'Your work will directly influence millions of users.', iconColor: '' },
-          ],
-          layout: 'cards',
-          background: 'plain',
         },
       },
       {
@@ -277,16 +235,6 @@ const creativeShowcase: PageTemplate = {
         },
       },
       {
-        type: 'AboutSection',
-        id: 'about-1',
-        props: {
-          heading: 'About the company',
-          body: 'Share your mission, vision, and what makes your team unique.',
-          layout: 'twoColumn',
-          background: 'plain',
-        },
-      },
-      {
         type: 'BenefitsSection',
         id: 'benefits-1',
         props: {
@@ -352,16 +300,6 @@ const balancedProfessional: PageTemplate = {
           backgroundStyle: 'solid',
           primaryCtaVariant: 'secondary',
           primaryCtaSize: 'default',
-        },
-      },
-      {
-        type: 'AboutSection',
-        id: 'about-1',
-        props: {
-          heading: 'About the company',
-          body: 'Share your mission, vision, and what makes your team unique.',
-          layout: 'full',
-          background: 'card',
         },
       },
       {

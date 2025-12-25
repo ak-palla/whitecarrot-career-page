@@ -34,7 +34,7 @@ const iconMap: Record<string, any> = {
   Sparkles,
 };
 
-export function BenefitsSection({ heading, benefits, styleVariant = 'cards', align = 'center' }: BenefitsSectionProps) {
+export function BenefitsSection({ heading, benefits, styleVariant = 'cards', align = 'left' }: BenefitsSectionProps) {
   const alignmentClasses = {
     left: 'text-left items-start',
     center: 'text-center items-center',

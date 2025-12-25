@@ -12,30 +12,14 @@ export interface PageSection {
 
 /**
  * Transform existing page_sections array to Puck data format
+ * Note: ContentSection has been removed from the editor, so this function
+ * now returns an empty Puck data structure
  */
 export function sectionsToPuckData(sections: PageSection[]): PuckData {
-  if (!sections || sections.length === 0) {
-    return {
-      content: [],
-      root: { props: {} },
-    };
-  }
-
-  const content = sections
-    .filter(s => s.visible)
-    .sort((a, b) => a.order - b.order)
-    .map((section, index) => ({
-      type: 'ContentSection' as const,
-      id: `section-${section.id}-${index}`,
-      props: {
-        title: section.title,
-        content: section.content,
-        sectionType: section.type as any,
-      },
-    }));
-
+  // ContentSection block has been removed from the editor
+  // Return empty Puck data structure
   return {
-    content,
+    content: [],
     root: { props: {} },
   };
 }

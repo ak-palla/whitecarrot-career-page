@@ -27,7 +27,7 @@ export interface TeamSectionProps {
   align?: 'left' | 'center';
 }
 
-export function TeamSection({ heading, description, members, background = 'plain', align = 'center' }: TeamSectionProps) {
+export function TeamSection({ heading, description, members, background = 'plain', align = 'left' }: TeamSectionProps) {
   const alignmentClasses = {
     left: 'text-left items-start',
     center: 'text-center items-center',
