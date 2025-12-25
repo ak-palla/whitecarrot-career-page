@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
-import { SECTION_TYPOGRAPHY, GRID_LAYOUTS } from '@/lib/section-layout/constants';
 import { Heart, Briefcase, GraduationCap, Home, Coffee, Plane, Shield, Award, Users, Zap, DollarSign, Sparkles } from 'lucide-react';
 
 export interface BenefitItem {
@@ -16,6 +15,7 @@ export interface BenefitsSectionProps {
   heading: string;
   benefits: BenefitItem[];
   styleVariant?: 'cards' | 'panels' | 'list';
+  align?: 'left' | 'center';
 }
 
 // Map icon names to icon components
@@ -34,16 +34,31 @@ const iconMap: Record<string, any> = {
   Sparkles,
 };
 
-export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: BenefitsSectionProps) {
+export function BenefitsSection({ heading, benefits, styleVariant = 'cards', align = 'center' }: BenefitsSectionProps) {
+  const alignmentClasses = {
+    left: 'text-left items-start',
+    center: 'text-center items-center',
+  };
+
+  const textAlignmentClasses = {
+    left: 'text-left',
+    center: 'text-center mx-auto',
+  };
+
   const isPanels = styleVariant === 'panels';
   const isList = styleVariant === 'list';
 
   if (isList) {
     return (
-      <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
-        <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing} text-black`}>
-          {heading}
-        </h2>
+      <SectionWrapper contentMaxWidth="3xl" verticalPadding="lg">
+        <div className={`flex flex-col space-y-4 mb-16 ${alignmentClasses[align]}`}>
+          <div className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+            Benefits
+          </div>
+          <h2 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-balance text-black">
+            {heading}
+          </h2>
+        </div>
         <div className="space-y-3">
           {benefits?.map((benefit, index) => (
             <div key={index}>
@@ -68,9 +83,12 @@ export function BenefitsSection({ heading, benefits, styleVariant = 'cards' }: B
   }
 
   return (
-    <SectionWrapper contentMaxWidth="full" verticalPadding="md">
-      <div className="flex flex-col items-center text-center space-y-4 mb-12">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl text-balance text-black">
+    <SectionWrapper contentMaxWidth="full" verticalPadding="lg">
+      <div className={`flex flex-col space-y-4 mb-16 ${alignmentClasses[align]}`}>
+        <div className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+          Benefits
+        </div>
+        <h2 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-balance text-black">
           {heading}
         </h2>
       </div>

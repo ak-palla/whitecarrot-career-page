@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Search, MapPin, Clock } from 'lucide-react';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
-import { SECTION_TYPOGRAPHY } from '@/lib/section-layout/constants';
 
 export interface JobsSectionProps {
   heading: string;
@@ -20,6 +19,7 @@ export interface JobsSectionProps {
   background?: 'plain' | 'card';
   buttonVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
   badgeVariant?: 'default' | 'secondary' | 'outline' | 'destructive';
+  align?: 'left' | 'center';
   // jobs will be injected at render time via PuckRenderer context/props
   jobs?: any;
 }
@@ -33,7 +33,17 @@ export function JobsSection({
   background = 'plain',
   buttonVariant = 'ghost',
   badgeVariant = 'secondary',
+  align = 'center',
 }: JobsSectionProps) {
+  const alignmentClasses = {
+    left: 'text-left items-start',
+    center: 'text-center items-center',
+  };
+
+  const textAlignmentClasses = {
+    left: 'text-left',
+    center: 'text-center mx-auto',
+  };
   const jobsArray: any[] = Array.isArray(jobs) ? jobs : [];
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -170,16 +180,24 @@ export function JobsSection({
   const sectionContent = (
     <>
       {(!jobsArray || jobsArray.length === 0) ? (
-        <div className="text-center mb-6">
-          <h2 className={`${SECTION_TYPOGRAPHY.heading.base} mb-2 text-black`}>
+        <div className={`flex flex-col space-y-4 mb-16 ${alignmentClasses[align]}`}>
+          <div className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+            Open Positions
+          </div>
+          <h2 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-balance text-black">
             {heading}
           </h2>
-          <p className="text-black">{emptyStateMessage}</p>
+          <p className={`text-lg max-w-2xl leading-relaxed text-muted-foreground ${textAlignmentClasses[align]}`}>
+            {emptyStateMessage}
+          </p>
         </div>
       ) : (
         <>
-          <div className="mb-6 text-center">
-            <h2 className={`${SECTION_TYPOGRAPHY.heading.base} mb-2 text-black`}>
+          <div className={`flex flex-col space-y-4 mb-16 ${alignmentClasses[align]}`}>
+            <div className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+              Open Positions
+            </div>
+            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-balance text-black">
               {heading}
             </h2>
           </div>
@@ -369,7 +387,7 @@ export function JobsSection({
 
   if (background === 'card') {
     return (
-      <SectionWrapper contentMaxWidth={maxWidth} verticalPadding="md">
+      <SectionWrapper contentMaxWidth={maxWidth} verticalPadding="lg">
         <section id="jobs" className="scroll-mt-20">
           <Card>
             <CardContent className="pt-6">
@@ -382,7 +400,7 @@ export function JobsSection({
   }
 
   return (
-    <SectionWrapper contentMaxWidth={maxWidth} verticalPadding="md">
+    <SectionWrapper contentMaxWidth={maxWidth} verticalPadding="lg">
       <section id="jobs" className="scroll-mt-20">
         {sectionContent}
       </section>

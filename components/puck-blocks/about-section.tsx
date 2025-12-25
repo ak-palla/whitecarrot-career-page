@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
-import { SECTION_TYPOGRAPHY } from '@/lib/section-layout/constants';
 import { Target, Users, Zap, Globe, Heart, Briefcase, Award, Lightbulb, Rocket, Shield } from 'lucide-react';
 
 export interface ValueCard {
@@ -17,6 +16,7 @@ export interface AboutSectionProps {
   values?: ValueCard[];
   layout?: 'full' | 'twoColumn' | 'cards';
   background?: 'plain' | 'card';
+  align?: 'left' | 'center';
 }
 
 // Map icon names to icon components
@@ -33,17 +33,30 @@ const iconMap: Record<string, any> = {
   Shield,
 };
 
-export function AboutSection({ heading, body, values, layout = 'full', background = 'plain' }: AboutSectionProps) {
+export function AboutSection({ heading, body, values, layout = 'full', background = 'plain', align = 'center' }: AboutSectionProps) {
+  const alignmentClasses = {
+    left: 'text-left items-start',
+    center: 'text-center items-center',
+  };
+
+  const textAlignmentClasses = {
+    left: 'text-left',
+    center: 'text-center mx-auto',
+  };
+
   // Cards layout - show value cards with icons
   if (layout === 'cards' && values && values.length > 0) {
     return (
-      <SectionWrapper contentMaxWidth="full" verticalPadding="md">
-        <div className="flex flex-col items-center text-center space-y-4 mb-12">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl text-balance text-black">
+      <SectionWrapper contentMaxWidth="full" verticalPadding="lg">
+        <div className={`flex flex-col space-y-4 mb-16 ${alignmentClasses[align]}`}>
+          <div className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+            About Us
+          </div>
+          <h2 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-balance text-black">
             {heading}
           </h2>
           {body && (
-            <p className="text-lg max-w-2xl leading-relaxed text-black">
+            <p className={`text-lg max-w-2xl leading-relaxed text-muted-foreground ${textAlignmentClasses[align]}`}>
               {body}
             </p>
           )}
@@ -87,31 +100,39 @@ export function AboutSection({ heading, body, values, layout = 'full', backgroun
   // Original text-based layouts
   const content = (
     <>
-      <h2 className={`${SECTION_TYPOGRAPHY.heading.base} ${SECTION_TYPOGRAPHY.heading.spacing} text-black`}>
-        {heading}
-      </h2>
-      {body && (
-        <div
-          className={`${SECTION_TYPOGRAPHY.body.spacing} text-black prose prose-lg max-w-none`}
-          dangerouslySetInnerHTML={{ __html: body }}
-        />
-      )}
+      <div className={`flex flex-col space-y-4 mb-16 ${alignmentClasses[align]}`}>
+        <div className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+          About Us
+        </div>
+        <h2 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-balance text-black">
+          {heading}
+        </h2>
+        {body && (
+          <div
+            className={`text-lg max-w-2xl leading-relaxed text-muted-foreground prose prose-lg max-w-none ${textAlignmentClasses[align]}`}
+            dangerouslySetInnerHTML={{ __html: body }}
+          />
+        )}
+      </div>
     </>
   );
 
   if (background === 'card') {
     return (
-      <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
-        <Card>
+      <SectionWrapper contentMaxWidth="3xl" verticalPadding="lg" className={alignmentClasses[align]}>
+        <Card className="border-0 w-full" style={{ backgroundColor: 'var(--primary-soft)' }}>
           <CardHeader>
-            <CardTitle className={`${SECTION_TYPOGRAPHY.heading.base} text-black`}>
+            <div className="text-sm font-semibold tracking-wider text-muted-foreground uppercase mb-4">
+              About Us
+            </div>
+            <CardTitle className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-balance text-black">
               {heading}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {body && (
               <div
-                className="text-black prose prose-lg max-w-none"
+                className="text-lg leading-relaxed text-muted-foreground prose prose-lg max-w-none"
                 dangerouslySetInnerHTML={{ __html: body }}
               />
             )}
@@ -122,10 +143,8 @@ export function AboutSection({ heading, body, values, layout = 'full', backgroun
   }
 
   return (
-    <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
-      <div className="prose prose-lg max-w-none">
-        {content}
-      </div>
+    <SectionWrapper contentMaxWidth="3xl" verticalPadding="lg" className={`prose prose-lg max-w-none ${alignmentClasses[align]}`}>
+      {content}
     </SectionWrapper>
   );
 }
