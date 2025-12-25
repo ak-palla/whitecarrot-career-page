@@ -5,6 +5,7 @@ import { EmptyState } from './empty-state';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
+export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
     const companies = await getCompanies();
