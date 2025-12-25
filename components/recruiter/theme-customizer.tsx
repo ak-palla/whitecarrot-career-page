@@ -14,8 +14,8 @@ export function ThemeCustomizer({
     careerPage: any
 }) {
     const [theme, setTheme] = useState(careerPage?.theme || { primaryColor: '#000000' });
-    const [logoUrl, setLogoUrl] = useState(careerPage?.logo_url);
-    const [bannerUrl, setBannerUrl] = useState(careerPage?.banner_url);
+    const [logoUrl, setLogoUrl] = useState<string | null | undefined>(careerPage?.logo_url);
+    const [bannerUrl, setBannerUrl] = useState<string | null | undefined>(careerPage?.banner_url);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
 
@@ -24,8 +24,8 @@ export function ThemeCustomizer({
         setMessage(null);
         const res = await updateCareerPage(careerPage.id, {
             theme,
-            logo_url: logoUrl,
-            banner_url: bannerUrl
+            logo_url: logoUrl || null,
+            banner_url: bannerUrl || null
         }, company.slug);
 
         if (res.error) {
@@ -72,13 +72,13 @@ export function ThemeCustomizer({
                         label="Company Logo"
                         bucket="company-logos"
                         currentImageUrl={logoUrl}
-                        onUpload={setLogoUrl}
+                        onUpload={(url) => setLogoUrl(url)}
                     />
                     <ImageUploader
                         label="Hero Banner"
                         bucket="company-banners"
                         currentImageUrl={bannerUrl}
-                        onUpload={setBannerUrl}
+                        onUpload={(url) => setBannerUrl(url)}
                     />
                 </div>
             </div>

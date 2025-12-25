@@ -11,6 +11,8 @@ export interface HeroSectionProps {
   subtitle?: string;
   backgroundImageUrl?: string;
   cultureVideoUrl?: string;
+  logoUrl?: string;
+  logoAlt?: string;
   primaryCtaLabel?: string;
   primaryCtaHref?: string;
   secondaryCtaLabel?: string;
@@ -27,6 +29,8 @@ export function HeroSection({
   subtitle,
   backgroundImageUrl,
   cultureVideoUrl,
+  logoUrl,
+  logoAlt,
   primaryCtaLabel,
   primaryCtaHref,
   secondaryCtaLabel,
@@ -72,6 +76,13 @@ export function HeroSection({
         />
       )}
       <div className={`relative z-10 mx-auto flex max-w-3xl flex-col gap-6 ${alignmentClasses[alignment]}`}>
+        {logoUrl && (
+          <img
+            src={logoUrl}
+            alt={logoAlt || 'Company Logo'}
+            className="h-20 w-auto mx-auto mb-6 bg-white p-2 rounded-lg shadow-sm"
+          />
+        )}
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-balance" style={{ color: 'var(--text-on-primary)' }}>
           {title}
         </h1>

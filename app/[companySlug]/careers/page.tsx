@@ -111,7 +111,14 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
             {puckData ? (
-                <PuckRenderer data={puckData} theme={careerPage.theme} jobs={jobs || []} />
+                <PuckRenderer 
+                    data={puckData} 
+                    theme={careerPage.theme} 
+                    jobs={jobs || []}
+                    bannerUrl={careerPage.banner_url}
+                    logoUrl={careerPage.logo_url}
+                    companyName={company.name}
+                />
             ) : (
                 <CareerPageRenderer
                     company={company}

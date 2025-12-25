@@ -87,7 +87,14 @@ export default async function PreviewPage({ params }: { params: Promise<{ compan
     const hasDraftPuck = !!careerPage.draft_puck_data;
 
     return hasDraftPuck ? (
-        <PuckRenderer data={careerPage.draft_puck_data} theme={careerPage.theme} jobs={jobs || []} />
+        <PuckRenderer 
+            data={careerPage.draft_puck_data} 
+            theme={careerPage.theme} 
+            jobs={jobs || []}
+            bannerUrl={careerPage.banner_url}
+            logoUrl={careerPage.logo_url}
+            companyName={company.name}
+        />
     ) : (
         <CareerPageRenderer
             company={company}

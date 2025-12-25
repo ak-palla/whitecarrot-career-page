@@ -4,6 +4,7 @@ import { uploadImage } from '@/app/actions/upload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { X } from 'lucide-react';
 
 export function ImageUploader({
     label,
@@ -14,7 +15,7 @@ export function ImageUploader({
     label: string,
     bucket: string,
     currentImageUrl?: string,
-    onUpload: (url: string) => void
+    onUpload: (url: string | null) => void
 }) {
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -39,6 +40,15 @@ export function ImageUploader({
         setUploading(false);
     }
 
+    function handleRemove() {
+        onUpload(null);
+        // Reset the file input
+        const fileInput = document.querySelector(`input[type="file"][data-uploader="${label}"]`) as HTMLInputElement;
+        if (fileInput) {
+            fileInput.value = '';
+        }
+    }
+
     return (
         <div className="space-y-2">
             <Label>{label}</Label>
@@ -46,6 +56,14 @@ export function ImageUploader({
                 {currentImageUrl ? (
                     <div className="relative group">
                         <img src={currentImageUrl} alt="Preview" className="h-16 w-16 object-cover rounded border" />
+                        <button
+                            type="button"
+                            onClick={handleRemove}
+                            className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-sm transition-colors"
+                            title="Remove image"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
                     </div>
                 ) : (
                     <div className="h-16 w-16 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-400">
@@ -58,6 +76,7 @@ export function ImageUploader({
                         accept="image/*"
                         onChange={handleFileChange}
                         disabled={uploading}
+                        data-uploader={label}
                     />
                     {uploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
                     {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
