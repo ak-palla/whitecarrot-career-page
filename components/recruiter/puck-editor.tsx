@@ -10,24 +10,6 @@ import { toast } from 'sonner';
 import { Eye, Save, Loader2, Share2, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
 import { normalizePuckData } from '@/lib/puck/utils';
-import { applyTemplate } from '@/lib/puck/templates';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 export function PuckEditor({ 
   careerPage, 
@@ -58,8 +40,6 @@ export function PuckEditor({
   });
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [linkCopied, setLinkCopied] = useState(false);
 
   const hasContent = Array.isArray(data.content) && data.content.length > 0;
@@ -100,34 +80,6 @@ export function PuckEditor({
     }
   };
 
-  const handleTemplateSelect = (templateId: string) => {
-    if (hasContent) {
-      setSelectedTemplate(templateId);
-      setTemplateDialogOpen(true);
-    } else {
-      applyTemplateDirectly(templateId);
-    }
-  };
-
-  const applyTemplateDirectly = (templateId: string) => {
-    try {
-      if (templateId === 'blank') {
-        setData({ content: [], root: { props: {} } });
-        setTemplateDialogOpen(false);
-        setSelectedTemplate('');
-        toast.success('Blank page loaded');
-      } else {
-        const templateData = applyTemplate(templateId);
-        setData(templateData);
-        setTemplateDialogOpen(false);
-        setSelectedTemplate('');
-        toast.success('Template applied');
-      }
-    } catch (error) {
-      toast.error('Failed to apply template');
-    }
-  };
-
   const handleCopyLink = async () => {
     const publicUrl = `${window.location.origin}/${companySlug}/careers`;
     try {
@@ -157,15 +109,6 @@ export function PuckEditor({
       <div className="border-b bg-card p-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-semibold">Page Builder</h2>
-          <Select value="" onValueChange={handleTemplateSelect}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Choose Template" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="modern-minimal">Prebuilt Template</SelectItem>
-              <SelectItem value="blank">Blank Page</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
         <div className="flex gap-2">
           <Button
@@ -222,33 +165,6 @@ export function PuckEditor({
           </div>
         )}
       </div>
-
-      {/* Template Confirmation Dialog */}
-      <AlertDialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Replace Current Content?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Applying a template will replace your current page content. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setTemplateDialogOpen(false);
-              setSelectedTemplate('');
-            }}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
-              if (selectedTemplate) {
-                applyTemplateDirectly(selectedTemplate);
-              }
-            }}>
-              Replace Content
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
