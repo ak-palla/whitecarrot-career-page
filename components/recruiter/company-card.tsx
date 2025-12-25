@@ -29,7 +29,7 @@ interface Company {
 export function CompanyCard({ company }: { company: Company }) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
-    
+
     const handleDelete = async () => {
         const result = await deleteCompany(company.id);
         if (result?.error) {
@@ -46,18 +46,18 @@ export function CompanyCard({ company }: { company: Company }) {
     return (
         <div className="group relative">
             <Link href={`/${company.slug}/edit`}>
-                <Card className="relative overflow-hidden transition-all hover:shadow-md hover:border-primary/20 cursor-pointer h-full">
-                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-muted/50 opacity-0 transition-opacity group-hover:opacity-100" />
-                    <CardHeader className="relative">
+                <Card className="relative overflow-hidden transition-all hover:shadow-lg hover:border-primary/10 border-border/50 bg-white h-full group-hover:translate-y-[-2px]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-muted/20 opacity-0 transition-opacity group-hover:opacity-100" />
+                    <CardHeader className="relative pb-2">
                         <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">{company.name}</CardTitle>
-                            <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                            <CardTitle className="text-xl font-bold tracking-tight">{company.name}</CardTitle>
+                            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/10">
                                 Live
                             </span>
                         </div>
                     </CardHeader>
                     <CardContent className="relative">
-                        <p className="text-sm text-muted-foreground font-mono">/{company.slug}</p>
+                        <p className="text-sm text-muted-foreground font-mono bg-muted/50 w-fit px-2 py-1 rounded-md">/{company.slug}</p>
                     </CardContent>
                 </Card>
             </Link>

@@ -1,7 +1,9 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { Calendar, Home, Inbox, Search, Plus, Briefcase, ChevronsUpDown, LogOut, User as UserIcon } from "lucide-react"
+import { UserProfileDialog } from "@/components/user-profile-dialog"
 
 import {
     Sidebar,
@@ -41,6 +43,7 @@ const items = [
 export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sidebar> & { user: User }) {
     const { isMobile } = useSidebar()
     const router = useRouter()
+    const [profileDialogOpen, setProfileDialogOpen] = React.useState(false)
 
     const handleSignOut = async () => {
         const supabase = createClient()
@@ -51,8 +54,26 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
 
     const { email, user_metadata } = user
     const avatarUrl = user_metadata?.avatar_url
-    const name = user_metadata?.full_name || email?.split("@")[0] || "User"
-    const initials = name
+    
+    // Get first and last name, with fallback to full_name or email
+    const firstName = user_metadata?.first_name || ''
+    const lastName = user_metadata?.last_name || ''
+    const fullName = user_metadata?.full_name || ''
+    
+    let displayName = ''
+    if (firstName && lastName) {
+        displayName = `${firstName} ${lastName}`
+    } else if (firstName) {
+        displayName = firstName
+    } else if (lastName) {
+        displayName = lastName
+    } else if (fullName) {
+        displayName = fullName
+    } else {
+        displayName = email?.split("@")[0] || "User"
+    }
+    
+    const initials = displayName
         .split(" ")
         .map((n: string) => n[0])
         .join("")
@@ -66,12 +87,17 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <a href="/dashboard">
-                                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                                    <Briefcase className="size-4" />
+                                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                                    <Image
+                                        src="/tie.png"
+                                        alt="Lisco Logo"
+                                        width={24}
+                                        height={24}
+                                        className="h-6 w-6 object-contain"
+                                    />
                                 </div>
                                 <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
-                                    <span className="font-semibold">WhiteCarrot</span>
-                                    <span className="">ATS</span>
+                                    <span className="font-bold tracking-tight text-base">Lisco</span>
                                 </div>
                             </a>
                         </SidebarMenuButton>
@@ -124,11 +150,11 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
                                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                                 >
                                     <Avatar className="h-8 w-8 rounded-lg">
-                                        <AvatarImage src={avatarUrl} alt={name} />
+                                        <AvatarImage src={avatarUrl} alt={displayName} />
                                         <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                                     </Avatar>
                                     <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                                        <span className="truncate font-semibold">{name}</span>
+                                        <span className="truncate font-semibold">{displayName}</span>
                                         <span className="truncate text-xs">{email}</span>
                                     </div>
                                     <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
@@ -140,6 +166,18 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
                                 align="end"
                                 sideOffset={4}
                             >
+                                <DropdownMenuItem onSelect={(e) => {
+                                    e.preventDefault()
+                                    setProfileDialogOpen(true)
+                                }}>
+                                    <UserIcon />
+                                    Profile
+                                </DropdownMenuItem>
+                                <UserProfileDialog 
+                                    user={user} 
+                                    open={profileDialogOpen}
+                                    onOpenChange={setProfileDialogOpen}
+                                />
                                 <DropdownMenuItem onClick={handleSignOut}>
                                     <LogOut />
                                     Log out
