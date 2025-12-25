@@ -92,7 +92,10 @@ export function JobManager({ companyId }: { companyId: string }) {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold">Job Postings</h2>
-                <Button onClick={() => { setEditingJob(null); setDialogOpen(true); }}>
+                <Button 
+                    onClick={() => { setEditingJob(null); setDialogOpen(true); }}
+                    className="bg-create-company hover:bg-create-company text-black"
+                >
                     <Plus className="mr-2 h-4 w-4" /> Add Job
                 </Button>
             </div>

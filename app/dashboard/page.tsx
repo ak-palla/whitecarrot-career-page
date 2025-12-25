@@ -18,7 +18,7 @@ export default async function DashboardPage() {
                 </div>
                 {companies.length > 0 && (
                     <CreateCompanyDialog>
-                        <Button className="font-semibold shadow-sm">
+                        <Button className="font-semibold shadow-sm bg-create-company hover:bg-create-company text-black">
                             <Plus className="mr-2 h-4 w-4" />
                             Create Company
                         </Button>

@@ -143,7 +143,12 @@ function SectionItem({ section, onUpdate }: { section: any, onUpdate: () => void
                     {hasChanges && (
                         <div className="bg-yellow-50 p-2 text-sm text-yellow-700 flex justify-between items-center rounded border border-yellow-100">
                             <span>You have unsaved changes.</span>
-                            <Button size="sm" onClick={handleSave} disabled={saving}>
+                            <Button 
+                                size="sm" 
+                                onClick={handleSave} 
+                                disabled={saving}
+                                className="bg-create-company hover:bg-create-company text-black"
+                            >
                                 {saving ? <Loader2 className="animate-spin h-3 w-3 mr-2" /> : <Save className="h-3 w-3 mr-2" />}
                                 Save Changes
                             </Button>

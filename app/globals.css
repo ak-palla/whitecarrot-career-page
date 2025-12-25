@@ -8,6 +8,14 @@
   .bg-muted-cream {
     background-color: #FAF9F5;
   }
+  .bg-create-company {
+    background-color: #FF8F3F !important;
+    color: #000000 !important;
+  }
+  .bg-create-company:hover {
+    background-color: #E67E35 !important;
+    color: #000000 !important;
+  }
 }
 
 @layer base {

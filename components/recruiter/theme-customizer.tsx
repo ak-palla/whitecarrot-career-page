@@ -94,6 +94,7 @@ export function ThemeCustomizer({
                         <Button 
                             onClick={handleSave} 
                             disabled={saving}
+                            className="bg-create-company hover:bg-create-company text-black"
                         >
                             {saving ? 'Saving...' : 'Save Changes'}
                         </Button>

@@ -69,7 +69,13 @@ export function CompanySettings({ company }: { company: any }) {
                         </div>
                     </CardContent>
                     <CardFooter>
-                        <Button onClick={handleSave} disabled={saving}>Save Changes</Button>
+                        <Button 
+                            onClick={handleSave} 
+                            disabled={saving}
+                            className="bg-create-company hover:bg-create-company text-black"
+                        >
+                            Save Changes
+                        </Button>
                     </CardFooter>
                 </Card>
 

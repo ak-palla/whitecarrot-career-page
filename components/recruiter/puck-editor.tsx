@@ -151,6 +151,7 @@ export function PuckEditor({
             onClick={handlePublish}
             disabled={publishing}
             size="sm"
+            className="bg-create-company hover:bg-create-company text-black"
           >
             {publishing ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : 'Publish'}
           </Button>
