@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { Calendar, Home, Inbox, Search, Plus, Briefcase, ChevronsUpDown, LogOut, User as UserIcon } from "lucide-react"
+import { Home, ChevronsUpDown, LogOut, User as UserIcon } from "lucide-react"
 import { UserProfileDialog } from "@/components/user-profile-dialog"
 
 import {
@@ -19,7 +19,6 @@ import {
     SidebarFooter,
     useSidebar,
 } from "@/components/ui/sidebar"
-import { CreateCompanyDialog } from "@/app/dashboard/create-company-dialog"
 import { User } from "@supabase/supabase-js"
 import {
     DropdownMenu,
@@ -82,7 +81,7 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
 
     return (
         <Sidebar {...props}>
-            <SidebarHeader>
+            <SidebarHeader className="pt-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
@@ -106,7 +105,7 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
             </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel>Application</SidebarGroupLabel>
+                    <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
@@ -123,24 +122,8 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarGroup>
-                    <SidebarGroupLabel>Actions</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <CreateCompanyDialog>
-                                    <SidebarMenuButton tooltip="Create Company">
-                                        <Plus />
-                                        <span>Create Company</span>
-                                    </SidebarMenuButton>
-                                </CreateCompanyDialog>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-
             </SidebarContent>
-            <SidebarFooter>
+            <SidebarFooter className="pb-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <DropdownMenu>

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { getJobs, createJob, updateJob, deleteJob } from '@/app/actions/jobs';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Loader2, Plus, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { JobFormDialog } from './job-form-dialog';
 import {
@@ -11,7 +12,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
+
 
 export function JobManager({ companyId }: { companyId: string }) {
     const [jobs, setJobs] = useState<any[]>([]);
@@ -79,9 +80,15 @@ export function JobManager({ companyId }: { companyId: string }) {
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <Badge variant={job.published ? "default" : "secondary"}>
-                                    {job.published ? 'Published' : 'Draft'}
-                                </Badge>
+                                <div className="flex items-center gap-2">
+                                    <Switch
+                                        checked={job.published}
+                                        onCheckedChange={() => togglePublish(job)}
+                                    />
+                                    <span className="text-sm font-medium">
+                                        {job.published ? 'Published' : 'Draft'}
+                                    </span>
+                                </div>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
@@ -90,11 +97,6 @@ export function JobManager({ companyId }: { companyId: string }) {
                                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                         <DropdownMenuItem onClick={() => { setEditingJob(job); setDialogOpen(true); }}>
                                             <Pencil className="mr-2 h-4 w-4" /> Edit Details
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => togglePublish(job)}>
-                                            <span className={job.published ? "" : "text-green-600 font-medium"}>
-                                                {job.published ? 'Unpublish' : 'Publish Job'}
-                                            </span>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => handleDelete(job.id)}>
                                             <Trash2 className="mr-2 h-4 w-4" /> Delete

@@ -51,7 +51,7 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
             <main className="flex-1 overflow-hidden bg-muted/20">
                 {activeTab === 'theme' && (
                     <div className="h-full overflow-auto p-4 md:p-6">
-                        <div className="mx-auto max-w-4xl">
+                        <div className="mx-auto max-w-4xl px-4 md:px-6">
                             <h2 className="mb-2 text-lg font-semibold tracking-tight">Theme Customization</h2>
                             <p className="mb-6 text-sm text-muted-foreground">Manage your brand colors, logo, and banner.</p>
                             <ThemeCustomizer company={company} careerPage={careerPage} />
@@ -65,7 +65,7 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
 
                 {activeTab === 'jobs' && (
                     <div className="h-full overflow-auto p-4 md:p-6">
-                        <div className="mx-auto max-w-4xl">
+                        <div className="mx-auto max-w-4xl px-4 md:px-6">
                             {company && <JobManager companyId={company.id} />}
                         </div>
                     </div>
@@ -73,7 +73,7 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
 
                 {activeTab === 'settings' && (
                     <div className="h-full overflow-auto p-4 md:p-6">
-                        <div className="mx-auto max-w-4xl">
+                        <div className="mx-auto max-w-4xl px-4 md:px-6">
                             <CompanySettings company={company} />
                         </div>
                     </div>

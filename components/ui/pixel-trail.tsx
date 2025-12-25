@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useMemo, useRef } from "react"
 import { motion, useAnimationControls } from "framer-motion"
 import { v4 as uuidv4 } from "uuid"
@@ -102,7 +104,7 @@ const PixelDot: React.FC<PixelDotProps> = React.memo(
     const ref = useCallback(
       (node: HTMLDivElement | null) => {
         if (node) {
-          ;(node as any).__animatePixel = animatePixel
+          ; (node as any).__animatePixel = animatePixel
         }
       },
       [animatePixel]
