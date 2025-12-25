@@ -7,22 +7,34 @@ export default async function DashboardLayout({
 }: {
     children: React.ReactNode
 }) {
-    const supabase = await createClient()
+    try {
+        const supabase = await createClient()
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+        const {
+            data: { user },
+            error: authError
+        } = await supabase.auth.getUser()
 
-    if (!user) {
-        redirect("/auth/login")
+        if (authError) {
+            console.error('Auth error in dashboard layout:', authError);
+            redirect("/auth/login")
+        }
+
+        if (!user) {
+            redirect("/auth/login")
+        }
+
+        return (
+            <div className="min-h-screen bg-muted-cream">
+                <DashboardNavbar user={user} />
+                <main className="mx-auto max-w-5xl p-6">
+                    {children}
+                </main>
+            </div>
+        )
+    } catch (error) {
+        console.error('Error in dashboard layout:', error);
+        // Re-throw to let error.tsx handle it
+        throw error;
     }
-
-    return (
-        <div className="min-h-screen bg-muted-cream">
-            <DashboardNavbar user={user} />
-            <main className="mx-auto max-w-5xl p-6">
-                {children}
-            </main>
-        </div>
-    )
 }

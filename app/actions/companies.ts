@@ -64,18 +64,33 @@ export async function createCompany(formData: FormData) {
 }
 
 export async function getCompanies() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  if (!user) return [];
+    if (authError) {
+      console.error('Error getting user:', authError);
+      return [];
+    }
 
-  const { data } = await supabase
-    .from('companies')
-    .select('*')
-    .eq('owner_id', user.id)
-    .order('created_at', { ascending: false });
+    if (!user) return [];
 
-  return data || [];
+    const { data, error } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('owner_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching companies:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error in getCompanies:', error);
+    return [];
+  }
 }
 
 export async function deleteCompany(companyId: string) {
