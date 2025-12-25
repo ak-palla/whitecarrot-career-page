@@ -48,7 +48,7 @@ export function CompanySettings({ company }: { company: any }) {
     }
 
     return (
-        <div className="space-y-6 max-w-2xl">
+        <div className="space-y-6 ">
             <h2 className="text-lg font-semibold">General Settings</h2>
 
             <Card>

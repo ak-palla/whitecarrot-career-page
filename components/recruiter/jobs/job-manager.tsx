@@ -19,6 +19,7 @@ export function JobManager({ companyId }: { companyId: string }) {
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingJob, setEditingJob] = useState<any>(null);
+    const [togglingJobId, setTogglingJobId] = useState<string | null>(null);
 
     useEffect(() => {
         loadJobs();
@@ -28,7 +29,7 @@ export function JobManager({ companyId }: { companyId: string }) {
         setLoading(true);
         const data = await getJobs(companyId);
         setJobs(data || []);
-        if (loading) setLoading(false);
+        setLoading(false);
     }
 
     async function handleCreate(data: any) {
@@ -44,8 +45,41 @@ export function JobManager({ companyId }: { companyId: string }) {
     }
 
     async function togglePublish(job: any) {
-        await updateJob(job.id, { published: !job.published });
-        await loadJobs();
+        const newPublishedState = !job.published;
+        
+        // Optimistically update the UI
+        setJobs(prevJobs => 
+            prevJobs.map(j => 
+                j.id === job.id ? { ...j, published: newPublishedState } : j
+            )
+        );
+        
+        setTogglingJobId(job.id);
+        
+        try {
+            const result = await updateJob(job.id, { published: newPublishedState });
+            
+            if (result?.error) {
+                // Revert on error
+                setJobs(prevJobs => 
+                    prevJobs.map(j => 
+                        j.id === job.id ? { ...j, published: !newPublishedState } : j
+                    )
+                );
+            } else {
+                // Refresh to ensure we have the latest data
+                await loadJobs();
+            }
+        } catch (error) {
+            // Revert on error
+            setJobs(prevJobs => 
+                prevJobs.map(j => 
+                    j.id === job.id ? { ...j, published: !newPublishedState } : j
+                )
+            );
+        } finally {
+            setTogglingJobId(null);
+        }
     }
 
     async function handleDelete(id: string) {
@@ -84,9 +118,17 @@ export function JobManager({ companyId }: { companyId: string }) {
                                     <Switch
                                         checked={job.published}
                                         onCheckedChange={() => togglePublish(job)}
+                                        disabled={togglingJobId === job.id}
                                     />
                                     <span className="text-sm font-medium">
-                                        {job.published ? 'Published' : 'Draft'}
+                                        {togglingJobId === job.id ? (
+                                            <span className="flex items-center gap-1">
+                                                <Loader2 className="h-3 w-3 animate-spin" />
+                                                {job.published ? 'Publishing...' : 'Unpublishing...'}
+                                            </span>
+                                        ) : (
+                                            job.published ? 'Published' : 'Draft'
+                                        )}
                                     </span>
                                 </div>
                                 <DropdownMenu>
