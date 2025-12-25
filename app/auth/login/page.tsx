@@ -6,26 +6,19 @@ import { PixelTrail } from "@/components/ui/pixel-trail";
 
 export default function Page() {
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <div className="flex items-center gap-2 font-medium">
-            <div className="flex h-6 w-6 items-center justify-center">
-              <Image
-                src="/tie.png"
-                alt="Lisco Logo"
-                width={24}
-                height={24}
-                className="h-6 w-6 object-contain"
-              />
-            </div>
-            Lisco
+    <div className="relative grid min-h-svh lg:grid-cols-2">
+      <div className="absolute top-6 left-6 z-30">
+        <div className="flex items-center gap-2 font-medium">
+          <div className="flex h-6 w-6 items-center justify-center">
+            <Image
+              src="/tie.png"
+              alt="Lisco Logo"
+              width={24}
+              height={24}
+              className="h-6 w-6 object-contain"
+            />
           </div>
-        </div>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
-            <LoginForm />
-          </div>
+          Lisco
         </div>
       </div>
       <div className="relative hidden lg:block" style={{ backgroundColor: '#FAF9F5' }}>
@@ -42,6 +35,13 @@ export default function Page() {
           <p className="text-lg md:text-xl text-muted-foreground max-w-md">
             Build amazing career pages with ease
           </p>
+        </div>
+      </div>
+      <div className="flex flex-col gap-4 p-6 md:p-10">
+        <div className="flex flex-1 items-center justify-center">
+          <div className="w-full max-w-xs">
+            <LoginForm />
+          </div>
         </div>
       </div>
     </div>
