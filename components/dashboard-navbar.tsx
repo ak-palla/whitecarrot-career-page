@@ -65,17 +65,17 @@ export function DashboardNavbar({ user }: DashboardNavbarProps) {
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-16 items-center px-6 max-w-5xl mx-auto">
                 <div className="mr-8 flex items-center gap-2">
-                    <Link href="/dashboard" className="flex items-center gap-2 font-bold">
-                        <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                    <Link href="/dashboard" className="flex items-center gap-2 font-medium">
+                        <div className="flex h-6 w-6 items-center justify-center">
                             <Image
                                 src="/tie.png"
                                 alt="Company Logo"
                                 width={24}
                                 height={24}
-                                className="h-5 w-5 object-contain invert"
+                                className="h-6 w-6 object-contain"
                             />
                         </div>
-                        <span className="text-lg">Lisco</span>
+                        Lisco
                     </Link>
                 </div>
 

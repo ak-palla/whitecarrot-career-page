@@ -41,7 +41,7 @@ A multi-tenant career page builder allowing recruiters to create branded career 
 3. **Database Setup**:
    Ensure migrations are applied for:
    - Tables: `companies`, `career_pages`, `page_sections`, `jobs`
-   - Storage Buckets: `company-logos`, `company-banners`
+   - Storage Buckets: `company-logos`, `company-banners`, `team-photos`
 
 4. **Run Development Server**:
    ```bash

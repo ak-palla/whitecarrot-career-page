@@ -24,12 +24,12 @@ export interface JobsSectionProps {
   jobs?: any;
 }
 
-export function JobsSection({ 
-  heading, 
-  layout, 
-  emptyStateMessage, 
-  jobs, 
-  density = 'comfortable', 
+export function JobsSection({
+  heading,
+  layout,
+  emptyStateMessage,
+  jobs,
+  density = 'comfortable',
   background = 'plain',
   buttonVariant = 'ghost',
   badgeVariant = 'secondary',
@@ -143,7 +143,7 @@ export function JobsSection({
       const queryString = newParams.toString();
       const newUrl = queryString ? `?${queryString}` : window.location.pathname;
       router.replace(newUrl, { scroll: false });
-      
+
       // Reset flag after a short delay to allow URL to update
       setTimeout(() => {
         isUpdatingUrlRef.current = false;
@@ -179,10 +179,10 @@ export function JobsSection({
       ) : (
         <>
           <div className="mb-6 text-center">
-          <h2 className={`${SECTION_TYPOGRAPHY.heading.base} mb-2 text-black`}>
-            {heading}
-          </h2>
-        </div>
+            <h2 className={`${SECTION_TYPOGRAPHY.heading.base} mb-2 text-black`}>
+              {heading}
+            </h2>
+          </div>
 
           {/* Filter UI */}
           {jobsArray.length > 0 && (
@@ -329,24 +329,24 @@ export function JobsSection({
                 <>
                   {Object.entries(groupBy(filteredJobs, (job) => job.team || 'Other')).map(([team, teamJobs]) => (
                     <div key={team} className="space-y-4 mb-8">
-            <h3 className="text-xl font-semibold text-black">
-              {team}
-            </h3>
+                      <h3 className="text-xl font-semibold text-black">
+                        {team}
+                      </h3>
                       <JobList jobs={teamJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
-          </div>
-        ))}
+                    </div>
+                  ))}
                 </>
               )}
               {layout === 'location' && (
                 <>
                   {Object.entries(groupBy(filteredJobs, (job) => job.location || 'Other')).map(([location, locationJobs]) => (
                     <div key={location} className="space-y-4 mb-8">
-            <h3 className="text-xl font-semibold text-black">
-              {location}
-            </h3>
+                      <h3 className="text-xl font-semibold text-black">
+                        {location}
+                      </h3>
                       <JobList jobs={locationJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
-          </div>
-        ))}
+                    </div>
+                  ))}
                 </>
               )}
               {layout !== 'team' && layout !== 'location' && (
@@ -365,9 +365,11 @@ export function JobsSection({
     </>
   );
 
+  const maxWidth = layout === 'cards' ? 'full' : '3xl';
+
   if (background === 'card') {
     return (
-      <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
+      <SectionWrapper contentMaxWidth={maxWidth} verticalPadding="md">
         <section id="jobs" className="scroll-mt-20">
           <Card>
             <CardContent className="pt-6">
@@ -380,7 +382,7 @@ export function JobsSection({
   }
 
   return (
-    <SectionWrapper contentMaxWidth="3xl" verticalPadding="md">
+    <SectionWrapper contentMaxWidth={maxWidth} verticalPadding="md">
       <section id="jobs" className="scroll-mt-20">
         {sectionContent}
       </section>
@@ -445,9 +447,9 @@ function JobCards({
   badgeVariant?: 'default' | 'secondary' | 'outline' | 'destructive';
 }) {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {jobs.map((job) => (
-        <Card key={job.id} className="hover:border-primary transition-colors">
+        <Card key={job.id} className="hover:border-primary transition-colors h-full flex flex-col">
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-2">
@@ -474,13 +476,13 @@ function JobCards({
               )}
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col justify-between">
             {job.description && (
-              <p className="text-sm mb-4 leading-relaxed text-black">
+              <p className="text-sm mb-4 leading-relaxed text-black line-clamp-3">
                 {job.description}
               </p>
             )}
-            <Button variant={buttonVariant} className="w-full" asChild>
+            <Button variant={buttonVariant} className="w-full mt-auto" asChild>
               <a href={`#job-${job.id}`}>Apply Now</a>
             </Button>
           </CardContent>

@@ -5,6 +5,7 @@ import { AboutSection, AboutSectionProps } from '@/components/puck-blocks/about-
 import { BenefitsSection, BenefitsSectionProps } from '@/components/puck-blocks/benefits-section';
 import { TeamSection, TeamSectionProps } from '@/components/puck-blocks/team-section';
 import { JobsSection, JobsSectionProps } from '@/components/puck-blocks/jobs-section';
+import { PuckImageField } from '@/components/puck-blocks/puck-image-field';
 
 /**
  * Type definition for all Puck component props
@@ -264,7 +265,7 @@ export const careersPageConfig: Config<PuckProps> = {
         },
         members: {
           type: 'array',
-          label: 'Team Members (optional)',
+          label: 'Team Members',
           arrayFields: {
             name: {
               type: 'text',
@@ -275,22 +276,35 @@ export const careersPageConfig: Config<PuckProps> = {
               label: 'Role/Title',
             },
             image: {
-              type: 'text',
-              label: 'Image URL (optional)',
+              type: 'custom',
+              label: 'Profile Photo',
+              render: ({ value, onChange }) => (
+                <PuckImageField
+                  label="Profile Photo"
+                  value={value}
+                  onChange={onChange}
+                />
+              ),
             },
             bio: {
               type: 'textarea',
               label: 'Short Bio (optional)',
             },
-            skills: {
-              type: 'array',
-              label: 'Skills/Tags (optional)',
-              arrayFields: {
-                skill: {
-                  type: 'text',
-                  label: 'Skill',
-                },
-              },
+            linkedin: {
+              type: 'text',
+              label: 'LinkedIn URL (optional)',
+            },
+            twitter: {
+              type: 'text',
+              label: 'Twitter/X URL (optional)',
+            },
+            facebook: {
+              type: 'text',
+              label: 'Facebook URL (optional)',
+            },
+            instagram: {
+              type: 'text',
+              label: 'Instagram URL (optional)',
             },
           },
         },
@@ -313,10 +327,35 @@ export const careersPageConfig: Config<PuckProps> = {
       },
       defaultProps: {
         heading: 'Meet the team',
-        description: 'Introduce key teams or share what it feels like to work here.',
-        members: [],
+        description: 'There are many variations of passages of Lorem Ipsum available, but the majority have suffered in some form, by injected humour',
+        members: [
+          {
+            name: 'Jocelyn Schleifer',
+            role: 'Software Engineer',
+            bio: 'There are many variations of passages of Lorem Ipsum available',
+            image: '',
+          },
+          {
+            name: 'Martin Donin',
+            role: 'Product Manager',
+            bio: 'There are many variations of passages of Lorem Ipsum available',
+            image: '',
+          },
+          {
+            name: 'Jordyn Septimus',
+            role: 'Designer',
+            bio: 'There are many variations of passages of Lorem Ipsum available',
+            image: '',
+          },
+          {
+            name: 'Leo Arcand',
+            role: 'QA Engineer',
+            bio: 'There are many variations of passages of Lorem Ipsum available',
+            image: '',
+          }
+        ],
         background: 'plain',
-        align: 'left',
+        align: 'center',
       },
       render: (props) => <TeamSection {...props} />,
     },

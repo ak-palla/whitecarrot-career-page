@@ -3,12 +3,12 @@
  */
 
 export const SECTION_PADDING = {
-  horizontal: 'px-4 md:px-6 lg:px-[60px]',
+  horizontal: 'px-4 md:px-6 lg:px-8',
   vertical: {
     none: '',
-    sm: 'py-6 md:py-8',
-    md: 'py-8 md:py-12 lg:py-16', // Standard spacing
-    lg: 'py-12 md:py-16 lg:py-20', // For hero sections
+    sm: 'py-8 md:py-12',
+    md: 'py-12 md:py-16 lg:py-24', // Increased standard spacing
+    lg: 'py-16 md:py-24 lg:py-32', // Increased hero spacing
   },
 } as const;
 
@@ -21,7 +21,7 @@ export const CONTENT_MAX_WIDTH = {
   '3xl': 'max-w-3xl',
   '4xl': 'max-w-4xl',
   '5xl': 'max-w-5xl',
-  full: 'max-w-full',
+  full: 'max-w-[1400px]', // Constrained full width
 } as const;
 
 export const SECTION_TYPOGRAPHY = {

@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
 import { SECTION_TYPOGRAPHY } from '@/lib/section-layout/constants';
+import { Facebook, Instagram, Linkedin, Twitter } from 'lucide-react';
 
 export interface TeamMember {
   name: string;
@@ -12,6 +13,10 @@ export interface TeamMember {
   image?: string;
   bio?: string;
   skills?: string[];
+  linkedin?: string;
+  twitter?: string;
+  facebook?: string;
+  instagram?: string;
 }
 
 export interface TeamSectionProps {
@@ -22,62 +27,97 @@ export interface TeamSectionProps {
   align?: 'left' | 'center';
 }
 
-export function TeamSection({ heading, description, members, background = 'plain', align = 'left' }: TeamSectionProps) {
+export function TeamSection({ heading, description, members, background = 'plain', align = 'center' }: TeamSectionProps) {
   const alignmentClasses = {
-    left: 'text-left',
-    center: 'text-center',
+    left: 'text-left items-start',
+    center: 'text-center items-center',
   };
+
+  const textAlignmentClasses = {
+    left: 'text-left',
+    center: 'text-center mx-auto',
+  }
 
   // If members are provided, show team member cards
   if (members && members.length > 0) {
     return (
-      <SectionWrapper contentMaxWidth="full" verticalPadding="md">
-        <div className="flex flex-col items-center text-center space-y-4 mb-12">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl text-balance text-black">
+      <SectionWrapper contentMaxWidth="full" verticalPadding="lg">
+        <div className={`flex flex-col space-y-4 mb-16 ${alignmentClasses[align]}`}>
+          <div className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+            Our Team
+          </div>
+          <h2 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-balance text-black">
             {heading}
           </h2>
           {description && (
-            <p className="text-lg max-w-2xl leading-relaxed text-black">
+            <p className={`text-lg max-w-2xl leading-relaxed text-muted-foreground ${textAlignmentClasses[align]}`}>
               {description}
             </p>
           )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
           {members.map((member, index) => {
-            const initials = member.name
+            const name = member.name || 'Team Member';
+            const initials = name
               .split(' ')
               .map((n) => n[0])
               .join('');
 
             return (
-              <div key={index} className="flex flex-col items-center text-center space-y-4">
-                <Avatar className="h-32 w-32">
-                  <AvatarImage src={member.image || '/placeholder.svg'} alt={member.name} />
-                  <AvatarFallback style={{ backgroundColor: 'var(--primary-soft)', color: 'var(--primary)' }}>
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-lg text-black">
-                    {member.name}
-                  </h3>
-                  <p className="text-sm font-medium" style={{ color: 'var(--primary)' }}>
-                    {member.role}
-                  </p>
+              <div key={index} className="flex flex-col text-left group">
+                <div className="relative mb-6 overflow-hidden rounded-sm aspect-square bg-muted">
+                  {member.image ? (
+                    <img
+                      src={member.image}
+                      alt={name}
+                      className="object-contain w-full h-full transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full bg-secondary/30 text-secondary-foreground/50 text-4xl font-light">
+                      {initials}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="text-xl font-bold text-black mb-1">
+                      {name}
+                    </h3>
+                    <p className="text-sm font-medium text-primary">
+                      {member.role}
+                    </p>
+                  </div>
+
                   {member.bio && (
-                    <p className="text-sm leading-relaxed text-black">
+                    <p className="text-sm leading-relaxed text-muted-foreground text-pretty line-clamp-3">
                       {member.bio}
                     </p>
                   )}
-                  {member.skills && member.skills.length > 0 && (
-                    <div className="flex flex-wrap justify-center gap-2 pt-2">
-                      {member.skills.map((skill, skillIndex) => (
-                        <Badge key={skillIndex} variant="secondary">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+
+                  <div className="flex items-center gap-3 pt-1">
+                    {member.facebook && (
+                      <a href={member.facebook} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
+                        <Facebook className="w-4 h-4" />
+                      </a>
+                    )}
+                    {member.instagram && (
+                      <a href={member.instagram} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
+                        <Instagram className="w-4 h-4" />
+                      </a>
+                    )}
+                    {member.twitter && (
+                      <a href={member.twitter} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
+                        <Twitter className="w-4 h-4" />
+                      </a>
+                    )}
+                    {member.linkedin && (
+                      <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
+                        <Linkedin className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             );
