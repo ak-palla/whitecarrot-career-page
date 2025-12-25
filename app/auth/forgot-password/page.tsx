@@ -9,7 +9,7 @@ export default function Page() {
           <div className="flex h-6 w-6 items-center justify-center">
             <Image
               src="/tie.png"
-              alt="Lisco Logo"
+              alt="Company Logo"
               width={24}
               height={24}
               className="h-6 w-6 object-contain"

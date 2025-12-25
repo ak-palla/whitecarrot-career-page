@@ -58,7 +58,7 @@ export default async function EditorPage({ params }: { params: Promise<{ company
     }
 
     return (
-        <div className="h-screen w-full bg-background overflow-hidden">
+        <div className="h-screen w-full overflow-hidden" style={{ backgroundColor: '#FAF9F5' }}>
             <EditorMain company={company} careerPage={careerPage || null} />
         </div>
     );

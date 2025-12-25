@@ -149,7 +149,7 @@ export function PuckEditor({
       </div>
 
       {/* Puck Editor */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto">
         {data && typeof data === 'object' && Array.isArray(data.content) ? (
           <Puck
             config={careersPageConfig}

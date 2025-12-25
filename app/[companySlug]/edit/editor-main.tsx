@@ -17,6 +17,9 @@ type TabId = 'theme' | 'builder' | 'jobs' | 'settings';
 
 export function EditorMain({ company, careerPage }: { company: any; careerPage: any }) {
     const [activeTab, setActiveTab] = useState<TabId>('theme');
+    const [saveHandler, setSaveHandler] = useState<(() => Promise<void>) | null>(null);
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState<string | null>(null);
 
     return (
         <div className="flex h-full w-full flex-col bg-muted/10">
@@ -32,7 +35,7 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
                     <Separator orientation="vertical" className="h-6" />
                 </div>
                 
-                <div className="inline-flex gap-1 rounded-lg bg-muted p-1">
+                <div className="inline-flex gap-1 rounded-lg p-1" style={{ backgroundColor: '#FAF9F5' }}>
                     <TabButton icon={Palette} label="Theme" active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} />
                     <TabButton icon={Layout} label="Page Builder" active={activeTab === 'builder'} onClick={() => setActiveTab('builder')} />
                     <TabButton icon={Briefcase} label="Jobs" active={activeTab === 'jobs'} onClick={() => setActiveTab('jobs')} />
@@ -51,10 +54,18 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
             <main className="flex-1 overflow-hidden bg-muted/20">
                 {activeTab === 'theme' && (
                     <div className="h-full overflow-auto p-4 md:p-6">
-                        <div className="mx-auto max-w-3xl px-4 md:px-6">
+                        <div className="mx-auto max-w-4xl px-4 md:px-6">
                             <h2 className="mb-2 text-lg font-semibold tracking-tight">Theme Customization</h2>
                             <p className="mb-6 text-sm text-muted-foreground">Manage your brand colors, logo, and banner.</p>
-                            <ThemeCustomizer company={company} careerPage={careerPage} />
+                            <ThemeCustomizer 
+                                company={company} 
+                                careerPage={careerPage}
+                                onSaveStateChange={(state) => { 
+                                    setSaveHandler(() => state.handleSave);
+                                    setSaving(state.saving);
+                                    setMessage(state.message);
+                                }}
+                            />
                         </div>
                     </div>
                 )}

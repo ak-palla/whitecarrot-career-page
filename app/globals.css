@@ -71,12 +71,12 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-muted-cream text-foreground;
   }
 }
 
 :root {
-  --sidebar: #FAF9F5;
+  --sidebar: #ffffff;
   --sidebar-foreground: hsl(240 5.3% 26.1%);
   --sidebar-primary: hsl(240 5.9% 10%);
   --sidebar-primary-foreground: hsl(0 0% 98%);
@@ -113,6 +113,6 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-muted-cream text-foreground;
   }
 }

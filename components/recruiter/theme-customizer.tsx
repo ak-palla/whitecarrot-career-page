@@ -1,17 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
 import { updateCareerPage } from '@/app/actions/career-pages';
 import { ImageUploader } from './image-uploader';
 
 export function ThemeCustomizer({
     company,
-    careerPage
+    careerPage,
+    onSaveStateChange
 }: {
     company: any,
-    careerPage: any
+    careerPage: any,
+    onSaveStateChange?: (state: { handleSave: () => Promise<void>, saving: boolean, message: string | null }) => void
 }) {
     const [theme, setTheme] = useState(careerPage?.theme || { primaryColor: '#000000' });
     const [logoUrl, setLogoUrl] = useState<string | null | undefined>(careerPage?.logo_url);
@@ -19,7 +22,7 @@ export function ThemeCustomizer({
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
 
-    async function handleSave() {
+    const handleSave = useCallback(async () => {
         setSaving(true);
         setMessage(null);
         const res = await updateCareerPage(careerPage.id, {
@@ -36,11 +39,36 @@ export function ThemeCustomizer({
             setTimeout(() => setMessage(null), 3000);
         }
         setSaving(false);
-    }
+    }, [careerPage.id, company.slug, theme, logoUrl, bannerUrl]);
+
+    // Expose save handler and state to parent
+    useEffect(() => {
+        if (onSaveStateChange) {
+            onSaveStateChange({ handleSave, saving, message });
+        }
+    }, [onSaveStateChange, handleSave, saving, message]);
 
     return (
-        <div className="space-y-8 max-w-lg p-1">
-            <div>
+        <Card className="space-y-8 max-w-3xl p-6 flex gap-[30px] justify-start items-start">
+            <div className="space-y-4 flex-1">
+                <h2 className="text-lg font-semibold mb-4 text-foreground">Assets</h2>
+                <div className="space-y-6">
+                    <ImageUploader
+                        label="Company Logo"
+                        bucket="company-logos"
+                        currentImageUrl={logoUrl ?? undefined}
+                        onUpload={(url) => setLogoUrl(url)}
+                    />
+                    <ImageUploader
+                        label="Hero Banner"
+                        bucket="company-banners"
+                        currentImageUrl={bannerUrl ?? undefined}
+                        onUpload={(url) => setBannerUrl(url)}
+                    />
+                </div>
+            </div>
+
+            <div className="flex-1 !m-0">
                 <h2 className="text-lg font-semibold mb-4 text-foreground">Brand Colors</h2>
                 <div className="space-y-2">
                     <Label>Primary Color</Label>
@@ -59,36 +87,27 @@ export function ThemeCustomizer({
                             className="font-mono w-24"
                         />
                     </div>
-                    <p className="text-sm text-muted-foreground mt-2">
+                    <p className="text-sm text-muted-foreground mt-2 mb-4 pb-4">
                         Secondary color is automatically generated from your primary color for optimal contrast.
                     </p>
+                    <div className="mt-4 flex items-center gap-4">
+                        <Button 
+                            onClick={handleSave} 
+                            disabled={saving}
+                        >
+                            {saving ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                        {message && (
+                            <span className={`text-sm font-medium animate-in fade-in ${
+                                message.includes('Error') ? 'text-destructive' : 'text-green-600'
+                            }`}>
+                                {message}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
-
-            <div className="space-y-4">
-                <h2 className="text-lg font-semibold mb-4 text-foreground">Assets</h2>
-                <div className="space-y-6">
-                    <ImageUploader
-                        label="Company Logo"
-                        bucket="company-logos"
-                        currentImageUrl={logoUrl}
-                        onUpload={(url) => setLogoUrl(url)}
-                    />
-                    <ImageUploader
-                        label="Hero Banner"
-                        bucket="company-banners"
-                        currentImageUrl={bannerUrl}
-                        onUpload={(url) => setBannerUrl(url)}
-                    />
-                </div>
-            </div>
-
-            <div className="pt-4 flex items-center gap-4">
-                <Button onClick={handleSave} disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Changes'}
-                </Button>
-                {message && <span className="text-sm text-green-600 font-medium animate-in fade-in">{message}</span>}
-            </div>
-        </div>
+        </Card>
     )
 }
+
