@@ -96,6 +96,14 @@ export const careersPageConfig: Config<PuckProps> = {
             { label: 'Large', value: 'lg' },
           ],
         },
+        textColor: {
+          type: 'radio',
+          label: 'Text Color',
+          options: [
+            { label: 'White', value: 'white' },
+            { label: 'Black', value: 'black' },
+          ],
+        },
       },
       defaultProps: {
         title: 'Join our team',
@@ -107,6 +115,7 @@ export const careersPageConfig: Config<PuckProps> = {
         backgroundStyle: 'solid',
         primaryCtaVariant: 'secondary',
         primaryCtaSize: 'default',
+        textColor: 'white',
       },
       render: (props) => <HeroSection {...props} />,
     },

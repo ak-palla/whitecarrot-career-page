@@ -22,6 +22,7 @@ export interface HeroSectionProps {
   backgroundStyle?: 'solid' | 'image' | 'gradient';
   primaryCtaVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
   primaryCtaSize?: 'default' | 'sm' | 'lg' | 'icon' | 'icon-sm' | 'icon-lg';
+  textColor?: 'black' | 'white';
 }
 
 export function HeroSection({
@@ -40,6 +41,7 @@ export function HeroSection({
   backgroundStyle = 'solid',
   primaryCtaVariant = 'secondary',
   primaryCtaSize = 'default',
+  textColor: customTextColor,
 }: HeroSectionProps) {
   const alignmentClasses = {
     left: 'items-start text-left',
@@ -58,10 +60,20 @@ export function HeroSection({
         background: `linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)`,
       };
     }
+    if (backgroundStyle === 'image') {
+      return {
+        backgroundColor: '#000000',
+      };
+    }
     return {
       backgroundColor: 'var(--primary)',
     };
   };
+
+  // Use custom text color if provided, otherwise fallback to logic
+  const textColor = customTextColor
+    ? (customTextColor === 'white' ? '#ffffff' : '#000000')
+    : (backgroundStyle === 'image' ? '#ffffff' : 'var(--text-on-primary)');
 
   return (
     <SectionWrapper contentMaxWidth="full" verticalPadding={size === 'tall' ? 'lg' : 'md'}>
@@ -71,7 +83,7 @@ export function HeroSection({
       >
         {backgroundImageUrl && backgroundStyle === 'image' && (
           <div
-            className="pointer-events-none absolute inset-0 opacity-20"
+            className="pointer-events-none absolute inset-0"
             style={{ backgroundImage: `url(${backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
           />
         )}
@@ -83,11 +95,11 @@ export function HeroSection({
               className="h-20 w-auto mx-auto mb-6 bg-white p-2 rounded-lg shadow-sm"
             />
           )}
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-balance" style={{ color: 'var(--text-on-primary)' }}>
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-balance" style={{ color: textColor }}>
             {title}
           </h1>
           {subtitle && (
-            <p className="text-lg md:text-xl leading-relaxed text-balance" style={{ color: 'var(--text-on-primary)', opacity: 0.9 }}>
+            <p className="text-lg md:text-xl leading-relaxed text-balance" style={{ color: textColor, opacity: 0.9 }}>
               {subtitle}
             </p>
           )}
@@ -100,8 +112,8 @@ export function HeroSection({
                   size={primaryCtaSize}
                   className="rounded-full gap-2"
                   style={{
-                    backgroundColor: primaryCtaVariant === 'secondary' ? 'var(--secondary)' : undefined,
-                    color: primaryCtaVariant === 'secondary' ? 'var(--primary)' : undefined,
+                    backgroundColor: primaryCtaVariant === 'secondary' ? (backgroundStyle === 'image' ? 'white' : 'var(--secondary)') : undefined,
+                    color: primaryCtaVariant === 'secondary' ? (backgroundStyle === 'image' ? 'black' : 'var(--primary)') : undefined,
                   }}
                 >
                   <a href={primaryCtaHref}>
@@ -117,8 +129,8 @@ export function HeroSection({
                   size={primaryCtaSize}
                   className="rounded-full"
                   style={{
-                    borderColor: 'var(--secondary)',
-                    color: 'var(--text-on-primary)',
+                    borderColor: backgroundStyle === 'image' ? 'white' : 'var(--secondary)',
+                    color: textColor,
                   }}
                 >
                   <a href={secondaryCtaHref}>
