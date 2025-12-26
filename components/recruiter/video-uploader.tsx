@@ -19,6 +19,7 @@ export function VideoUploader({
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [validating, setValidating] = useState(false);
+    const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
     async function validateVideoDuration(file: File): Promise<boolean> {
@@ -64,6 +65,7 @@ export function VideoUploader({
         const file = e.target.files?.[0];
         if (!file) return;
 
+        setSelectedFileName(file.name);
         setUploading(false);
         setValidating(true);
         setError(null);
@@ -73,6 +75,7 @@ export function VideoUploader({
         if (!validTypes.includes(file.type)) {
             setError('Invalid file type. Please upload MP4, WebM, or OGG video files.');
             setValidating(false);
+            setSelectedFileName(null);
             return;
         }
 
@@ -82,6 +85,7 @@ export function VideoUploader({
 
         if (!isValidDuration) {
             setError('Video duration must be 1 minute or less.');
+            setSelectedFileName(null);
             // Reset the file input
             const fileInput = e.target;
             if (fileInput) {
@@ -101,6 +105,7 @@ export function VideoUploader({
             if (file.size > 100 * 1024 * 1024) {
                 setError('File size must be less than 100MB');
                 setUploading(false);
+                setSelectedFileName(null);
                 return;
             }
 
@@ -116,6 +121,7 @@ export function VideoUploader({
             if (uploadError) {
                 setError(uploadError.message);
                 setUploading(false);
+                setSelectedFileName(null);
                 return;
             }
 
@@ -125,8 +131,10 @@ export function VideoUploader({
                 .getPublicUrl(filePath);
 
             onUpload(publicUrl);
+            // Keep the file name visible after successful upload
         } catch (err: any) {
             setError(err.message || 'Upload failed');
+            setSelectedFileName(null);
         } finally {
             setUploading(false);
         }
@@ -134,6 +142,7 @@ export function VideoUploader({
 
     function handleRemove() {
         onUpload(null);
+        setSelectedFileName(null);
         // Reset the file input
         const fileInput = document.querySelector(`input[type="file"][data-uploader="${label}"]`) as HTMLInputElement;
         if (fileInput) {
@@ -176,10 +185,15 @@ export function VideoUploader({
                         disabled={uploading || validating}
                         data-uploader={label}
                     />
+                    {selectedFileName && !error && (
+                        <p className="text-xs text-muted-foreground mt-1 truncate" title={selectedFileName}>
+                            {selectedFileName}
+                        </p>
+                    )}
                     {validating && <p className="text-xs text-muted-foreground mt-1">Validating video duration...</p>}
                     {uploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
                     {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-                    {!error && !uploading && !validating && (
+                    {!error && !uploading && !validating && !selectedFileName && (
                         <p className="text-xs text-muted-foreground mt-1">Max 1 minute, MP4/WebM/OGG</p>
                     )}
                 </div>

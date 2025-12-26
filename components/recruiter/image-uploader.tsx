@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { uploadImage } from '@/app/actions/upload';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,29 +19,56 @@ export function ImageUploader({
 }) {
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
 
     async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        setSelectedFileName(file.name);
         setUploading(true);
         setError(null);
 
-        const formData = new FormData();
-        formData.append('file', file);
+        try {
+            // Basic validation
+            if (file.size > 25 * 1024 * 1024) { // 25MB limit
+                throw new Error('File size must be less than 25MB');
+            }
 
-        const result = await uploadImage(formData, bucket);
+            if (!file.type.startsWith('image/')) {
+                throw new Error('File must be an image');
+            }
 
-        if (result.error) {
-            setError(result.error);
-        } else if (result.url) {
-            onUpload(result.url);
+            const supabase = createClient();
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from(bucket)
+                .upload(filePath, file);
+
+            if (uploadError) {
+                throw new Error(uploadError.message);
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from(bucket)
+                .getPublicUrl(filePath);
+
+            onUpload(publicUrl);
+        } catch (err: any) {
+            setError(err.message || 'Upload failed');
+            setSelectedFileName(null);
+            onUpload(null); // Clear any previous valid upload logic if needed, or just let error show
+        } finally {
+            setUploading(false);
         }
-        setUploading(false);
     }
 
     function handleRemove() {
         onUpload(null);
+        setSelectedFileName(null);
         // Reset the file input
         const fileInput = document.querySelector(`input[type="file"][data-uploader="${label}"]`) as HTMLInputElement;
         if (fileInput) {
@@ -78,6 +105,11 @@ export function ImageUploader({
                         disabled={uploading}
                         data-uploader={label}
                     />
+                    {selectedFileName && !error && (
+                        <p className="text-xs text-muted-foreground mt-1 truncate" title={selectedFileName}>
+                            {selectedFileName}
+                        </p>
+                    )}
                     {uploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
                     {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
                 </div>
