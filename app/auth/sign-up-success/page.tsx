@@ -6,6 +6,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sign Up Successful",
+  description: "Thank you for signing up! Please check your email to confirm your account.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function Page() {
   return (

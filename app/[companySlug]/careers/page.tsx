@@ -8,23 +8,79 @@ export async function generateMetadata({ params }: { params: Promise<{ companySl
     const { companySlug } = await params;
     const supabase = await createClient();
 
-    // Simple fetch for metadata
+    // Fetch company and career page data for metadata
     const { data: company } = await supabase
         .from('companies')
-        .select('name, career_pages(banner_url)')
+        .select('name, career_pages(banner_url, logo_url)')
         .eq('slug', companySlug)
         .single();
 
     if (!company) return {};
 
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+        (process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000");
+    const canonicalUrl = `${baseUrl}/${companySlug}/careers`;
+    const bannerUrl = company.career_pages?.[0]?.banner_url;
+    const logoUrl = company.career_pages?.[0]?.logo_url;
+
+    // Use logo URL directly if it's absolute (from Supabase storage), otherwise use tie.png
+    const iconUrl = logoUrl && logoUrl.startsWith('http') 
+        ? logoUrl 
+        : `${baseUrl}/tie.png`;
+
     return {
         title: `Careers at ${company.name}`,
         description: `Join our team at ${company.name}. Browse available jobs and apply today.`,
+        icons: {
+            icon: iconUrl,
+            shortcut: iconUrl,
+            apple: iconUrl,
+        },
+        alternates: {
+            canonical: canonicalUrl,
+        },
         openGraph: {
             title: `Careers at ${company.name}`,
-            description: `Join our team at ${company.name}.`,
-            images: company.career_pages?.[0]?.banner_url ? [company.career_pages[0].banner_url] : [],
-        }
+            description: `Join our team at ${company.name}. Browse available jobs and apply today.`,
+            url: canonicalUrl,
+            siteName: "Lisco",
+            images: bannerUrl ? [
+                {
+                    url: bannerUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: `${company.name} Careers`,
+                }
+            ] : logoUrl ? [
+                {
+                    url: logoUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: `${company.name} Logo`,
+                }
+            ] : [],
+            locale: "en_US",
+            type: "website",
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: `Careers at ${company.name}`,
+            description: `Join our team at ${company.name}. Browse available jobs and apply today.`,
+            images: bannerUrl ? [bannerUrl] : logoUrl ? [logoUrl] : [],
+        },
+        robots: {
+            index: true,
+            follow: true,
+            googleBot: {
+                index: true,
+                follow: true,
+                "max-video-preview": -1,
+                "max-image-preview": "large",
+                "max-snippet": -1,
+            },
+        },
     };
 }
 
@@ -93,13 +149,71 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
         .eq('published', true)
         .order('created_at', { ascending: false });
 
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+        (process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000");
+    const careersUrl = `${baseUrl}/${companySlug}/careers`;
+
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": company.name,
         "logo": careerPage.logo_url,
-        "url": `https://whitecarrot.com/${companySlug}/careers`,
+        "url": careersUrl,
     };
+
+    // Generate JobPosting structured data for each published job
+    const jobPostings = (jobs || []).map((job) => {
+        const jobPosting: any = {
+            "@context": "https://schema.org",
+            "@type": "JobPosting",
+            "title": job.title,
+            "description": job.description || `${job.title} at ${company.name}`,
+            "identifier": {
+                "@type": "PropertyValue",
+                "name": company.name,
+                "value": job.id,
+            },
+            "datePosted": job.created_at,
+            "employmentType": job.employment_type || "FULL_TIME",
+            "hiringOrganization": {
+                "@type": "Organization",
+                "name": company.name,
+                "logo": careerPage.logo_url,
+                "sameAs": careersUrl,
+            },
+        };
+
+        if (job.expires_at) {
+            jobPosting.validThrough = job.expires_at;
+        }
+
+        if (job.location) {
+            jobPosting.jobLocation = {
+                "@type": "Place",
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": job.location,
+                },
+            };
+        }
+
+        if (job.salary_range) {
+            const salaryParts = job.salary_range.split('-');
+            jobPosting.baseSalary = {
+                "@type": "MonetaryAmount",
+                "currency": job.currency || "USD",
+                "value": {
+                    "@type": "QuantitativeValue",
+                    "minValue": salaryParts[0]?.trim(),
+                    "maxValue": salaryParts[1]?.trim(),
+                },
+            };
+        }
+
+        return jobPosting;
+    });
 
     const puckData = careerPage.puck_data || careerPage.draft_puck_data;
 
@@ -110,6 +224,13 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
+            {jobPostings.map((jobPosting, index) => (
+                <script
+                    key={index}
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPosting) }}
+                />
+            ))}
             {puckData ? (
                 <PuckRenderer 
                     data={puckData} 

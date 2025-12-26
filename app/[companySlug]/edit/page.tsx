@@ -3,6 +3,43 @@ import { notFound, redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { EditorMain } from './editor-main';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ companySlug: string }> }): Promise<Metadata> {
+    const { companySlug } = await params;
+    const supabase = await createClient();
+    
+    const { data: company } = await supabase
+        .from('companies')
+        .select('name, career_pages(logo_url)')
+        .eq('slug', companySlug)
+        .single();
+
+    const logoUrl = company?.career_pages?.[0]?.logo_url;
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+        (process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000");
+    
+    // Use logo URL directly if it's absolute (from Supabase storage), otherwise use tie.png
+    const iconUrl = logoUrl && logoUrl.startsWith('http') 
+        ? logoUrl 
+        : `${baseUrl}/tie.png`;
+
+    return {
+        title: company ? `Edit - ${company.name}` : "Edit Career Page",
+        description: "Edit and customize your company's career page, theme, sections, and job postings.",
+        icons: {
+            icon: iconUrl,
+            shortcut: iconUrl,
+            apple: iconUrl,
+        },
+        robots: {
+            index: false,
+            follow: false,
+        },
+    };
+}
 
 export default async function EditorPage({ params }: { params: Promise<{ companySlug: string }> }) {
     // Await the params object (since it's a promise in Next.js 15 usually, checking typings)

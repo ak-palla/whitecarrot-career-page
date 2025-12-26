@@ -1,8 +1,16 @@
-"use client";
-
 import Image from "next/image";
 import { SignUpForm } from "@/components/sign-up-form";
 import { PixelTrail } from "@/components/ui/pixel-trail";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sign Up",
+  description: "Create a new Lisco account to start building beautiful career pages for your company.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function Page() {
   return (

@@ -2,6 +2,43 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import { CareerPageRenderer } from '@/components/candidate/career-page-renderer';
 import { PuckRenderer } from '@/components/candidate/puck-renderer';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ companySlug: string }> }): Promise<Metadata> {
+    const { companySlug } = await params;
+    const supabase = await createClient();
+    
+    const { data: company } = await supabase
+        .from('companies')
+        .select('name, career_pages(logo_url)')
+        .eq('slug', companySlug)
+        .single();
+
+    const logoUrl = company?.career_pages?.[0]?.logo_url;
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+        (process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000");
+    
+    // Use logo URL directly if it's absolute (from Supabase storage), otherwise use tie.png
+    const iconUrl = logoUrl && logoUrl.startsWith('http') 
+        ? logoUrl 
+        : `${baseUrl}/tie.png`;
+
+    return {
+        title: company ? `Preview - ${company.name}` : "Preview Career Page",
+        description: "Preview your company's career page before publishing.",
+        icons: {
+            icon: iconUrl,
+            shortcut: iconUrl,
+            apple: iconUrl,
+        },
+        robots: {
+            index: false,
+            follow: false,
+        },
+    };
+}
 
 export default async function PreviewPage({ params }: { params: Promise<{ companySlug: string }> }) {
     const { companySlug } = await params;

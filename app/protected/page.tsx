@@ -4,6 +4,16 @@ import { createClient } from "@/lib/supabase/server";
 import { InfoIcon } from "lucide-react";
 import { FetchDataSteps } from "@/components/tutorial/fetch-data-steps";
 import { Suspense } from "react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Protected Page",
+  description: "This is a protected page that requires authentication.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 async function UserDetails() {
   const supabase = await createClient();

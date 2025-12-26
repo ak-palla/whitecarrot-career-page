@@ -1,8 +1,16 @@
-"use client";
-
 import Image from "next/image";
 import { LoginForm } from "@/components/login-form";
 import { PixelTrail } from "@/components/ui/pixel-trail";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Login",
+  description: "Sign in to your Lisco account to manage your career pages and job postings.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function Page() {
   return (

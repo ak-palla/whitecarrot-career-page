@@ -4,8 +4,18 @@ import { CompanyCard } from '@/components/recruiter/company-card';
 import { EmptyState } from './empty-state';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Manage your companies, career pages, and job postings. Create and customize career pages to attract top talent.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function DashboardPage() {
     const companies = await getCompanies();
