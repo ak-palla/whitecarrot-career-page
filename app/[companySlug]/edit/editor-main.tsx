@@ -8,6 +8,7 @@ import { Palette, Briefcase, Settings, ArrowLeft, Layout, Users } from 'lucide-r
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ThemeCustomizer } from '@/components/recruiter/theme-customizer';
 import { JobManager } from '@/components/recruiter/jobs/job-manager';
 import { CompanySettings } from '@/components/recruiter/company-settings';
@@ -16,11 +17,22 @@ import { ApplicationsList } from '@/components/recruiter/applications/applicatio
 
 type TabId = 'theme' | 'builder' | 'jobs' | 'applications' | 'settings';
 
+const tabs = [
+    { id: 'theme' as TabId, label: 'Theme', icon: Palette },
+    { id: 'builder' as TabId, label: 'Page Builder', icon: Layout },
+    { id: 'jobs' as TabId, label: 'Jobs', icon: Briefcase },
+    { id: 'applications' as TabId, label: 'Applications', icon: Users },
+    { id: 'settings' as TabId, label: 'Settings', icon: Settings },
+];
+
 export function EditorMain({ company, careerPage, jobs = [] }: { company: any; careerPage: any; jobs?: any[] }) {
     const [activeTab, setActiveTab] = useState<TabId>('theme');
     const [saveHandler, setSaveHandler] = useState<(() => Promise<void>) | null>(null);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
+
+    const activeTabData = tabs.find(tab => tab.id === activeTab) || tabs[0];
+    const ActiveIcon = activeTabData.icon;
 
     return (
         <div className="flex h-full w-full flex-col bg-muted/10">
@@ -29,19 +41,49 @@ export function EditorMain({ company, careerPage, jobs = [] }: { company: any; c
                 <div className="flex items-center gap-3 flex-1">
                     <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                         <Link href="/dashboard">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Dashboard
+                            <ArrowLeft className="h-4 w-4 md:mr-2" />
+                            <span className="hidden md:inline">Back to Dashboard</span>
                         </Link>
                     </Button>
                     <Separator orientation="vertical" className="h-6" />
                 </div>
 
-                <div className="inline-flex gap-1 rounded-lg p-1" style={{ backgroundColor: '#FAF9F5' }}>
-                    <TabButton icon={Palette} label="Theme" active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} />
-                    <TabButton icon={Layout} label="Page Builder" active={activeTab === 'builder'} onClick={() => setActiveTab('builder')} />
-                    <TabButton icon={Briefcase} label="Jobs" active={activeTab === 'jobs'} onClick={() => setActiveTab('jobs')} />
-                    <TabButton icon={Users} label="Applications" active={activeTab === 'applications'} onClick={() => setActiveTab('applications')} />
-                    <TabButton icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
+                {/* Mobile: Dropdown Select */}
+                <div className="md:hidden">
+                    <Select value={activeTab} onValueChange={(value) => setActiveTab(value as TabId)}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {tabs.map((tab) => {
+                                const Icon = tab.icon;
+                                return (
+                                    <SelectItem key={tab.id} value={tab.id}>
+                                        <div className="flex items-center gap-2">
+                                            <Icon className="h-4 w-4" />
+                                            <span>{tab.label}</span>
+                                        </div>
+                                    </SelectItem>
+                                );
+                            })}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {/* Desktop: Tab Buttons */}
+                <div className="hidden md:inline-flex gap-1 rounded-lg p-1" style={{ backgroundColor: '#FAF9F5' }}>
+                    {tabs.map((tab) => {
+                        const Icon = tab.icon;
+                        return (
+                            <TabButton
+                                key={tab.id}
+                                icon={Icon}
+                                label={tab.label}
+                                active={activeTab === tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                            />
+                        );
+                    })}
                 </div>
 
                 <div className="hidden text-xs text-muted-foreground md:flex items-center gap-2 flex-1 justify-end">

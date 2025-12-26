@@ -45,8 +45,8 @@ export function CompanyCard({ company }: { company: Company }) {
 
     return (
         <div className="group relative">
-            <Link href={`/${company.slug}/edit`}>
-                <Card className="relative overflow-hidden transition-all hover:shadow-lg hover:border-primary/10 border-border/50 bg-white h-full group-hover:translate-y-[-2px]">
+            <Card className="relative overflow-hidden transition-all hover:shadow-lg hover:border-primary/10 border-border/50 bg-white h-full group-hover:translate-y-[-2px]">
+                <Link href={`/${company.slug}/edit`} className="block">
                     <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-muted/20 opacity-0 transition-opacity group-hover:opacity-100" />
                     <CardHeader className="relative pb-2">
                         <div className="flex items-center justify-between">
@@ -59,48 +59,41 @@ export function CompanyCard({ company }: { company: Company }) {
                     <CardContent className="relative">
                         <p className="text-sm text-muted-foreground font-mono bg-muted/50 w-fit px-2 py-1 rounded-md">/{company.slug}</p>
                     </CardContent>
-                    
-                    <div className="absolute bottom-3 right-6 z-20 opacity-0 transition-opacity group-hover:opacity-100">
-                        <AlertDialog open={open} onOpenChange={setOpen}>
-                            <AlertDialogTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                    onClick={(e: React.MouseEvent) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                    }}
+                </Link>
+                
+                <div className="absolute bottom-3 right-6 z-20 opacity-0 transition-opacity group-hover:opacity-100">
+                    <AlertDialog open={open} onOpenChange={setOpen}>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the company
+                                    <span className="font-semibold text-foreground"> {company.name} </span>
+                                    and all its data.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    onClick={handleDelete}
                                 >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete the company
-                                        <span className="font-semibold text-foreground"> {company.name} </span>
-                                        and all its data.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel onClick={(e: React.MouseEvent) => e.stopPropagation()}>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        onClick={(e: React.MouseEvent) => {
-                                            e.stopPropagation();
-                                            handleDelete();
-                                        }}
-                                    >
-                                        Delete
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-                </Card>
-            </Link>
+                                    Delete
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            </Card>
         </div>
     );
 }

@@ -22,14 +22,14 @@ export default async function DashboardPage() {
 
     return (
         <div className="flex flex-1 flex-col gap-8 pt-6 px-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-1">
                     <h1 className="text-3xl font-bold tracking-tight">Companies</h1>
                     <p className="text-lg text-muted-foreground">Manage your career pages and job postings.</p>
                 </div>
                 {companies.length > 0 && (
                     <CreateCompanyDialog>
-                        <Button className="font-semibold shadow-sm bg-create-company hover:bg-create-company text-black">
+                        <Button className="w-fit font-semibold shadow-sm bg-create-company hover:bg-create-company text-black">
                             <Plus className="mr-2 h-4 w-4" />
                             Create Company
                         </Button>

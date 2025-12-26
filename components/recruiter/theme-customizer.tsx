@@ -56,7 +56,7 @@ export function ThemeCustomizer({
     }, [onSaveStateChange, handleSave, saving, message]);
 
     return (
-        <Card className="space-y-8 max-w-3xl p-6 flex gap-[30px] justify-start items-start">
+        <Card className="space-y-8 max-w-3xl p-6 flex flex-col md:flex-row gap-[30px] justify-start items-start">
             <div className="space-y-4 flex-1">
                 <h2 className="text-lg font-semibold mb-4 text-foreground">Assets</h2>
                 <div className="space-y-6">
