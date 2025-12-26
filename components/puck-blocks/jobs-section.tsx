@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Search, MapPin, Clock } from 'lucide-react';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
+import { JobApplicationModal } from '@/components/candidate/job-application-modal';
 
 export interface JobsSectionProps {
   heading: string;
@@ -443,9 +444,11 @@ function JobList({
                 )}
               </div>
             </div>
-            <Button variant={buttonVariant} size="sm" asChild>
-              <a href={`#job-${job.id}`}>View details</a>
-            </Button>
+            <JobApplicationModal job={job} trigger={
+              <Button variant={buttonVariant} size="sm">
+                Apply Now
+              </Button>
+            } />
           </div>
         </Card>
       ))}
@@ -500,9 +503,11 @@ function JobCards({
                 {job.description}
               </p>
             )}
-            <Button variant={buttonVariant} className="w-full mt-auto" asChild>
-              <a href={`#job-${job.id}`}>Apply Now</a>
-            </Button>
+            <JobApplicationModal job={job} trigger={
+              <Button variant={buttonVariant} className="w-full mt-auto">
+                Apply Now
+              </Button>
+            } />
           </CardContent>
         </Card>
       ))}

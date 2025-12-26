@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Palette, Briefcase, Settings, ArrowLeft, Layout } from 'lucide-react';
+import { Palette, Briefcase, Settings, ArrowLeft, Layout, Users } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -12,8 +12,9 @@ import { ThemeCustomizer } from '@/components/recruiter/theme-customizer';
 import { JobManager } from '@/components/recruiter/jobs/job-manager';
 import { CompanySettings } from '@/components/recruiter/company-settings';
 import { PuckEditor } from '@/components/recruiter/puck-editor';
+import { ApplicationsList } from '@/components/recruiter/applications/applications-list';
 
-type TabId = 'theme' | 'builder' | 'jobs' | 'settings';
+type TabId = 'theme' | 'builder' | 'jobs' | 'applications' | 'settings';
 
 export function EditorMain({ company, careerPage }: { company: any; careerPage: any }) {
     const [activeTab, setActiveTab] = useState<TabId>('theme');
@@ -34,11 +35,12 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
                     </Button>
                     <Separator orientation="vertical" className="h-6" />
                 </div>
-                
+
                 <div className="inline-flex gap-1 rounded-lg p-1" style={{ backgroundColor: '#FAF9F5' }}>
                     <TabButton icon={Palette} label="Theme" active={activeTab === 'theme'} onClick={() => setActiveTab('theme')} />
                     <TabButton icon={Layout} label="Page Builder" active={activeTab === 'builder'} onClick={() => setActiveTab('builder')} />
                     <TabButton icon={Briefcase} label="Jobs" active={activeTab === 'jobs'} onClick={() => setActiveTab('jobs')} />
+                    <TabButton icon={Users} label="Applications" active={activeTab === 'applications'} onClick={() => setActiveTab('applications')} />
                     <TabButton icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
                 </div>
 
@@ -57,10 +59,10 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
                         <div className="mx-auto max-w-4xl px-4 md:px-6">
                             <h2 className="mb-2 text-lg font-semibold tracking-tight">Theme Customization</h2>
                             <p className="mb-6 text-sm text-muted-foreground">Manage your brand colors, logo, and banner.</p>
-                            <ThemeCustomizer 
-                                company={company} 
+                            <ThemeCustomizer
+                                company={company}
                                 careerPage={careerPage}
-                                onSaveStateChange={(state) => { 
+                                onSaveStateChange={(state) => {
                                     setSaveHandler(() => state.handleSave);
                                     setSaving(state.saving);
                                     setMessage(state.message);
@@ -78,6 +80,14 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
                     <div className="h-full overflow-auto p-4 md:p-6">
                         <div className="mx-auto max-w-4xl px-4 md:px-6">
                             {company && <JobManager companyId={company.id} />}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'applications' && (
+                    <div className="h-full overflow-auto p-4 md:p-6">
+                        <div className="mx-auto max-w-4xl px-4 md:px-6">
+                            <ApplicationsList company={company} />
                         </div>
                     </div>
                 )}
@@ -108,9 +118,8 @@ function TabButton({
     return (
         <button
             onClick={onClick}
-            className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                active ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
-            }`}
+            className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
+                }`}
         >
             <Icon className="h-3.5 w-3.5" />
             <span>{label}</span>
