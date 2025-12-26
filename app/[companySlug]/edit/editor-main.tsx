@@ -16,7 +16,7 @@ import { ApplicationsList } from '@/components/recruiter/applications/applicatio
 
 type TabId = 'theme' | 'builder' | 'jobs' | 'applications' | 'settings';
 
-export function EditorMain({ company, careerPage }: { company: any; careerPage: any }) {
+export function EditorMain({ company, careerPage, jobs = [] }: { company: any; careerPage: any; jobs?: any[] }) {
     const [activeTab, setActiveTab] = useState<TabId>('theme');
     const [saveHandler, setSaveHandler] = useState<(() => Promise<void>) | null>(null);
     const [saving, setSaving] = useState(false);
@@ -73,7 +73,7 @@ export function EditorMain({ company, careerPage }: { company: any; careerPage: 
                 )}
 
                 {activeTab === 'builder' && (
-                    <PuckEditor careerPage={careerPage} companySlug={company.slug} />
+                    <PuckEditor careerPage={careerPage} companySlug={company.slug} jobs={jobs} />
                 )}
 
                 {activeTab === 'jobs' && (

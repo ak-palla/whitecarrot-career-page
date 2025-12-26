@@ -10,13 +10,16 @@ import { toast } from 'sonner';
 import { Eye, Save, Loader2, Share2, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
 import { normalizePuckData } from '@/lib/puck/utils';
+import { JobsSection } from '@/components/puck-blocks/jobs-section';
 
-export function PuckEditor({ 
-  careerPage, 
-  companySlug 
-}: { 
-  careerPage: any; 
+export function PuckEditor({
+  careerPage,
+  companySlug,
+  jobs = []
+}: {
+  careerPage: any;
   companySlug: string;
+  jobs?: any[];
 }) {
   // Helper function to inject theme assets into the first HeroSection
   const injectThemeAssets = useCallback((puckData: any) => {
@@ -26,7 +29,7 @@ export function PuckEditor({
 
     const processedData = { ...puckData };
     const firstComponent = processedData.content[0];
-    
+
     if (firstComponent && firstComponent.type === 'HeroSection') {
       const updatedProps = { ...firstComponent.props };
 
@@ -70,7 +73,7 @@ export function PuckEditor({
       // Normalize and ensure array format
       const normalized = normalizePuckData(draftData as any);
       console.log('PuckEditor: Normalized data', normalized);
-      
+
       // Inject theme assets into the first HeroSection
       return injectThemeAssets(normalized);
     } catch (error) {
@@ -81,7 +84,7 @@ export function PuckEditor({
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
-  
+
   // Track previous theme asset values to detect changes
   const prevThemeAssetsRef = useRef({
     video_url: careerPage?.video_url,
@@ -157,7 +160,7 @@ export function PuckEditor({
     };
 
     // Only update if theme assets actually changed
-    const themeAssetsChanged = 
+    const themeAssetsChanged =
       prevThemeAssetsRef.current.video_url !== currentThemeAssets.video_url ||
       prevThemeAssetsRef.current.banner_url !== currentThemeAssets.banner_url ||
       prevThemeAssetsRef.current.logo_url !== currentThemeAssets.logo_url;
@@ -279,7 +282,16 @@ export function PuckEditor({
       <div className="flex-1 overflow-auto">
         {data && typeof data === 'object' && Array.isArray(data.content) ? (
           <Puck
-            config={careersPageConfig}
+            config={{
+              ...careersPageConfig,
+              components: {
+                ...careersPageConfig.components,
+                JobsSection: {
+                  ...careersPageConfig.components.JobsSection,
+                  render: (props: any) => <JobsSection {...props} jobs={jobs || []} />,
+                },
+              },
+            }}
             data={data}
             onChange={handleChange}
             onPublish={handlePublish}

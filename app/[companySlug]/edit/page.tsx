@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 export async function generateMetadata({ params }: { params: Promise<{ companySlug: string }> }): Promise<Metadata> {
     const { companySlug } = await params;
     const supabase = await createClient();
-    
+
     const { data: company } = await supabase
         .from('companies')
         .select('name, career_pages(logo_url)')
@@ -16,14 +16,14 @@ export async function generateMetadata({ params }: { params: Promise<{ companySl
         .single();
 
     const logoUrl = company?.career_pages?.[0]?.logo_url;
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
-        (process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000");
-    
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+        (process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : "http://localhost:3000");
+
     // Use logo URL directly if it's absolute (from Supabase storage), otherwise use tie.png
-    const iconUrl = logoUrl && logoUrl.startsWith('http') 
-        ? logoUrl 
+    const iconUrl = logoUrl && logoUrl.startsWith('http')
+        ? logoUrl
         : `${baseUrl}/tie.png`;
 
     return {
@@ -94,9 +94,17 @@ export default async function EditorPage({ params }: { params: Promise<{ company
         }
     }
 
+    // Fetch published jobs for the company
+    const { data: jobs } = await supabase
+        .from('jobs')
+        .select('*')
+        .eq('company_id', company.id)
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+
     return (
         <div className="h-screen w-full overflow-hidden" style={{ backgroundColor: '#FAF9F5' }}>
-            <EditorMain company={company} careerPage={careerPage || null} />
+            <EditorMain company={company} careerPage={careerPage || null} jobs={jobs || []} />
         </div>
     );
 }

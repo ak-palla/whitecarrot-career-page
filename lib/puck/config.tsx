@@ -367,17 +367,6 @@ export const careersPageConfig: Config<PuckProps> = {
         // JobsSection uses Next.js hooks that may not work in editor context
         // Wrap in error boundary and provide fallback
         try {
-          // Check if we're in editor context (no router available)
-          if (typeof window !== 'undefined' && !window.location.pathname.includes('/careers')) {
-            // Editor context - show simplified preview
-            return (
-              <div className="p-6 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-                <h2 className="text-2xl font-bold mb-2">{props.heading || 'Open Positions'}</h2>
-                <p className="text-gray-600">{props.emptyStateMessage || 'No open positions at the moment. Check back soon!'}</p>
-                <p className="text-xs text-gray-400 mt-2">(Jobs will appear on published page)</p>
-              </div>
-            );
-          }
           return <JobsSection {...props} jobs={[]} />;
         } catch (error) {
           console.error('Error rendering JobsSection:', error);
