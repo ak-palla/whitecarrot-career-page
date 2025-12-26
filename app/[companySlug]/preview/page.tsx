@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 export async function generateMetadata({ params }: { params: Promise<{ companySlug: string }> }): Promise<Metadata> {
     const { companySlug } = await params;
     const supabase = await createClient();
-    
+
     const { data: company } = await supabase
         .from('companies')
         .select('name, career_pages(logo_url)')
@@ -15,14 +15,14 @@ export async function generateMetadata({ params }: { params: Promise<{ companySl
         .single();
 
     const logoUrl = company?.career_pages?.[0]?.logo_url;
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
-        (process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000");
-    
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+        (process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : "http://localhost:3000");
+
     // Use logo URL directly if it's absolute (from Supabase storage), otherwise use tie.png
-    const iconUrl = logoUrl && logoUrl.startsWith('http') 
-        ? logoUrl 
+    const iconUrl = logoUrl && logoUrl.startsWith('http')
+        ? logoUrl
         : `${baseUrl}/tie.png`;
 
     return {
@@ -124,12 +124,13 @@ export default async function PreviewPage({ params }: { params: Promise<{ compan
     const hasDraftPuck = !!careerPage.draft_puck_data;
 
     return hasDraftPuck ? (
-        <PuckRenderer 
-            data={careerPage.draft_puck_data} 
-            theme={careerPage.theme} 
+        <PuckRenderer
+            data={careerPage.draft_puck_data}
+            theme={careerPage.theme}
             jobs={jobs || []}
             bannerUrl={careerPage.banner_url}
             logoUrl={careerPage.logo_url}
+            videoUrl={careerPage.video_url}
             companyName={company.name}
         />
     ) : (

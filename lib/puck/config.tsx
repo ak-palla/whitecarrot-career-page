@@ -35,6 +35,17 @@ export const careersPageConfig: Config<PuckProps> = {
           type: 'text',
           label: 'Primary CTA Label',
         },
+        cultureVideoUrl: {
+          type: 'custom',
+          label: 'Culture Video',
+          render: ({ value, onChange }) => (
+            <PuckVideoField
+              label="Culture Video"
+              value={value}
+              onChange={onChange}
+            />
+          ),
+        },
         primaryCtaHref: {
           type: 'text',
           label: 'Primary CTA Link',

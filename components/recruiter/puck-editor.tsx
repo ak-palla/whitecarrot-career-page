@@ -2,7 +2,7 @@
 
 import { Puck, type Data } from '@measured/puck';
 import '@measured/puck/puck.css';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { careersPageConfig, type PuckData } from '@/lib/puck/config';
 import { savePuckDraft, publishPuckPage } from '@/app/actions/career-pages';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,44 @@ export function PuckEditor({
   careerPage: any; 
   companySlug: string;
 }) {
+  // Helper function to inject theme assets into the first HeroSection
+  const injectThemeAssets = useCallback((puckData: any) => {
+    if (!puckData || !puckData.content || !Array.isArray(puckData.content)) {
+      return puckData;
+    }
+
+    const processedData = { ...puckData };
+    const firstComponent = processedData.content[0];
+    
+    if (firstComponent && firstComponent.type === 'HeroSection') {
+      const updatedProps = { ...firstComponent.props };
+
+      // Inject banner if provided and not already set
+      if (careerPage?.banner_url && !updatedProps.backgroundImageUrl) {
+        updatedProps.backgroundImageUrl = careerPage.banner_url;
+        updatedProps.backgroundStyle = 'image';
+      }
+
+      // Inject logo if provided and not already set
+      if (careerPage?.logo_url && !updatedProps.logoUrl) {
+        updatedProps.logoUrl = careerPage.logo_url;
+        updatedProps.logoAlt = `${careerPage?.company?.name || 'Company'} Logo`;
+      }
+
+      // Inject video if provided and not already set
+      if (careerPage?.video_url && !updatedProps.cultureVideoUrl) {
+        updatedProps.cultureVideoUrl = careerPage.video_url;
+      }
+
+      processedData.content[0] = {
+        ...firstComponent,
+        props: updatedProps,
+      };
+    }
+
+    return processedData;
+  }, [careerPage]);
+
   const [data, setData] = useState<any>(() => {
     try {
       const draftData = careerPage?.draft_puck_data;
@@ -32,7 +70,9 @@ export function PuckEditor({
       // Normalize and ensure array format
       const normalized = normalizePuckData(draftData as any);
       console.log('PuckEditor: Normalized data', normalized);
-      return normalized;
+      
+      // Inject theme assets into the first HeroSection
+      return injectThemeAssets(normalized);
     } catch (error) {
       console.error('Error initializing Puck data:', error, careerPage?.draft_puck_data);
       return { content: [], root: { props: {} } };
@@ -41,6 +81,13 @@ export function PuckEditor({
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  
+  // Track previous theme asset values to detect changes
+  const prevThemeAssetsRef = useRef({
+    video_url: careerPage?.video_url,
+    banner_url: careerPage?.banner_url,
+    logo_url: careerPage?.logo_url,
+  });
 
   const hasContent = Array.isArray(data.content) && data.content.length > 0;
 
@@ -100,6 +147,76 @@ export function PuckEditor({
       toast.error('Failed to copy link');
     }
   };
+
+  // Sync theme assets when careerPage changes (e.g., after saving in theme tab)
+  useEffect(() => {
+    const currentThemeAssets = {
+      video_url: careerPage?.video_url,
+      banner_url: careerPage?.banner_url,
+      logo_url: careerPage?.logo_url,
+    };
+
+    // Only update if theme assets actually changed
+    const themeAssetsChanged = 
+      prevThemeAssetsRef.current.video_url !== currentThemeAssets.video_url ||
+      prevThemeAssetsRef.current.banner_url !== currentThemeAssets.banner_url ||
+      prevThemeAssetsRef.current.logo_url !== currentThemeAssets.logo_url;
+
+    if (themeAssetsChanged) {
+      setData((currentData: any) => {
+        if (!currentData || !currentData.content || !Array.isArray(currentData.content)) {
+          return currentData;
+        }
+
+        const firstComponent = currentData.content[0];
+        if (!firstComponent || firstComponent.type !== 'HeroSection') {
+          return currentData;
+        }
+
+        const updatedData = { ...currentData };
+        const updatedContent = [...updatedData.content];
+        const updatedProps = { ...firstComponent.props };
+        let hasChanges = false;
+
+        // Update banner if theme has one and hero doesn't have one set
+        if (careerPage?.banner_url && !updatedProps.backgroundImageUrl) {
+          updatedProps.backgroundImageUrl = careerPage.banner_url;
+          updatedProps.backgroundStyle = 'image';
+          hasChanges = true;
+        }
+
+        // Update logo if theme has one and hero doesn't have one set
+        if (careerPage?.logo_url && !updatedProps.logoUrl) {
+          updatedProps.logoUrl = careerPage.logo_url;
+          updatedProps.logoAlt = `${careerPage?.company?.name || 'Company'} Logo`;
+          hasChanges = true;
+        }
+
+        // Update video if theme has one and hero doesn't have one set
+        if (careerPage?.video_url && !updatedProps.cultureVideoUrl) {
+          updatedProps.cultureVideoUrl = careerPage.video_url;
+          hasChanges = true;
+        }
+
+        if (hasChanges) {
+          updatedContent[0] = {
+            ...firstComponent,
+            props: updatedProps,
+          };
+          updatedData.content = updatedContent;
+          return updatedData;
+        }
+
+        return currentData;
+      });
+
+      // Update the ref to track current values
+      prevThemeAssetsRef.current = currentThemeAssets;
+    } else {
+      // Update ref even if no changes detected (initial render)
+      prevThemeAssetsRef.current = currentThemeAssets;
+    }
+  }, [careerPage?.video_url, careerPage?.banner_url, careerPage?.logo_url]);
 
   // Auto-save on changes (debounced) - disabled for now to avoid conflicts
   // useEffect(() => {

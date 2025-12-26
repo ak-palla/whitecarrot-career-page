@@ -147,7 +147,7 @@ export function JobApplicationModal({ job, trigger, open, onOpenChange }: JobApp
 
                     <div className="space-y-2">
                         <Label htmlFor="resume">Resume (PDF)</Label>
-                        <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors relative">
+                        <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors relative focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                             <input
                                 type="file"
                                 id="resume"

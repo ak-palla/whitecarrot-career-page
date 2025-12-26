@@ -13,10 +13,11 @@ interface PuckRendererProps {
   jobs?: any[];
   bannerUrl?: string;
   logoUrl?: string;
+  videoUrl?: string;
   companyName?: string;
 }
 
-export function PuckRenderer({ data, theme, jobs, bannerUrl, logoUrl, companyName }: PuckRendererProps) {
+export function PuckRenderer({ data, theme, jobs, bannerUrl, logoUrl, videoUrl, companyName }: PuckRendererProps) {
   // If no Puck data, return empty
   if (!data || !data.content || data.content.length === 0) {
     return null;
@@ -33,19 +34,23 @@ export function PuckRenderer({ data, theme, jobs, bannerUrl, logoUrl, companyNam
     if (firstComponent && firstComponent.type === 'HeroSection') {
       // Update props with banner and logo from Theme Customizer
       const updatedProps = { ...firstComponent.props };
-      
+
       // If bannerUrl is provided, use it (from Theme Customizer takes precedence)
       if (bannerUrl) {
         updatedProps.backgroundImageUrl = bannerUrl;
         updatedProps.backgroundStyle = 'image'; // Set to image style to show the banner
       }
-      
-      // If logoUrl is provided, add it to the hero section
+
       if (logoUrl) {
         updatedProps.logoUrl = logoUrl;
         updatedProps.logoAlt = `${companyName || 'Company'} Logo`;
       }
-      
+
+      // If videoUrl is provided, add it to the hero section (as culture video)
+      if (videoUrl) {
+        updatedProps.cultureVideoUrl = videoUrl;
+      }
+
       processedData.content[0] = {
         ...firstComponent,
         props: updatedProps,

@@ -1,11 +1,13 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { updateCareerPage } from '@/app/actions/career-pages';
 import { ImageUploader } from './image-uploader';
+import { VideoUploader } from './video-uploader';
 
 export function ThemeCustomizer({
     company,
@@ -16,9 +18,11 @@ export function ThemeCustomizer({
     careerPage: any,
     onSaveStateChange?: (state: { handleSave: () => Promise<void>, saving: boolean, message: string | null }) => void
 }) {
+    const router = useRouter();
     const [theme, setTheme] = useState(careerPage?.theme || { primaryColor: '#000000' });
     const [logoUrl, setLogoUrl] = useState<string | null | undefined>(careerPage?.logo_url);
     const [bannerUrl, setBannerUrl] = useState<string | null | undefined>(careerPage?.banner_url);
+    const [videoUrl, setVideoUrl] = useState<string | null | undefined>(careerPage?.video_url);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
 
@@ -28,7 +32,8 @@ export function ThemeCustomizer({
         const res = await updateCareerPage(careerPage.id, {
             theme,
             logo_url: logoUrl || null,
-            banner_url: bannerUrl || null
+            banner_url: bannerUrl || null,
+            video_url: videoUrl || null
         }, company.slug);
 
         if (res.error) {
@@ -37,9 +42,11 @@ export function ThemeCustomizer({
             setMessage('Saved successfully!');
             // Auto-hide message after 3s
             setTimeout(() => setMessage(null), 3000);
+            // Refresh the page to update the careerPage prop so theme assets appear in the editor
+            router.refresh();
         }
         setSaving(false);
-    }, [careerPage.id, company.slug, theme, logoUrl, bannerUrl]);
+    }, [careerPage.id, company.slug, theme, logoUrl, bannerUrl, videoUrl, router]);
 
     // Expose save handler and state to parent
     useEffect(() => {
@@ -64,6 +71,12 @@ export function ThemeCustomizer({
                         bucket="company-banners"
                         currentImageUrl={bannerUrl ?? undefined}
                         onUpload={(url) => setBannerUrl(url)}
+                    />
+                    <VideoUploader
+                        label="Culture Video"
+                        bucket="videos"
+                        currentVideoUrl={videoUrl ?? undefined}
+                        onUpload={(url: string | null) => setVideoUrl(url)}
                     />
                 </div>
             </div>
@@ -91,17 +104,16 @@ export function ThemeCustomizer({
                         Secondary color is automatically generated from your primary color for optimal contrast.
                     </p>
                     <div className="mt-4 flex items-center gap-4">
-                        <Button 
-                            onClick={handleSave} 
+                        <Button
+                            onClick={handleSave}
                             disabled={saving}
                             className="bg-create-company hover:bg-create-company text-black"
                         >
                             {saving ? 'Saving...' : 'Save Changes'}
                         </Button>
                         {message && (
-                            <span className={`text-sm font-medium animate-in fade-in ${
-                                message.includes('Error') ? 'text-destructive' : 'text-green-600'
-                            }`}>
+                            <span className={`text-sm font-medium animate-in fade-in ${message.includes('Error') ? 'text-destructive' : 'text-green-600'
+                                }`}>
                                 {message}
                             </span>
                         )}

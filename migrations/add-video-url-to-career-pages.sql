@@ -1,0 +1,1 @@
+ALTER TABLE career_pages ADD COLUMN IF NOT EXISTS video_url TEXT;

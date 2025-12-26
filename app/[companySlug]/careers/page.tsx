@@ -17,17 +17,17 @@ export async function generateMetadata({ params }: { params: Promise<{ companySl
 
     if (!company) return {};
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
-        (process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000");
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+        (process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : "http://localhost:3000");
     const canonicalUrl = `${baseUrl}/${companySlug}/careers`;
     const bannerUrl = company.career_pages?.[0]?.banner_url;
     const logoUrl = company.career_pages?.[0]?.logo_url;
 
     // Use logo URL directly if it's absolute (from Supabase storage), otherwise use tie.png
-    const iconUrl = logoUrl && logoUrl.startsWith('http') 
-        ? logoUrl 
+    const iconUrl = logoUrl && logoUrl.startsWith('http')
+        ? logoUrl
         : `${baseUrl}/tie.png`;
 
     return {
@@ -149,10 +149,10 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
         .eq('published', true)
         .order('created_at', { ascending: false });
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
-        (process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000");
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+        (process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : "http://localhost:3000");
     const careersUrl = `${baseUrl}/${companySlug}/careers`;
 
     const jsonLd = {
@@ -222,22 +222,16 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
         <>
             <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                dangerouslySetInnerHTML={{ __html: JSON.stringify([jsonLd, ...jobPostings]) }}
             />
-            {jobPostings.map((jobPosting, index) => (
-                <script
-                    key={index}
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPosting) }}
-                />
-            ))}
             {puckData ? (
-                <PuckRenderer 
-                    data={puckData} 
-                    theme={careerPage.theme} 
+                <PuckRenderer
+                    data={puckData}
+                    theme={careerPage.theme}
                     jobs={jobs || []}
                     bannerUrl={careerPage.banner_url}
                     logoUrl={careerPage.logo_url}
+                    videoUrl={careerPage.video_url}
                     companyName={company.name}
                 />
             ) : (
