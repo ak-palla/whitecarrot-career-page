@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { X, Search, MapPin, Clock } from 'lucide-react';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
 import { JobApplicationModal } from '@/components/candidate/job-application-modal';
+import { Pagination } from '@/components/ui/pagination';
 
 export interface JobsSectionProps {
   heading: string;
@@ -66,6 +67,13 @@ export function JobsSection({
     return team || 'all';
   });
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+  
+  // Pagination state
+  const itemsPerPage = 20;
+  const [currentPage, setCurrentPage] = useState(() => {
+    const page = searchParams.get('page');
+    return page ? parseInt(page, 10) : 1;
+  });
 
   // Debounce search query
   useEffect(() => {
@@ -119,6 +127,40 @@ export function JobsSection({
     });
   }, [jobsArray, debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam]);
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam]);
+
+  // Calculate pagination
+  // For team/location layouts, paginate groups; for others, paginate jobs
+  const totalItems = useMemo(() => {
+    if (layout === 'team' || layout === 'location') {
+      const grouped = layout === 'team' 
+        ? groupBy(filteredJobs, (job) => job.team || 'Other')
+        : groupBy(filteredJobs, (job) => job.location || 'Other');
+      return Object.keys(grouped).length;
+    }
+    return filteredJobs.length;
+  }, [filteredJobs, layout]);
+
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedJobs = useMemo(() => {
+    return filteredJobs.slice(startIndex, endIndex);
+  }, [filteredJobs, startIndex, endIndex]);
+
+  // Handle page change
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of jobs section
+    const jobsSection = document.getElementById('jobs');
+    if (jobsSection) {
+      jobsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
   // Update URL when filters change (only if different from current URL)
   useEffect(() => {
     // Prevent infinite loop by checking if we're already updating
@@ -130,6 +172,7 @@ export function JobsSection({
     if (selectedLocation && selectedLocation !== 'all') newParams.set('location', selectedLocation);
     if (selectedJobType && selectedJobType !== 'all') newParams.set('type', selectedJobType);
     if (selectedTeam && selectedTeam !== 'all') newParams.set('team', selectedTeam);
+    if (currentPage > 1) newParams.set('page', currentPage.toString());
 
     // Compare with current URL params using window.location to avoid re-render loops
     const currentParams = new URLSearchParams(window.location.search);
@@ -137,18 +180,21 @@ export function JobsSection({
     const currentLocation = currentParams.get('location') || '';
     const currentType = currentParams.get('type') || '';
     const currentTeam = currentParams.get('team') || '';
+    const currentPageParam = currentParams.get('page') || '1';
 
     const newSearch = newParams.get('search') || '';
     const newLocation = newParams.get('location') || '';
     const newType = newParams.get('type') || '';
     const newTeam = newParams.get('team') || '';
+    const newPage = newParams.get('page') || '1';
 
     // Only update if params actually changed
     if (
       currentSearch !== newSearch ||
       currentLocation !== newLocation ||
       currentType !== newType ||
-      currentTeam !== newTeam
+      currentTeam !== newTeam ||
+      currentPageParam !== newPage
     ) {
       isUpdatingUrlRef.current = true;
       const queryString = newParams.toString();
@@ -160,7 +206,7 @@ export function JobsSection({
         isUpdatingUrlRef.current = false;
       }, 100);
     }
-  }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, router]);
+  }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, currentPage, router]);
 
   // Check if any filters are active
   const hasActiveFilters = debouncedSearchQuery || (selectedLocation !== 'all') || (selectedJobType !== 'all') || (selectedTeam !== 'all');
@@ -344,38 +390,66 @@ export function JobsSection({
             </div>
           ) : (
             <>
-              {layout === 'team' && (
-                <>
-                  {Object.entries(groupBy(filteredJobs, (job) => job.team || 'Other')).map(([team, teamJobs]) => (
-                    <div key={team} className="space-y-4 mb-8">
-                      <h3 className="text-xl font-semibold text-black">
-                        {team}
-                      </h3>
-                      <JobList jobs={teamJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
-                    </div>
-                  ))}
-                </>
-              )}
-              {layout === 'location' && (
-                <>
-                  {Object.entries(groupBy(filteredJobs, (job) => job.location || 'Other')).map(([location, locationJobs]) => (
-                    <div key={location} className="space-y-4 mb-8">
-                      <h3 className="text-xl font-semibold text-black">
-                        {location}
-                      </h3>
-                      <JobList jobs={locationJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
-                    </div>
-                  ))}
-                </>
-              )}
+              {layout === 'team' && (() => {
+                const grouped = groupBy(filteredJobs, (job) => job.team || 'Other');
+                const groups = Object.entries(grouped);
+                const paginatedGroups = groups.slice(startIndex, endIndex);
+                return (
+                  <>
+                    {paginatedGroups.map(([team, teamJobs]) => (
+                      <div key={team} className="space-y-4 mb-8">
+                        <h3 className="text-xl font-semibold text-black">
+                          {team}
+                        </h3>
+                        <JobList jobs={teamJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                      </div>
+                    ))}
+                  </>
+                );
+              })()}
+              {layout === 'location' && (() => {
+                const grouped = groupBy(filteredJobs, (job) => job.location || 'Other');
+                const groups = Object.entries(grouped);
+                const paginatedGroups = groups.slice(startIndex, endIndex);
+                return (
+                  <>
+                    {paginatedGroups.map(([location, locationJobs]) => (
+                      <div key={location} className="space-y-4 mb-8">
+                        <h3 className="text-xl font-semibold text-black">
+                          {location}
+                        </h3>
+                        <JobList jobs={locationJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                      </div>
+                    ))}
+                  </>
+                );
+              })()}
               {layout !== 'team' && layout !== 'location' && (
                 <>
                   {layout === 'cards' ? (
-                    <JobCards jobs={filteredJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                    <JobCards jobs={paginatedJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
                   ) : (
-                    <JobList jobs={filteredJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                    <JobList jobs={paginatedJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
                   )}
                 </>
+              )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex flex-col items-center gap-4">
+                  <p className="text-sm text-muted-foreground">
+                    {layout === 'team' || layout === 'location' ? (
+                      <>Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} {totalItems === 1 ? 'group' : 'groups'}</>
+                    ) : (
+                      <>Showing {startIndex + 1}-{Math.min(endIndex, filteredJobs.length)} of {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'}</>
+                    )}
+                  </p>
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
               )}
             </>
           )}
@@ -409,7 +483,7 @@ export function JobsSection({
   );
 }
 
-function JobList({
+const JobList = React.memo(function JobList({
   jobs,
   density = 'comfortable',
   buttonVariant = 'ghost',
@@ -454,9 +528,9 @@ function JobList({
       ))}
     </div>
   );
-}
+});
 
-function JobCards({
+const JobCards = React.memo(function JobCards({
   jobs,
   density = 'comfortable',
   buttonVariant = 'ghost',
@@ -513,13 +587,14 @@ function JobCards({
       ))}
     </div>
   );
-}
+});
 
-function groupBy<T, K extends string | number>(items: T[], getKey: (item: T) => K): Record<K, T[]> {
+// Memoized groupBy function for better performance
+const groupBy = <T, K extends string | number>(items: T[], getKey: (item: T) => K): Record<K, T[]> => {
   return items.reduce((acc, item) => {
     const key = getKey(item);
     if (!acc[key]) acc[key] = [];
     acc[key].push(item);
     return acc;
   }, {} as Record<K, T[]>);
-}
+};

@@ -235,7 +235,7 @@ export function PuckEditor({
   return (
     <div className="h-full flex flex-col">
       {/* Toolbar */}
-      <div className="border-b bg-card p-4 flex items-center justify-between gap-4">
+      <div className="border-b bg-card p-4 flex items-center justify-end gap-4">
         <div className="flex gap-2">
           <Button
             variant="outline"
