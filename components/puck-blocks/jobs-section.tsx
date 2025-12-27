@@ -13,6 +13,138 @@ import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
 import { JobApplicationModal } from '@/components/candidate/job-application-modal';
 import { Pagination } from '@/components/ui/pagination';
 
+// Memoized filter component to reduce re-renders
+const JobsFilter = React.memo(function JobsFilter({
+  searchQuery,
+  onSearchChange,
+  selectedLocation,
+  onLocationChange,
+  selectedJobType,
+  onJobTypeChange,
+  selectedTeam,
+  onTeamChange,
+  filterOptions,
+  hasActiveFilters,
+  filteredJobsCount,
+  onClearFilters,
+  formatJobType,
+}: {
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  selectedLocation: string;
+  onLocationChange: (value: string) => void;
+  selectedJobType: string;
+  onJobTypeChange: (value: string) => void;
+  selectedTeam: string;
+  onTeamChange: (value: string) => void;
+  filterOptions: { locations: string[]; jobTypes: string[]; teams: string[] };
+  hasActiveFilters: boolean;
+  filteredJobsCount: number;
+  onClearFilters: () => void;
+  formatJobType: (jobType: string) => string;
+}) {
+  return (
+    <Card className="p-4">
+      <div className="space-y-4">
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-black opacity-50" />
+          <Input
+            type="text"
+            placeholder="Search jobs..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-9 pr-9"
+            aria-label="Search jobs by title or description"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => onSearchChange('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4 text-black opacity-50" />
+            </button>
+          )}
+        </div>
+
+        {/* Filter Dropdowns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {filterOptions.locations.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="location-filter" className="text-black">Location</Label>
+              <Select value={selectedLocation} onValueChange={onLocationChange}>
+                <SelectTrigger id="location-filter" aria-label="Filter by location">
+                  <SelectValue placeholder="All Locations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  {filterOptions.locations.map((location) => (
+                    <SelectItem key={location} value={location}>{location}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {filterOptions.jobTypes.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="job-type-filter" className="text-black">Job Type</Label>
+              <Select value={selectedJobType} onValueChange={onJobTypeChange}>
+                <SelectTrigger id="job-type-filter" aria-label="Filter by job type">
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  {filterOptions.jobTypes.map((jobType) => (
+                    <SelectItem key={jobType} value={jobType}>{formatJobType(jobType)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {filterOptions.teams.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="team-filter" className="text-black">Department/Team</Label>
+              <Select value={selectedTeam} onValueChange={onTeamChange}>
+                <SelectTrigger id="team-filter" aria-label="Filter by team">
+                  <SelectValue placeholder="All Teams" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Teams</SelectItem>
+                  {filterOptions.teams.map((team) => (
+                    <SelectItem key={team} value={team}>{team}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+
+        {/* Clear Filters Button */}
+        {hasActiveFilters ? (
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-sm text-black">
+              {filteredJobsCount === 0
+                ? 'No jobs match your filters'
+                : `${filteredJobsCount} ${filteredJobsCount === 1 ? 'job' : 'jobs'} found`}
+            </p>
+            <Button variant="outline" size="sm" onClick={onClearFilters} className="gap-2">
+              <X className="h-4 w-4" />
+              Clear filters
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm pt-2 text-black">
+            {filteredJobsCount} {filteredJobsCount === 1 ? 'job' : 'jobs'} available
+          </p>
+        )}
+      </div>
+    </Card>
+  );
+});
+
 export interface JobsSectionProps {
   heading: string;
   layout: 'list' | 'cards' | 'team' | 'location';
@@ -75,26 +207,26 @@ export function JobsSection({
     return page ? parseInt(page, 10) : 1;
   });
 
-  // Debounce search query
+  // Debounce search query - reduced to 200ms for better responsiveness
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 300);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Extract unique filter values
+  // Extract unique filter values - optimized calculation
   const filterOptions = useMemo(() => {
     const locations = new Set<string>();
     const jobTypes = new Set<string>();
     const teams = new Set<string>();
 
-    jobsArray.forEach((job) => {
+    for (const job of jobsArray) {
       if (job.location) locations.add(job.location);
       if (job.job_type) jobTypes.add(job.job_type);
       if (job.team) teams.add(job.team);
-    });
+    }
 
     return {
       locations: Array.from(locations).sort(),
@@ -103,29 +235,51 @@ export function JobsSection({
     };
   }, [jobsArray]);
 
-  // Filter jobs based on all active filters
+  // Pre-compile search term once
+  const searchLower = useMemo(() => 
+    debouncedSearchQuery ? debouncedSearchQuery.toLowerCase() : null,
+    [debouncedSearchQuery]
+  );
+
+  // Filter jobs based on all active filters - optimized single-pass with early exits
   const filteredJobs = useMemo(() => {
-    return jobsArray.filter((job) => {
-      // Text search (title and description)
-      if (debouncedSearchQuery) {
-        const searchLower = debouncedSearchQuery.toLowerCase();
-        const matchesTitle = job.title?.toLowerCase().includes(searchLower);
-        const matchesDescription = job.description?.toLowerCase().includes(searchLower);
-        if (!matchesTitle && !matchesDescription) return false;
+    if (!searchLower && selectedLocation === 'all' && selectedJobType === 'all' && selectedTeam === 'all') {
+      return jobsArray; // No filters active, return all jobs
+    }
+
+    const filtered: typeof jobsArray = [];
+    
+    for (const job of jobsArray) {
+      // Early exit: Text search (most expensive, check first if active)
+      if (searchLower) {
+        const titleLower = job.title?.toLowerCase();
+        const descLower = job.description?.toLowerCase();
+        if (!titleLower?.includes(searchLower) && !descLower?.includes(searchLower)) {
+          continue; // Skip this job
+        }
       }
 
-      // Location filter (skip if 'all')
-      if (selectedLocation && selectedLocation !== 'all' && job.location !== selectedLocation) return false;
+      // Early exit: Location filter
+      if (selectedLocation !== 'all' && job.location !== selectedLocation) {
+        continue;
+      }
 
-      // Job type filter (skip if 'all')
-      if (selectedJobType && selectedJobType !== 'all' && job.job_type !== selectedJobType) return false;
+      // Early exit: Job type filter
+      if (selectedJobType !== 'all' && job.job_type !== selectedJobType) {
+        continue;
+      }
 
-      // Team filter (skip if 'all')
-      if (selectedTeam && selectedTeam !== 'all' && job.team !== selectedTeam) return false;
+      // Early exit: Team filter
+      if (selectedTeam !== 'all' && job.team !== selectedTeam) {
+        continue;
+      }
 
-      return true;
-    });
-  }, [jobsArray, debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam]);
+      // All filters passed
+      filtered.push(job);
+    }
+
+    return filtered;
+  }, [jobsArray, searchLower, selectedLocation, selectedJobType, selectedTeam]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -161,32 +315,30 @@ export function JobsSection({
     }
   }, []);
 
-  // Update URL when filters change (only if different from current URL)
+  // Update URL when filters change - simplified and optimized
   useEffect(() => {
-    // Prevent infinite loop by checking if we're already updating
     if (isUpdatingUrlRef.current) return;
 
     // Build new params
     const newParams = new URLSearchParams();
     if (debouncedSearchQuery) newParams.set('search', debouncedSearchQuery);
-    if (selectedLocation && selectedLocation !== 'all') newParams.set('location', selectedLocation);
-    if (selectedJobType && selectedJobType !== 'all') newParams.set('type', selectedJobType);
-    if (selectedTeam && selectedTeam !== 'all') newParams.set('team', selectedTeam);
+    if (selectedLocation !== 'all') newParams.set('location', selectedLocation);
+    if (selectedJobType !== 'all') newParams.set('type', selectedJobType);
+    if (selectedTeam !== 'all') newParams.set('team', selectedTeam);
     if (currentPage > 1) newParams.set('page', currentPage.toString());
 
-    // Compare with current URL params using window.location to avoid re-render loops
-    const currentParams = new URLSearchParams(window.location.search);
-    const currentSearch = currentParams.get('search') || '';
-    const currentLocation = currentParams.get('location') || '';
-    const currentType = currentParams.get('type') || '';
-    const currentTeam = currentParams.get('team') || '';
-    const currentPageParam = currentParams.get('page') || '1';
+    // Compare with current URL params from searchParams hook
+    const currentSearch = searchParams.get('search') || '';
+    const currentLocation = searchParams.get('location') || '';
+    const currentType = searchParams.get('type') || '';
+    const currentTeam = searchParams.get('team') || '';
+    const currentPageParam = searchParams.get('page') || '1';
 
-    const newSearch = newParams.get('search') || '';
-    const newLocation = newParams.get('location') || '';
-    const newType = newParams.get('type') || '';
-    const newTeam = newParams.get('team') || '';
-    const newPage = newParams.get('page') || '1';
+    const newSearch = debouncedSearchQuery || '';
+    const newLocation = selectedLocation !== 'all' ? selectedLocation : '';
+    const newType = selectedJobType !== 'all' ? selectedJobType : '';
+    const newTeam = selectedTeam !== 'all' ? selectedTeam : '';
+    const newPage = currentPage > 1 ? currentPage.toString() : '1';
 
     // Only update if params actually changed
     if (
@@ -198,15 +350,14 @@ export function JobsSection({
     ) {
       isUpdatingUrlRef.current = true;
       const queryString = newParams.toString();
-      const newUrl = queryString ? `?${queryString}` : window.location.pathname;
-      router.replace(newUrl, { scroll: false });
+      router.replace(queryString ? `?${queryString}` : window.location.pathname, { scroll: false });
 
-      // Reset flag after a short delay to allow URL to update
+      // Reset flag after URL update completes
       setTimeout(() => {
         isUpdatingUrlRef.current = false;
-      }, 100);
+      }, 50);
     }
-  }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, currentPage, router]);
+  }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, currentPage, router, searchParams]);
 
   // Check if any filters are active
   const hasActiveFilters = debouncedSearchQuery || (selectedLocation !== 'all') || (selectedJobType !== 'all') || (selectedTeam !== 'all');
@@ -252,141 +403,29 @@ export function JobsSection({
           {/* Filter UI */}
           {jobsArray.length > 0 && (
             <div className="mb-6">
-              <Card className="p-4">
-                <div className="space-y-4">
-                  {/* Search Input */}
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-black opacity-50" />
-                    <Input
-                      type="text"
-                      placeholder="Search jobs..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 pr-9"
-                      aria-label="Search jobs by title or description"
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery('')}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                        aria-label="Clear search"
-                      >
-                        <X className="h-4 w-4 text-black opacity-50" />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Filter Dropdowns */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Location Filter */}
-                    {filterOptions.locations.length > 0 && (
-                      <div className="space-y-2">
-                        <Label htmlFor="location-filter" className="text-black">
-                          Location
-                        </Label>
-                        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                          <SelectTrigger id="location-filter" aria-label="Filter by location">
-                            <SelectValue placeholder="All Locations" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Locations</SelectItem>
-                            {filterOptions.locations.map((location) => (
-                              <SelectItem key={location} value={location}>
-                                {location}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    {/* Job Type Filter */}
-                    {filterOptions.jobTypes.length > 0 && (
-                      <div className="space-y-2">
-                        <Label htmlFor="job-type-filter" className="text-black">
-                          Job Type
-                        </Label>
-                        <Select value={selectedJobType} onValueChange={setSelectedJobType}>
-                          <SelectTrigger id="job-type-filter" aria-label="Filter by job type">
-                            <SelectValue placeholder="All Types" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Types</SelectItem>
-                            {filterOptions.jobTypes.map((jobType) => (
-                              <SelectItem key={jobType} value={jobType}>
-                                {formatJobType(jobType)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    {/* Team Filter */}
-                    {filterOptions.teams.length > 0 && (
-                      <div className="space-y-2">
-                        <Label htmlFor="team-filter" className="text-black">
-                          Department/Team
-                        </Label>
-                        <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-                          <SelectTrigger id="team-filter" aria-label="Filter by team">
-                            <SelectValue placeholder="All Teams" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Teams</SelectItem>
-                            {filterOptions.teams.map((team) => (
-                              <SelectItem key={team} value={team}>
-                                {team}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Clear Filters Button */}
-                  {hasActiveFilters && (
-                    <div className="flex items-center justify-between pt-2">
-                      <p className="text-sm text-black">
-                        {filteredJobs.length === 0 ? (
-                          'No jobs match your filters'
-                        ) : (
-                          `${filteredJobs.length} ${filteredJobs.length === 1 ? 'job' : 'jobs'} found`
-                        )}
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={clearFilters}
-                        className="gap-2"
-                      >
-                        <X className="h-4 w-4" />
-                        Clear filters
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Result count when no filters active */}
-                  {!hasActiveFilters && (
-                    <p className="text-sm pt-2 text-black">
-                      {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} available
-                    </p>
-                  )}
-                </div>
-              </Card>
+              <JobsFilter
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                selectedLocation={selectedLocation}
+                onLocationChange={setSelectedLocation}
+                selectedJobType={selectedJobType}
+                onJobTypeChange={setSelectedJobType}
+                selectedTeam={selectedTeam}
+                onTeamChange={setSelectedTeam}
+                filterOptions={filterOptions}
+                hasActiveFilters={hasActiveFilters}
+                filteredJobsCount={filteredJobs.length}
+                onClearFilters={clearFilters}
+                formatJobType={formatJobType}
+              />
             </div>
           )}
 
           {/* Job Listings */}
           {filteredJobs.length === 0 && hasActiveFilters ? (
             <div className="text-center py-12">
-              <p className="text-lg mb-4 text-black">
-                No jobs match your filters
-              </p>
-              <Button variant="outline" onClick={clearFilters}>
-                Clear all filters
-              </Button>
+              <p className="text-lg mb-4 text-black">No jobs match your filters</p>
+              <Button variant="outline" onClick={clearFilters}>Clear all filters</Button>
             </div>
           ) : (
             <>
@@ -394,44 +433,29 @@ export function JobsSection({
                 const grouped = groupBy(filteredJobs, (job) => job.team || 'Other');
                 const groups = Object.entries(grouped);
                 const paginatedGroups = groups.slice(startIndex, endIndex);
-                return (
-                  <>
-                    {paginatedGroups.map(([team, teamJobs]) => (
-                      <div key={team} className="space-y-4 mb-8">
-                        <h3 className="text-xl font-semibold text-black">
-                          {team}
-                        </h3>
-                        <JobList jobs={teamJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
-                      </div>
-                    ))}
-                  </>
-                );
+                return paginatedGroups.map(([team, teamJobs]) => (
+                  <div key={team} className="space-y-4 mb-8">
+                    <h3 className="text-xl font-semibold text-black">{team}</h3>
+                    <JobList jobs={teamJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                  </div>
+                ));
               })()}
               {layout === 'location' && (() => {
                 const grouped = groupBy(filteredJobs, (job) => job.location || 'Other');
                 const groups = Object.entries(grouped);
                 const paginatedGroups = groups.slice(startIndex, endIndex);
-                return (
-                  <>
-                    {paginatedGroups.map(([location, locationJobs]) => (
-                      <div key={location} className="space-y-4 mb-8">
-                        <h3 className="text-xl font-semibold text-black">
-                          {location}
-                        </h3>
-                        <JobList jobs={locationJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
-                      </div>
-                    ))}
-                  </>
-                );
+                return paginatedGroups.map(([location, locationJobs]) => (
+                  <div key={location} className="space-y-4 mb-8">
+                    <h3 className="text-xl font-semibold text-black">{location}</h3>
+                    <JobList jobs={locationJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                  </div>
+                ));
               })()}
-              {layout !== 'team' && layout !== 'location' && (
-                <>
-                  {layout === 'cards' ? (
-                    <JobCards jobs={paginatedJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
-                  ) : (
-                    <JobList jobs={paginatedJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
-                  )}
-                </>
+              {layout === 'cards' && (
+                <JobCards jobs={paginatedJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+              )}
+              {layout === 'list' && (
+                <JobList jobs={paginatedJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
               )}
 
               {/* Pagination */}
@@ -483,6 +507,11 @@ export function JobsSection({
   );
 }
 
+// Pre-compute job type formatting for performance
+const formatJobTypeDisplay = (jobType: string): string => {
+  return jobType.replace('-', ' ');
+};
+
 const JobList = React.memo(function JobList({
   jobs,
   density = 'comfortable',
@@ -494,15 +523,15 @@ const JobList = React.memo(function JobList({
   buttonVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
   badgeVariant?: 'default' | 'secondary' | 'outline' | 'destructive';
 }) {
+  const densityClass = density === 'compact' ? 'p-3' : 'p-4';
+  
   return (
     <div className="space-y-3">
       {jobs.map((job) => (
-        <Card key={job.id} className={`${density === 'compact' ? 'p-3' : 'p-4'} hover:border-primary transition-colors`}>
+        <Card key={job.id} className={`${densityClass} hover:border-primary transition-colors`}>
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              <CardTitle className="text-base font-medium mb-2 text-black">
-                {job.title}
-              </CardTitle>
+              <CardTitle className="text-base font-medium mb-2 text-black">{job.title}</CardTitle>
               <div className="flex gap-3 flex-wrap items-center text-sm text-black">
                 {job.location && (
                   <span className="flex items-center gap-1">
@@ -513,15 +542,13 @@ const JobList = React.memo(function JobList({
                 {job.job_type && (
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {job.job_type.replace('-', ' ')}
+                    {formatJobTypeDisplay(job.job_type)}
                   </span>
                 )}
               </div>
             </div>
             <JobApplicationModal job={job} trigger={
-              <Button variant={buttonVariant} size="sm">
-                Apply Now
-              </Button>
+              <Button variant={buttonVariant} size="sm">Apply Now</Button>
             } />
           </div>
         </Card>
@@ -548,9 +575,7 @@ const JobCards = React.memo(function JobCards({
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-2">
-                <CardTitle className="text-xl text-black">
-                  {job.title}
-                </CardTitle>
+                <CardTitle className="text-xl text-black">{job.title}</CardTitle>
                 <div className="flex flex-wrap items-center gap-3 text-sm text-black">
                   {job.location && (
                     <span className="flex items-center gap-1">
@@ -561,26 +586,20 @@ const JobCards = React.memo(function JobCards({
                   {job.job_type && (
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      {job.job_type.replace('-', ' ')}
+                      {formatJobTypeDisplay(job.job_type)}
                     </span>
                   )}
                 </div>
               </div>
-              {job.team && (
-                <Badge variant={badgeVariant}>{job.team}</Badge>
-              )}
+              {job.team && <Badge variant={badgeVariant}>{job.team}</Badge>}
             </div>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col justify-between">
             {job.description && (
-              <p className="text-sm mb-4 leading-relaxed text-black line-clamp-3">
-                {job.description}
-              </p>
+              <p className="text-sm mb-4 leading-relaxed text-black line-clamp-3">{job.description}</p>
             )}
             <JobApplicationModal job={job} trigger={
-              <Button variant={buttonVariant} className="w-full mt-auto">
-                Apply Now
-              </Button>
+              <Button variant={buttonVariant} className="w-full mt-auto">Apply Now</Button>
             } />
           </CardContent>
         </Card>

@@ -27,95 +27,6 @@ const APPLICATION_STATUSES: ApplicationStatus[] = [
     { value: 'interviewed', label: 'Interviewed', color: 'text-purple-700', bgColor: 'bg-purple-100' },
 ];
 
-// Mock data for testing - Set to true to use mock data
-const USE_MOCK_DATA = true;
-
-// Generate mock applications data
-const generateMockApplications = (): ApplicationWithJob[] => {
-    const jobs = [
-        { id: 'job-1', title: 'Senior Software Engineer' },
-        { id: 'job-2', title: 'Product Manager' },
-        { id: 'job-3', title: 'UX Designer' },
-        { id: 'job-4', title: 'Data Scientist' },
-        { id: 'job-5', title: 'DevOps Engineer' },
-        { id: 'job-6', title: 'Frontend Developer' },
-        { id: 'job-7', title: 'Backend Developer' },
-        { id: 'job-8', title: 'Full Stack Developer' },
-    ];
-
-    const firstNames = [
-        'Neeraj', 'Akhil', 'Sarah', 'Michael', 'Emily', 'David', 'Jessica', 'James',
-        'Emma', 'William', 'Olivia', 'Benjamin', 'Sophia', 'Daniel', 'Isabella', 'Matthew',
-        'Ava', 'Joseph', 'Mia', 'Andrew', 'Charlotte', 'Ryan', 'Amelia', 'Joshua',
-        'Harper', 'Christopher', 'Evelyn', 'Anthony', 'Abigail', 'Mark', 'Elizabeth', 'Steven'
-    ];
-
-    const lastNames = [
-        'Sharma', 'Palla', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller',
-        'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Wilson', 'Anderson', 'Thomas',
-        'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Thompson', 'White', 'Harris',
-        'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen'
-    ];
-
-    const statuses = ['new', 'reviewed', 'rejected', 'accepted', 'interviewed'];
-    const statusWeights = [0.4, 0.2, 0.15, 0.1, 0.15]; // More new applications
-
-    const getRandomStatus = () => {
-        const rand = Math.random();
-        let cumulative = 0;
-        for (let i = 0; i < statuses.length; i++) {
-            cumulative += statusWeights[i];
-            if (rand < cumulative) return statuses[i];
-        }
-        return statuses[0];
-    };
-
-    const applications: ApplicationWithJob[] = [];
-    const usedNames = new Set<string>();
-
-    // Generate 35-40 applications across different jobs
-    for (let i = 0; i < 38; i++) {
-        let firstName, lastName, fullName;
-        do {
-            firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-            lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-            fullName = `${firstName} ${lastName}`;
-        } while (usedNames.has(fullName) && usedNames.size < firstNames.length * lastNames.length);
-        usedNames.add(fullName);
-
-        const job = jobs[Math.floor(Math.random() * jobs.length)];
-        const daysAgo = Math.floor(Math.random() * 30); // Applications from last 30 days
-        const createdDate = new Date();
-        createdDate.setDate(createdDate.getDate() - daysAgo);
-        createdDate.setHours(Math.floor(Math.random() * 24));
-        createdDate.setMinutes(Math.floor(Math.random() * 60));
-
-        const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 100)}@example.com`;
-        const linkedinUrl = `https://linkedin.com/in/${firstName.toLowerCase()}-${lastName.toLowerCase()}`;
-
-        applications.push({
-            id: `app-${i + 1}`,
-            first_name: firstName,
-            last_name: lastName,
-            email: email,
-            linkedin_url: linkedinUrl,
-            resume_url: `resumes/${job.id}/${Date.now()}_${firstName}_${lastName}.pdf`,
-            created_at: createdDate.toISOString(),
-            job_id: job.id,
-            status: getRandomStatus(),
-            job: {
-                id: job.id,
-                title: job.title,
-            },
-        });
-    }
-
-    // Sort by created_at descending (newest first)
-    return applications.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-};
-
 export function ApplicationsList({ company }: { company: any }) {
     const [applications, setApplications] = useState<ApplicationWithJob[]>([]);
     const [loading, setLoading] = useState(true);
@@ -133,11 +44,11 @@ export function ApplicationsList({ company }: { company: any }) {
     // Status update state
     const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
 
-    // Debounce search query
+    // Debounce search query - reduced to 200ms for better responsiveness
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearchQuery(searchQuery);
-        }, 300);
+        }, 200);
 
         return () => clearTimeout(timer);
     }, [searchQuery]);
@@ -150,37 +61,6 @@ export function ApplicationsList({ company }: { company: any }) {
     const loadApplications = useCallback(async () => {
         setLoading(true);
         
-        // Use mock data if enabled
-        if (USE_MOCK_DATA) {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            let mockData = generateMockApplications();
-            
-            // Apply filters to mock data
-            if (selectedJob !== 'all') {
-                mockData = mockData.filter(app => app.job_id === selectedJob);
-            }
-            
-            if (selectedStatus !== 'all') {
-                mockData = mockData.filter(app => app.status === selectedStatus);
-            }
-            
-            if (debouncedSearchQuery) {
-                const searchLower = debouncedSearchQuery.toLowerCase();
-                mockData = mockData.filter(app => {
-                    const fullName = `${app.first_name} ${app.last_name}`.toLowerCase();
-                    const email = (app.email || '').toLowerCase();
-                    return fullName.includes(searchLower) || email.includes(searchLower);
-                });
-            }
-            
-            setApplications(mockData);
-            setLoading(false);
-            return;
-        }
-        
-        // Real data fetching
         const filters: any = {};
         
         if (selectedJob !== 'all') {
@@ -214,12 +94,6 @@ export function ApplicationsList({ company }: { company: any }) {
                 app.id === applicationId ? { ...app, status: newStatus } : app
             )
         );
-
-        // If using mock data, just update locally
-        if (USE_MOCK_DATA) {
-            setUpdatingStatusId(null);
-            return;
-        }
 
         try {
             const result = await updateApplicationStatus(applicationId, newStatus);

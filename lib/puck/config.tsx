@@ -24,6 +24,11 @@ export type PuckProps = {
 export const careersPageConfig: Config<PuckProps> = {
   components: {
     HeroSection: {
+      // Prevent deletion and duplication - only one hero allowed at the top
+      permissions: {
+        delete: false,
+        duplicate: false,
+      },
       fields: {
         title: {
           type: 'text',
@@ -460,9 +465,10 @@ export const careersPageConfig: Config<PuckProps> = {
   categories: {
     content: {
       title: 'Content',
-      components: ['HeroSection', 'BenefitsSection', 'TeamSection', 'JobsSection', 'VideoSection'],
-      // FooterSection is not included here, so it won't appear in the component list
-      // It's automatically added to the page and can't be removed
+      components: ['BenefitsSection', 'TeamSection', 'JobsSection', 'VideoSection'],
+      // HeroSection and FooterSection are not included here
+      // They're automatically added to the page (Hero at top, Footer at bottom)
+      // and can't be removed or duplicated
     },
   },
 };

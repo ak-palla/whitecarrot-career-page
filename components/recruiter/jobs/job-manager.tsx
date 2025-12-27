@@ -49,11 +49,11 @@ export function JobManager({ companyId }: { companyId: string }) {
         loadJobs();
     }, [companyId]);
 
-    // Debounce search query
+    // Debounce search query - reduced to 200ms for better responsiveness
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearchQuery(searchQuery);
-        }, 300);
+        }, 200);
 
         return () => clearTimeout(timer);
     }, [searchQuery]);
@@ -136,17 +136,17 @@ export function JobManager({ companyId }: { companyId: string }) {
         }
     }
 
-    // Extract unique filter values
+    // Extract unique filter values - optimized calculation
     const filterOptions = useMemo(() => {
         const locations = new Set<string>();
         const jobTypes = new Set<string>();
         const teams = new Set<string>();
 
-        jobs.forEach((job) => {
+        for (const job of jobs) {
             if (job.location) locations.add(job.location);
             if (job.job_type) jobTypes.add(job.job_type);
             if (job.team) teams.add(job.team);
-        });
+        }
 
         return {
             locations: Array.from(locations).sort(),
@@ -155,36 +155,68 @@ export function JobManager({ companyId }: { companyId: string }) {
         };
     }, [jobs]);
 
-    // Filter jobs based on all active filters
+    // Pre-compile search term once
+    const searchLower = useMemo(() => 
+        debouncedSearchQuery ? debouncedSearchQuery.toLowerCase() : null,
+        [debouncedSearchQuery]
+    );
+
+    // Filter jobs based on all active filters - optimized single-pass with early exits
     const filteredJobs = useMemo(() => {
-        return jobs.filter((job) => {
-            // Text search (title and description)
-            if (debouncedSearchQuery) {
-                const searchLower = debouncedSearchQuery.toLowerCase();
-                const matchesTitle = job.title?.toLowerCase().includes(searchLower);
-                const matchesDescription = job.description?.toLowerCase().includes(searchLower);
-                if (!matchesTitle && !matchesDescription) return false;
+        const hasNoFilters = !searchLower && 
+            selectedLocation === 'all' && 
+            selectedJobType === 'all' && 
+            selectedTeam === 'all' && 
+            selectedPublishedStatus === 'all';
+        
+        if (hasNoFilters) {
+            return jobs; // No filters active, return all jobs
+        }
+
+        const filtered: typeof jobs = [];
+        
+        for (const job of jobs) {
+            // Early exit: Text search (most expensive, check first if active)
+            if (searchLower) {
+                const titleLower = job.title?.toLowerCase();
+                const descLower = job.description?.toLowerCase();
+                if (!titleLower?.includes(searchLower) && !descLower?.includes(searchLower)) {
+                    continue; // Skip this job
+                }
             }
 
-            // Location filter (skip if 'all')
-            if (selectedLocation && selectedLocation !== 'all' && job.location !== selectedLocation) return false;
+            // Early exit: Location filter
+            if (selectedLocation !== 'all' && job.location !== selectedLocation) {
+                continue;
+            }
 
-            // Job type filter (skip if 'all')
-            if (selectedJobType && selectedJobType !== 'all' && job.job_type !== selectedJobType) return false;
+            // Early exit: Job type filter
+            if (selectedJobType !== 'all' && job.job_type !== selectedJobType) {
+                continue;
+            }
 
-            // Team filter (skip if 'all')
-            if (selectedTeam && selectedTeam !== 'all' && job.team !== selectedTeam) return false;
+            // Early exit: Team filter
+            if (selectedTeam !== 'all' && job.team !== selectedTeam) {
+                continue;
+            }
 
-            // Published status filter
+            // Early exit: Published status filter
             if (selectedPublishedStatus !== 'all') {
                 const isPublished = job.published === true;
-                if (selectedPublishedStatus === 'published' && !isPublished) return false;
-                if (selectedPublishedStatus === 'draft' && isPublished) return false;
+                if (selectedPublishedStatus === 'published' && !isPublished) {
+                    continue;
+                }
+                if (selectedPublishedStatus === 'draft' && isPublished) {
+                    continue;
+                }
             }
 
-            return true;
-        });
-    }, [jobs, debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, selectedPublishedStatus]);
+            // All filters passed
+            filtered.push(job);
+        }
+
+        return filtered;
+    }, [jobs, searchLower, selectedLocation, selectedJobType, selectedTeam, selectedPublishedStatus]);
 
     // Calculate pagination
     const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);

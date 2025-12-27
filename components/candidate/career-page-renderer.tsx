@@ -1,7 +1,5 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { PuckRenderer } from '@/components/candidate/puck-renderer';
-import { sectionsToPuckData } from '@/lib/puck/migrate-sections';
 
 export function CareerPageRenderer({
     company,
@@ -70,62 +68,101 @@ export function CareerPageRenderer({
                     const puckData = preview ? careerPage?.draft_puck_data : careerPage?.puck_data;
 
                     if (puckData) {
-                        return <PuckRenderer data={puckData} theme={theme} />;
+                        // PuckRenderer handles jobs internally, no need for separate jobs section
+                        return <PuckRenderer data={puckData} theme={theme} jobs={jobs} />;
                     } else if (sections.length > 0) {
                         return (
-                            <div className="space-y-16">
-                                {sections.map((section: any) => (
-                                    <section key={section.id} className="prose prose-lg max-w-none">
-                                        <h2 className="text-3xl font-bold mb-6 text-gray-900 border-b pb-4">{section.title}</h2>
-                                        <div dangerouslySetInnerHTML={{ __html: section.content || '' }} />
-                                    </section>
-                                ))}
-                            </div>
+                            <>
+                                <div className="space-y-16">
+                                    {sections.map((section: any) => (
+                                        <section key={section.id} className="prose prose-lg max-w-none">
+                                            <h2 className="text-3xl font-bold mb-6 text-gray-900 border-b pb-4">{section.title}</h2>
+                                            <div dangerouslySetInnerHTML={{ __html: section.content || '' }} />
+                                        </section>
+                                    ))}
+                                </div>
+                                {/* Jobs Section - only render when using legacy sections */}
+                                <section id="jobs" className="scroll-mt-20">
+                                    <div className="text-center mb-12">
+                                        <h2 className="text-3xl font-bold mb-4">Open Positions</h2>
+                                        <p className="text-gray-600">Find the role that fits you best.</p>
+                                    </div>
+                                    {jobs.length === 0 ? (
+                                        <div className="text-center p-12 bg-gray-50 rounded-lg border border-dashed">
+                                            <p className="text-gray-500 text-lg">No open positions at the moment. Check back soon!</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid md:grid-cols-2 gap-6">
+                                            {jobs.map((job: any) => (
+                                                <div key={job.id} className="group border rounded-xl p-6 hover:shadow-md transition-all bg-white hover:border-[var(--primary)] relative">
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div>
+                                                            <h3 className="font-bold text-xl mb-1 group-hover:text-[var(--primary)] transition-colors">{job.title}</h3>
+                                                            <div className="flex gap-2 text-sm text-gray-500 items-center">
+                                                                <span>{job.location}</span>
+                                                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                                <span className="capitalize">{job.job_type.replace('-', ' ')}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-4 pt-4 border-t flex justify-end">
+                                                        <span className="text-sm font-medium text-[var(--primary)] group-hover:translate-x-1 transition-transform inline-flex items-center">
+                                                            View Details
+                                                            <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
+                                                    <Link href="#" className="absolute inset-0" aria-label={`View ${job.title}`} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </section>
+                            </>
                         );
                     }
-                    return null;
-                })()}
-
-                {/* Jobs Section */}
-                <section id="jobs" className="scroll-mt-20">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4">Open Positions</h2>
-                        <p className="text-gray-600">Find the role that fits you best.</p>
-                    </div>
-
-                    {jobs.length === 0 ? (
-                        <div className="text-center p-12 bg-gray-50 rounded-lg border border-dashed">
-                            <p className="text-gray-500 text-lg">No open positions at the moment. Check back soon!</p>
-                        </div>
-                    ) : (
-                        <div className="grid md:grid-cols-2 gap-6">
-                            {jobs.map((job: any) => (
-                                <div key={job.id} className="group border rounded-xl p-6 hover:shadow-md transition-all bg-white hover:border-[var(--primary)] relative">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h3 className="font-bold text-xl mb-1 group-hover:text-[var(--primary)] transition-colors">{job.title}</h3>
-                                            <div className="flex gap-2 text-sm text-gray-500 items-center">
-                                                <span>{job.location}</span>
-                                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                <span className="capitalize">{job.job_type.replace('-', ' ')}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="mt-4 pt-4 border-t flex justify-end">
-                                        <span className="text-sm font-medium text-[var(--primary)] group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                            View Details
-                                            <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                    {/* Placeholder link */}
-                                    <Link href="#" className="absolute inset-0" aria-label={`View ${job.title}`} />
+                    // No sections and no puck data - show jobs only
+                    return (
+                        <section id="jobs" className="scroll-mt-20">
+                            <div className="text-center mb-12">
+                                <h2 className="text-3xl font-bold mb-4">Open Positions</h2>
+                                <p className="text-gray-600">Find the role that fits you best.</p>
+                            </div>
+                            {jobs.length === 0 ? (
+                                <div className="text-center p-12 bg-gray-50 rounded-lg border border-dashed">
+                                    <p className="text-gray-500 text-lg">No open positions at the moment. Check back soon!</p>
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                </section>
+                            ) : (
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    {jobs.map((job: any) => (
+                                        <div key={job.id} className="group border rounded-xl p-6 hover:shadow-md transition-all bg-white hover:border-[var(--primary)] relative">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 className="font-bold text-xl mb-1 group-hover:text-[var(--primary)] transition-colors">{job.title}</h3>
+                                                    <div className="flex gap-2 text-sm text-gray-500 items-center">
+                                                        <span>{job.location}</span>
+                                                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                        <span className="capitalize">{job.job_type.replace('-', ' ')}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="mt-4 pt-4 border-t flex justify-end">
+                                                <span className="text-sm font-medium text-[var(--primary)] group-hover:translate-x-1 transition-transform inline-flex items-center">
+                                                    View Details
+                                                    <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                            <Link href="#" className="absolute inset-0" aria-label={`View ${job.title}`} />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    );
+                })()}
             </main>
 
             <footer className="bg-gray-900 text-gray-300 py-12 mt-20">

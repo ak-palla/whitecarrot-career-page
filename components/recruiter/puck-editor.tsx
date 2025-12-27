@@ -116,6 +116,61 @@ export function PuckEditor({
     });
   }, [validComponentTypes]);
 
+  // Helper function to ensure HeroSection is always at the top (and only one exists)
+  const ensureHeroSection = useCallback((puckData: any) => {
+    if (!puckData || !puckData.content || !Array.isArray(puckData.content)) {
+      return puckData;
+    }
+
+    const content = [...puckData.content];
+
+    // Find all HeroSections
+    const heroItems = content.filter((item: any) => item.type === 'HeroSection');
+
+    // Check if HeroSection already exists at the beginning and is the only one
+    const firstItem = content[0];
+    if (firstItem && firstItem.type === 'HeroSection' && heroItems.length === 1) {
+      // HeroSection is already at the top and is the only one - no changes needed
+      return puckData;
+    }
+
+    // Get the first HeroSection if any exist (in case of duplicates)
+    const existingHero = heroItems.length > 0 ? heroItems[0] : null;
+
+    // Remove ALL HeroSections (handles duplicates and wrong positions)
+    const filteredContent = content.filter((item: any) => item.type !== 'HeroSection');
+
+    // Add exactly ONE HeroSection at the beginning with a stable, unique ID
+    // Use existing hero if found (preserve its ID and props), otherwise create new
+    const heroId = existingHero?.id || `hero-section-${careerPage?.id || 'default'}`;
+    filteredContent.unshift({
+      type: 'HeroSection',
+      id: heroId,
+      props: existingHero?.props || {
+        title: 'Join our team',
+        subtitle: 'Help us build the future of work.',
+        primaryCtaLabel: 'View open roles',
+        primaryCtaHref: '#jobs',
+        alignment: 'center',
+        size: 'tall',
+        backgroundStyle: 'solid',
+        primaryCtaVariant: 'secondary',
+        primaryCtaSize: 'default',
+        textColor: 'white',
+      },
+    });
+
+    // Log if we removed duplicates
+    if (heroItems.length > 1) {
+      console.warn(`Removed ${heroItems.length - 1} duplicate HeroSection(s)`);
+    }
+
+    return {
+      ...puckData,
+      content: filteredContent,
+    };
+  }, [careerPage?.id]);
+
   // Helper function to ensure FooterSection is always at the end (and only one exists)
   const ensureFooterSection = useCallback((puckData: any) => {
     if (!puckData || !puckData.content || !Array.isArray(puckData.content)) {
@@ -271,10 +326,13 @@ export function PuckEditor({
         normalized.content = aggressivelyValidated;
       }
 
-      // Inject theme assets into the first HeroSection
-      const withTheme = injectThemeAssets(normalized);
+      // Ensure HeroSection is always at the top (and only one exists)
+      const withHero = ensureHeroSection(normalized);
 
-      // Ensure FooterSection is always at the end
+      // Inject theme assets into the first HeroSection
+      const withTheme = injectThemeAssets(withHero);
+
+      // Ensure FooterSection is always at the end (and only one exists)
       const withFooter = ensureFooterSection(withTheme);
 
       // Final normalization to ensure all IDs are unique and valid
@@ -405,9 +463,10 @@ export function PuckEditor({
         // Validate and clean the content
         const validContent = ensureUniqueIds(cleanedNewData.content);
 
-        // Ensure FooterSection is at the end and normalize
+        // Ensure HeroSection is at the top and FooterSection is at the end
         const dataWithValidContent = { ...cleanedNewData, content: validContent };
-        const dataWithFooter = ensureFooterSection(dataWithValidContent);
+        const dataWithHero = ensureHeroSection(dataWithValidContent);
+        const dataWithFooter = ensureFooterSection(dataWithHero);
         const normalized = normalizePuckData(dataWithFooter);
 
         // Final validation
@@ -421,7 +480,7 @@ export function PuckEditor({
       // On error, don't update state to prevent crashes
       toast.error('Failed to update page structure. Please refresh and try again.');
     }
-  }, [ensureFooterSection, ensureUniqueIds]);
+  }, [ensureHeroSection, ensureFooterSection, ensureUniqueIds]);
 
   const handleSave = async () => {
     setSaving(true);
