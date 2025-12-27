@@ -360,7 +360,7 @@ export function JobsSection({
   }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, currentPage, router, searchParams]);
 
   // Check if any filters are active
-  const hasActiveFilters = debouncedSearchQuery || (selectedLocation !== 'all') || (selectedJobType !== 'all') || (selectedTeam !== 'all');
+  const hasActiveFilters = Boolean(debouncedSearchQuery) || (selectedLocation !== 'all') || (selectedJobType !== 'all') || (selectedTeam !== 'all');
 
   // Clear all filters
   const clearFilters = useCallback(() => {
