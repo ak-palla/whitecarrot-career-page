@@ -27,18 +27,47 @@ export function PuckRenderer({ data, theme, jobs, bannerUrl, logoUrl, videoUrl, 
   const palette = generatePalette(theme || {});
   const themeStyle = paletteToCSSVariables(palette);
 
-  // Inject banner_url and logo_url into the first HeroSection if it exists
+  // Ensure FooterSection is always at the end
   const processedData = { ...data };
+  if (processedData.content && Array.isArray(processedData.content)) {
+    // Find existing FooterSection if it exists
+    const footerItems = processedData.content.filter((item: any) => item.type === 'FooterSection');
+    const existingFooter = footerItems.length > 0 ? footerItems[0] : null;
+
+    // Remove all FooterSections (in case there are duplicates or it's in wrong position)
+    const filteredContent = processedData.content.filter((item: any) => item.type !== 'FooterSection');
+
+    // Always add FooterSection at the end with a stable ID
+    const footerId = existingFooter?.id || 'footer-section-default';
+    filteredContent.push({
+      type: 'FooterSection',
+      id: footerId,
+      props: existingFooter?.props || {},
+    });
+
+    processedData.content = filteredContent;
+  }
+
+  // Inject banner_url and logo_url into the first HeroSection if it exists
   if (processedData.content && processedData.content.length > 0) {
     const firstComponent = processedData.content[0];
     if (firstComponent && firstComponent.type === 'HeroSection') {
       // Update props with banner and logo from Theme Customizer
       const updatedProps = { ...firstComponent.props };
 
-      // If bannerUrl is provided, use it (from Theme Customizer takes precedence)
+      // Theme Customizer banner always takes precedence
       if (bannerUrl) {
         updatedProps.backgroundImageUrl = bannerUrl;
         updatedProps.backgroundStyle = 'image'; // Set to image style to show the banner
+      } else {
+        // If bannerUrl is removed, clear the banner image
+        // Clear backgroundImageUrl to prevent showing stale banner
+        updatedProps.backgroundImageUrl = undefined;
+        // Reset backgroundStyle to solid if it was set to 'image' (likely from previous theme banner)
+        // This ensures removing the banner actually removes it from display
+        if (updatedProps.backgroundStyle === 'image') {
+          updatedProps.backgroundStyle = 'solid';
+        }
       }
 
       if (logoUrl) {
@@ -74,8 +103,10 @@ export function PuckRenderer({ data, theme, jobs, bannerUrl, logoUrl, videoUrl, 
   };
 
   return (
-    <div style={themeStyle} className="space-y-16">
-      <Render config={runtimeConfig} data={processedData} />
+    <div style={themeStyle} className="flex flex-col min-h-screen">
+      <div className="flex-1 space-y-16">
+        <Render config={runtimeConfig} data={processedData} />
+      </div>
     </div>
   );
 }

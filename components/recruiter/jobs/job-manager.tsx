@@ -1,12 +1,13 @@
 'use client';
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { getJobs, createJob, updateJob, deleteJob } from '@/app/actions/jobs';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { getJobs, createJob, updateJob, deleteJob, bulkUpdateJobsPublished, bulkDeleteJobs } from '@/app/actions/jobs';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, Plus, MoreHorizontal, Pencil, Trash2, Upload, Search, X } from 'lucide-react';
 import { JobFormDialog } from './job-form-dialog';
 import { CSVImportDialog } from './csv-import-dialog';
@@ -28,6 +29,9 @@ export function JobManager({ companyId }: { companyId: string }) {
     const [editingJob, setEditingJob] = useState<any>(null);
     const [togglingJobId, setTogglingJobId] = useState<string | null>(null);
     const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
+    const [selectedJobIds, setSelectedJobIds] = useState<Set<string>>(new Set());
+    const [bulkActionLoading, setBulkActionLoading] = useState(false);
+    const selectAllCheckboxRef = useRef<HTMLButtonElement>(null);
 
     // Filter state
     const [searchQuery, setSearchQuery] = useState('');
@@ -57,6 +61,11 @@ export function JobManager({ companyId }: { companyId: string }) {
     // Reset to page 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
+    }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, selectedPublishedStatus]);
+
+    // Clear selection when filters change
+    useEffect(() => {
+        setSelectedJobIds(new Set());
     }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, selectedPublishedStatus]);
 
     async function loadJobs() {
@@ -213,6 +222,118 @@ export function JobManager({ companyId }: { companyId: string }) {
         return jobType.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
 
+    // Selection helper functions
+    const toggleJobSelection = useCallback((jobId: string) => {
+        setSelectedJobIds(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(jobId)) {
+                newSet.delete(jobId);
+            } else {
+                newSet.add(jobId);
+            }
+            return newSet;
+        });
+    }, []);
+
+    const selectAllJobs = useCallback(() => {
+        const allIds = new Set(paginatedJobs.map(job => job.id));
+        setSelectedJobIds(allIds);
+    }, [paginatedJobs]);
+
+    const deselectAllJobs = useCallback(() => {
+        setSelectedJobIds(new Set());
+    }, []);
+
+    const isJobSelected = useCallback((jobId: string) => {
+        return selectedJobIds.has(jobId);
+    }, [selectedJobIds]);
+
+    const isAllSelected = useMemo(() => {
+        if (paginatedJobs.length === 0) return false;
+        return paginatedJobs.every(job => selectedJobIds.has(job.id));
+    }, [paginatedJobs, selectedJobIds]);
+
+    const isSomeSelected = useMemo(() => {
+        const selectedCount = paginatedJobs.filter(job => selectedJobIds.has(job.id)).length;
+        return selectedCount > 0 && selectedCount < paginatedJobs.length;
+    }, [paginatedJobs, selectedJobIds]);
+
+    // Handle indeterminate state for select all checkbox
+    useEffect(() => {
+        if (selectAllCheckboxRef.current) {
+            // Radix Checkbox uses a button element, we need to set data-state
+            const button = selectAllCheckboxRef.current;
+            if (isSomeSelected) {
+                button.setAttribute('data-state', 'indeterminate');
+                // Also set aria-checked to mixed
+                button.setAttribute('aria-checked', 'mixed');
+            } else {
+                button.removeAttribute('data-state');
+                button.removeAttribute('aria-checked');
+            }
+        }
+    }, [isSomeSelected, isAllSelected]);
+
+    // Bulk action handlers
+    async function handleBulkPublish() {
+        if (selectedJobIds.size === 0) return;
+        
+        setBulkActionLoading(true);
+        try {
+            const result = await bulkUpdateJobsPublished(Array.from(selectedJobIds), true);
+            if (result?.error) {
+                alert(`Error: ${result.error}`);
+            } else {
+                setSelectedJobIds(new Set());
+                await loadJobs();
+            }
+        } catch (error: any) {
+            alert(`Error: ${error.message || 'Failed to publish jobs'}`);
+        } finally {
+            setBulkActionLoading(false);
+        }
+    }
+
+    async function handleBulkUnpublish() {
+        if (selectedJobIds.size === 0) return;
+        
+        setBulkActionLoading(true);
+        try {
+            const result = await bulkUpdateJobsPublished(Array.from(selectedJobIds), false);
+            if (result?.error) {
+                alert(`Error: ${result.error}`);
+            } else {
+                setSelectedJobIds(new Set());
+                await loadJobs();
+            }
+        } catch (error: any) {
+            alert(`Error: ${error.message || 'Failed to unpublish jobs'}`);
+        } finally {
+            setBulkActionLoading(false);
+        }
+    }
+
+    async function handleBulkDelete() {
+        if (selectedJobIds.size === 0) return;
+        
+        if (!confirm(`Delete ${selectedJobIds.size} job(s)? This cannot be undone.`)) return;
+        
+        setBulkActionLoading(true);
+        try {
+            const result = await bulkDeleteJobs(Array.from(selectedJobIds));
+            if (result?.error) {
+                alert(`Error: ${result.error}`);
+            } else {
+                setSelectedJobIds(new Set());
+                await loadJobs();
+            }
+        } catch (error: any) {
+            alert(`Error: ${error.message || 'Failed to delete jobs'}`);
+        } finally {
+            setBulkActionLoading(false);
+        }
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -247,6 +368,32 @@ export function JobManager({ companyId }: { companyId: string }) {
                     {/* Filter UI */}
                     <Card className="p-4">
                         <div className="space-y-4">
+                            {/* Select All Checkbox */}
+                            {paginatedJobs.length > 0 && (
+                                <div className="flex items-center space-x-2 pb-2 border-b">
+                                    <Checkbox
+                                        ref={selectAllCheckboxRef}
+                                        checked={isAllSelected}
+                                        onCheckedChange={(checked) => {
+                                            if (checked) {
+                                                selectAllJobs();
+                                            } else {
+                                                deselectAllJobs();
+                                            }
+                                        }}
+                                    />
+                                    <Label className="text-sm font-medium cursor-pointer" onClick={() => {
+                                        if (isAllSelected) {
+                                            deselectAllJobs();
+                                        } else {
+                                            selectAllJobs();
+                                        }
+                                    }}>
+                                        Select All
+                                    </Label>
+                                </div>
+                            )}
+
                             {/* Search Input */}
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -378,6 +525,76 @@ export function JobManager({ companyId }: { companyId: string }) {
                         </div>
                     </Card>
 
+                    {/* Bulk Action Toolbar */}
+                    {selectedJobIds.size > 0 && (
+                        <Card className="p-4 bg-blue-50 border-blue-200">
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm font-medium">
+                                    {selectedJobIds.size} {selectedJobIds.size === 1 ? 'job' : 'jobs'} selected
+                                </p>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleBulkPublish}
+                                        disabled={bulkActionLoading}
+                                    >
+                                        {bulkActionLoading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Publishing...
+                                            </>
+                                        ) : (
+                                            'Publish Selected'
+                                        )}
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleBulkUnpublish}
+                                        disabled={bulkActionLoading}
+                                    >
+                                        {bulkActionLoading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Unpublishing...
+                                            </>
+                                        ) : (
+                                            'Unpublish Selected'
+                                        )}
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleBulkDelete}
+                                        disabled={bulkActionLoading}
+                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                        {bulkActionLoading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Deleting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                Delete Selected
+                                            </>
+                                        )}
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={deselectAllJobs}
+                                        disabled={bulkActionLoading}
+                                    >
+                                        Clear Selection
+                                    </Button>
+                                </div>
+                            </div>
+                        </Card>
+                    )}
+
                     {/* Job Listings */}
                     {filteredJobs.length === 0 && hasActiveFilters ? (
                         <div className="text-center py-12">
@@ -392,8 +609,13 @@ export function JobManager({ companyId }: { companyId: string }) {
                         <>
                             <div className="space-y-3">
                                 {paginatedJobs.map(job => (
-                                    <div key={job.id} className={`flex items-center justify-between p-4 bg-white border rounded-lg shadow-sm hover:border-gray-300 transition-colors ${deletingJobId === job.id ? 'opacity-50' : ''}`}>
-                            <div className="flex items-center gap-2">
+                                    <div key={job.id} className={`flex items-center justify-between p-4 bg-white border rounded-lg shadow-sm hover:border-gray-300 transition-colors ${deletingJobId === job.id ? 'opacity-50' : ''} ${isJobSelected(job.id) ? 'bg-blue-50 border-blue-500' : ''}`}>
+                            <div className="flex items-center gap-3">
+                                <Checkbox
+                                    checked={isJobSelected(job.id)}
+                                    onCheckedChange={() => toggleJobSelection(job.id)}
+                                    disabled={bulkActionLoading || deletingJobId === job.id}
+                                />
                                 {deletingJobId === job.id && (
                                     <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                                 )}

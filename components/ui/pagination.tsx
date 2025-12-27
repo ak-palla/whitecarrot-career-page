@@ -92,12 +92,12 @@ export function Pagination({
           return (
             <Button
               key={page}
-              variant={currentPage === page ? 'default' : 'outline'}
+              variant="outline"
               size="sm"
               onClick={() => onPageChange(page)}
               className={cn(
                 'min-w-[2.5rem]',
-                currentPage === page && 'bg-primary text-primary-foreground'
+                currentPage === page && 'text-black bg-transparent hover:bg-transparent'
               )}
               aria-label={`Page ${page}`}
               aria-current={currentPage === page ? 'page' : undefined}

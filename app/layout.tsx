@@ -62,7 +62,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${geistSans.className} antialiased`}>
+      <body className={`${geistSans.className} antialiased`} suppressHydrationWarning>
         {children}
         <Toaster />
       </body>

@@ -4,6 +4,7 @@ import { BenefitsSection, BenefitsSectionProps } from '@/components/puck-blocks/
 import { TeamSection, TeamSectionProps } from '@/components/puck-blocks/team-section';
 import { JobsSection, JobsSectionProps } from '@/components/puck-blocks/jobs-section';
 import { VideoSection, VideoSectionProps } from '@/components/puck-blocks/video-section';
+import { FooterSection } from '@/components/puck-blocks/footer-section';
 import { PuckImageField } from '@/components/puck-blocks/puck-image-field';
 import { PuckVideoField } from '@/components/puck-blocks/puck-video-field';
 
@@ -17,6 +18,7 @@ export type PuckProps = {
   TeamSection: TeamSectionProps;
   JobsSection: JobsSectionProps;
   VideoSection: VideoSectionProps;
+  FooterSection: Record<string, never>; // FooterSection has no props
 };
 
 export const careersPageConfig: Config<PuckProps> = {
@@ -443,6 +445,24 @@ export const careersPageConfig: Config<PuckProps> = {
         loop: 'false',
       },
       render: (props) => <VideoSection {...props} />,
+    },
+    FooterSection: {
+      fields: {},
+      defaultProps: {},
+      render: () => <FooterSection />,
+      // Prevent deletion and duplication - only one footer allowed
+      permissions: {
+        delete: false,
+        duplicate: false,
+      },
+    },
+  },
+  categories: {
+    content: {
+      title: 'Content',
+      components: ['HeroSection', 'BenefitsSection', 'TeamSection', 'JobsSection', 'VideoSection'],
+      // FooterSection is not included here, so it won't appear in the component list
+      // It's automatically added to the page and can't be removed
     },
   },
 };

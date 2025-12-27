@@ -12,16 +12,35 @@ export function generatePuckId(type: string, index: number, timestamp?: number):
 }
 
 /**
+ * Valid component types that are registered in the Puck config
+ */
+const VALID_COMPONENT_TYPES = new Set([
+  'HeroSection',
+  'BenefitsSection',
+  'TeamSection',
+  'JobsSection',
+  'VideoSection',
+  'FooterSection',
+]);
+
+/**
  * Validates that a Puck content item has the required structure
  */
 export function isValidPuckContentItem(item: unknown): item is { type: string; props: Record<string, unknown>; id?: string } {
   if (!item || typeof item !== 'object') return false;
   const obj = item as Record<string, unknown>;
-  return (
-    typeof obj.type === 'string' &&
-    obj.props !== null &&
-    typeof obj.props === 'object'
-  );
+  const type = obj.type;
+  
+  // Must have a type that is a string
+  if (!type || typeof type !== 'string') return false;
+  
+  // Type must be a valid component type
+  if (!VALID_COMPONENT_TYPES.has(type)) return false;
+  
+  // Must have props that is an object
+  if (obj.props === null || typeof obj.props !== 'object') return false;
+  
+  return true;
 }
 
 /**
@@ -44,6 +63,7 @@ export function normalizePuckData(puckData: PuckData | null | undefined): PuckDa
 
     const content: PuckContentItem[] = Array.isArray(puckData.content)
       ? puckData.content
+          // First, filter out invalid items
           .filter(isValidPuckContentItem)
           // Remove duplicates: keep first occurrence only
           .filter((item) => {
@@ -52,14 +72,21 @@ export function normalizePuckData(puckData: PuckData | null | undefined): PuckDa
             seen.add(key);
             return true;
           })
-          // Assign IDs
-          .map((item, index) => ({
-            type: item.type as keyof import('./config').PuckProps,
-            id: item.id && typeof item.id === 'string' && item.id.trim() !== '' 
-              ? item.id 
-              : generatePuckId(item.type, index, baseTimestamp),
-            props: item.props,
-          }))
+          // Assign IDs and ensure proper structure
+          .map((item, index) => {
+            // Ensure props is always an object
+            const props = item.props && typeof item.props === 'object' ? item.props : {};
+            
+            return {
+              type: item.type as keyof import('./config').PuckProps,
+              id: item.id && typeof item.id === 'string' && item.id.trim() !== '' 
+                ? item.id 
+                : generatePuckId(item.type, index, baseTimestamp),
+              props: props,
+            };
+          })
+          // Final filter to ensure all items have valid types
+          .filter((item) => VALID_COMPONENT_TYPES.has(item.type as string))
       : [];
 
     return { root, content };

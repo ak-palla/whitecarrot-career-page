@@ -63,6 +63,41 @@ export async function getJobs(companyId: string) {
     return data;
 }
 
+export async function bulkUpdateJobsPublished(jobIds: string[], published: boolean) {
+    const supabase = await createClient();
+
+    if (jobIds.length === 0) {
+        return { error: 'No jobs selected' };
+    }
+
+    const { error } = await supabase
+        .from('jobs')
+        .update({ 
+            published,
+            updated_at: new Date().toISOString()
+        })
+        .in('id', jobIds);
+
+    if (error) return { error: error.message };
+    return { success: true, updated: jobIds.length };
+}
+
+export async function bulkDeleteJobs(jobIds: string[]) {
+    const supabase = await createClient();
+
+    if (jobIds.length === 0) {
+        return { error: 'No jobs selected' };
+    }
+
+    const { error } = await supabase
+        .from('jobs')
+        .delete()
+        .in('id', jobIds);
+
+    if (error) return { error: error.message };
+    return { success: true, deleted: jobIds.length };
+}
+
 export async function bulkImportJobsFromCSV(companyId: string, csvFilePath: string) {
     const supabase = await createClient();
 

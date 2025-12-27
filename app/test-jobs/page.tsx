@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { Suspense } from 'react';
 import { JobsSection } from '@/components/puck-blocks/jobs-section';
 import { loadJobsFromCSV } from '@/lib/utils/csv-loader';
 
@@ -57,65 +58,73 @@ export default async function TestJobsPage() {
         {/* Test Layout: List */}
         <div className="mb-16">
           <h2 className="text-2xl font-semibold mb-4">Layout: List</h2>
-          <JobsSection
-            heading="Open Positions"
-            layout="list"
-            emptyStateMessage="No positions available at this time."
-            jobs={jobs}
-            density="comfortable"
-            background="plain"
-            buttonVariant="ghost"
-            badgeVariant="secondary"
-            align="center"
-          />
+          <Suspense fallback={<div className="p-8 text-center">Loading jobs...</div>}>
+            <JobsSection
+              heading="Open Positions"
+              layout="list"
+              emptyStateMessage="No positions available at this time."
+              jobs={jobs}
+              density="comfortable"
+              background="plain"
+              buttonVariant="ghost"
+              badgeVariant="secondary"
+              align="center"
+            />
+          </Suspense>
         </div>
 
         {/* Test Layout: Cards */}
         <div className="mb-16">
           <h2 className="text-2xl font-semibold mb-4">Layout: Cards</h2>
-          <JobsSection
-            heading="Open Positions"
-            layout="cards"
-            emptyStateMessage="No positions available at this time."
-            jobs={jobs}
-            density="comfortable"
-            background="plain"
-            buttonVariant="ghost"
-            badgeVariant="secondary"
-            align="center"
-          />
+          <Suspense fallback={<div className="p-8 text-center">Loading jobs...</div>}>
+            <JobsSection
+              heading="Open Positions"
+              layout="cards"
+              emptyStateMessage="No positions available at this time."
+              jobs={jobs}
+              density="comfortable"
+              background="plain"
+              buttonVariant="ghost"
+              badgeVariant="secondary"
+              align="center"
+            />
+          </Suspense>
         </div>
 
         {/* Test Layout: Team */}
         <div className="mb-16">
           <h2 className="text-2xl font-semibold mb-4">Layout: Team</h2>
-          <JobsSection
-            heading="Open Positions"
-            layout="team"
-            emptyStateMessage="No positions available at this time."
-            jobs={jobs}
-            density="comfortable"
-            background="plain"
-            buttonVariant="ghost"
-            badgeVariant="secondary"
-            align="center"
-          />
+          <Suspense fallback={<div className="p-8 text-center">Loading jobs...</div>}>
+            <JobsSection
+              heading="Open Positions"
+              layout="team"
+              emptyStateMessage="No positions available at this time."
+              jobs={jobs}
+              density="comfortable"
+              background="plain"
+              buttonVariant="ghost"
+              badgeVariant="secondary"
+              align="center"
+            />
+          </Suspense>
         </div>
 
         {/* Test Layout: Location */}
         <div className="mb-16">
           <h2 className="text-2xl font-semibold mb-4">Layout: Location</h2>
-          <JobsSection
-            heading="Open Positions"
-            layout="location"
-            emptyStateMessage="No positions available at this time."
-            jobs={jobs}
-            density="comfortable"
-            background="plain"
-            buttonVariant="ghost"
-            badgeVariant="secondary"
-            align="center"
-          />
+          <Suspense fallback={<div className="p-8 text-center">Loading jobs...</div>}>
+            <JobsSection
+              heading="Open Positions"
+              layout="location"
+              emptyStateMessage="No positions available at this time."
+              jobs={jobs}
+              density="comfortable"
+              background="plain"
+              buttonVariant="ghost"
+              badgeVariant="secondary"
+              align="center"
+            />
+          </Suspense>
         </div>
       </div>
     </div>

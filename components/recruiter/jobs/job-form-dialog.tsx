@@ -31,12 +31,12 @@ export function JobFormDialog({ open, onOpenChange, onSubmit, initialData }: any
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
-                <DialogHeader>
+            <DialogContent className="max-h-[90vh] sm:max-h-[85vh] overflow-hidden flex flex-col max-w-[calc(100vw-2rem)] sm:max-w-2xl w-full">
+                <DialogHeader className="px-1 sm:px-0">
                     <DialogTitle>{initialData ? 'Edit Job' : 'Create Job'}</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 flex-1 overflow-y-auto p-1">
-                    <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-4 flex-1 overflow-y-auto px-1 sm:px-0 pb-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Job Title</Label>
                             <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="e.g. Senior Frontend Engineer" />
@@ -69,9 +69,9 @@ export function JobFormDialog({ open, onOpenChange, onSubmit, initialData }: any
                         <RichTextEditor content={requirements} onChange={setRequirements} />
                     </div>
                 </form>
-                <DialogFooter className="pt-2">
-                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                    <Button onClick={handleSubmit} disabled={submitting}>{submitting ? 'Saving...' : 'Save Job'}</Button>
+                <DialogFooter className="pt-4 sm:pt-2 px-1 sm:px-0 gap-2 sm:gap-0">
+                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">Cancel</Button>
+                    <Button onClick={handleSubmit} disabled={submitting} className="w-full sm:w-auto">{submitting ? 'Saving...' : 'Save Job'}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

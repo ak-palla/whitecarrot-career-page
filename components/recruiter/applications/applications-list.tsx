@@ -27,6 +27,95 @@ const APPLICATION_STATUSES: ApplicationStatus[] = [
     { value: 'interviewed', label: 'Interviewed', color: 'text-purple-700', bgColor: 'bg-purple-100' },
 ];
 
+// Mock data for testing - Set to true to use mock data
+const USE_MOCK_DATA = true;
+
+// Generate mock applications data
+const generateMockApplications = (): ApplicationWithJob[] => {
+    const jobs = [
+        { id: 'job-1', title: 'Senior Software Engineer' },
+        { id: 'job-2', title: 'Product Manager' },
+        { id: 'job-3', title: 'UX Designer' },
+        { id: 'job-4', title: 'Data Scientist' },
+        { id: 'job-5', title: 'DevOps Engineer' },
+        { id: 'job-6', title: 'Frontend Developer' },
+        { id: 'job-7', title: 'Backend Developer' },
+        { id: 'job-8', title: 'Full Stack Developer' },
+    ];
+
+    const firstNames = [
+        'Neeraj', 'Akhil', 'Sarah', 'Michael', 'Emily', 'David', 'Jessica', 'James',
+        'Emma', 'William', 'Olivia', 'Benjamin', 'Sophia', 'Daniel', 'Isabella', 'Matthew',
+        'Ava', 'Joseph', 'Mia', 'Andrew', 'Charlotte', 'Ryan', 'Amelia', 'Joshua',
+        'Harper', 'Christopher', 'Evelyn', 'Anthony', 'Abigail', 'Mark', 'Elizabeth', 'Steven'
+    ];
+
+    const lastNames = [
+        'Sharma', 'Palla', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller',
+        'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Wilson', 'Anderson', 'Thomas',
+        'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Thompson', 'White', 'Harris',
+        'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen'
+    ];
+
+    const statuses = ['new', 'reviewed', 'rejected', 'accepted', 'interviewed'];
+    const statusWeights = [0.4, 0.2, 0.15, 0.1, 0.15]; // More new applications
+
+    const getRandomStatus = () => {
+        const rand = Math.random();
+        let cumulative = 0;
+        for (let i = 0; i < statuses.length; i++) {
+            cumulative += statusWeights[i];
+            if (rand < cumulative) return statuses[i];
+        }
+        return statuses[0];
+    };
+
+    const applications: ApplicationWithJob[] = [];
+    const usedNames = new Set<string>();
+
+    // Generate 35-40 applications across different jobs
+    for (let i = 0; i < 38; i++) {
+        let firstName, lastName, fullName;
+        do {
+            firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+            lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+            fullName = `${firstName} ${lastName}`;
+        } while (usedNames.has(fullName) && usedNames.size < firstNames.length * lastNames.length);
+        usedNames.add(fullName);
+
+        const job = jobs[Math.floor(Math.random() * jobs.length)];
+        const daysAgo = Math.floor(Math.random() * 30); // Applications from last 30 days
+        const createdDate = new Date();
+        createdDate.setDate(createdDate.getDate() - daysAgo);
+        createdDate.setHours(Math.floor(Math.random() * 24));
+        createdDate.setMinutes(Math.floor(Math.random() * 60));
+
+        const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 100)}@example.com`;
+        const linkedinUrl = `https://linkedin.com/in/${firstName.toLowerCase()}-${lastName.toLowerCase()}`;
+
+        applications.push({
+            id: `app-${i + 1}`,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            linkedin_url: linkedinUrl,
+            resume_url: `resumes/${job.id}/${Date.now()}_${firstName}_${lastName}.pdf`,
+            created_at: createdDate.toISOString(),
+            job_id: job.id,
+            status: getRandomStatus(),
+            job: {
+                id: job.id,
+                title: job.title,
+            },
+        });
+    }
+
+    // Sort by created_at descending (newest first)
+    return applications.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+};
+
 export function ApplicationsList({ company }: { company: any }) {
     const [applications, setApplications] = useState<ApplicationWithJob[]>([]);
     const [loading, setLoading] = useState(true);
@@ -60,6 +149,38 @@ export function ApplicationsList({ company }: { company: any }) {
 
     const loadApplications = useCallback(async () => {
         setLoading(true);
+        
+        // Use mock data if enabled
+        if (USE_MOCK_DATA) {
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            let mockData = generateMockApplications();
+            
+            // Apply filters to mock data
+            if (selectedJob !== 'all') {
+                mockData = mockData.filter(app => app.job_id === selectedJob);
+            }
+            
+            if (selectedStatus !== 'all') {
+                mockData = mockData.filter(app => app.status === selectedStatus);
+            }
+            
+            if (debouncedSearchQuery) {
+                const searchLower = debouncedSearchQuery.toLowerCase();
+                mockData = mockData.filter(app => {
+                    const fullName = `${app.first_name} ${app.last_name}`.toLowerCase();
+                    const email = (app.email || '').toLowerCase();
+                    return fullName.includes(searchLower) || email.includes(searchLower);
+                });
+            }
+            
+            setApplications(mockData);
+            setLoading(false);
+            return;
+        }
+        
+        // Real data fetching
         const filters: any = {};
         
         if (selectedJob !== 'all') {
@@ -93,6 +214,12 @@ export function ApplicationsList({ company }: { company: any }) {
                 app.id === applicationId ? { ...app, status: newStatus } : app
             )
         );
+
+        // If using mock data, just update locally
+        if (USE_MOCK_DATA) {
+            setUpdatingStatusId(null);
+            return;
+        }
 
         try {
             const result = await updateApplicationStatus(applicationId, newStatus);
@@ -173,8 +300,8 @@ export function ApplicationsList({ company }: { company: any }) {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="space-y-4 md:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <div>
                     <h2 className="text-lg font-semibold">Applications</h2>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -194,8 +321,8 @@ export function ApplicationsList({ company }: { company: any }) {
             ) : (
                 <>
                     {/* Filter UI */}
-                    <Card className="p-4">
-                        <div className="space-y-4">
+                    <Card className="p-3 md:p-4">
+                        <div className="space-y-3 md:space-y-4">
                             {/* Search Input */}
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -204,7 +331,7 @@ export function ApplicationsList({ company }: { company: any }) {
                                     placeholder="Search by name or email..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-9 pr-9"
+                                    className="pl-9 pr-9 text-sm md:text-base"
                                     aria-label="Search applications by name or email"
                                 />
                                 {searchQuery && (
@@ -219,7 +346,7 @@ export function ApplicationsList({ company }: { company: any }) {
                             </div>
 
                             {/* Filter Dropdowns */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                                 {/* Job Filter */}
                                 {filterOptions.jobs.length > 0 && (
                                     <div className="space-y-2">
@@ -261,7 +388,7 @@ export function ApplicationsList({ company }: { company: any }) {
 
                             {/* Clear Filters Button and Result Count */}
                             {hasActiveFilters && (
-                                <div className="flex items-center justify-between pt-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2">
                                     <p className="text-sm text-muted-foreground">
                                         {filteredApplications.length === 0 ? (
                                             'No applications match your filters'
@@ -273,7 +400,7 @@ export function ApplicationsList({ company }: { company: any }) {
                                         variant="outline"
                                         size="sm"
                                         onClick={clearFilters}
-                                        className="gap-2"
+                                        className="gap-2 w-full sm:w-auto"
                                     >
                                         <X className="h-4 w-4" />
                                         Clear filters
@@ -310,58 +437,67 @@ export function ApplicationsList({ company }: { company: any }) {
                                     return (
                                         <div
                                             key={app.id}
-                                            className={`flex items-center justify-between p-4 bg-white border rounded-lg shadow-sm hover:border-gray-300 transition-colors ${isUpdating ? 'opacity-50' : ''}`}
+                                            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 md:p-4 bg-white border rounded-lg shadow-sm hover:border-gray-300 transition-colors ${isUpdating ? 'opacity-50' : ''}`}
                                         >
-                                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                            <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                                                 {isUpdating && (
-                                                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground shrink-0" />
+                                                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground shrink-0 mt-1 sm:mt-0" />
                                                 )}
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <h3 className="font-medium text-base">
+                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                        <h3 className="font-medium text-sm sm:text-base truncate">
                                                             {app.first_name} {app.last_name}
                                                         </h3>
                                                         <Badge
-                                                            className={`text-[10px] h-5 px-1.5 ${statusInfo.bgColor} ${statusInfo.color} hover:${statusInfo.bgColor} border-none`}
+                                                            className={`text-[10px] h-5 px-1.5 shrink-0 ${statusInfo.bgColor} ${statusInfo.color} hover:${statusInfo.bgColor} border-none`}
                                                         >
                                                             {statusInfo.label}
                                                         </Badge>
                                                     </div>
-                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                                                        <span className="font-medium text-foreground">{app.job?.title}</span>
-                                                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                        <a
-                                                            href={`mailto:${app.email}`}
-                                                            className="flex items-center gap-1 hover:text-foreground transition-colors"
-                                                        >
-                                                            <Mail className="h-3.5 w-3.5" />
-                                                            {app.email}
-                                                        </a>
-                                                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                        <a
-                                                            href={app.linkedin_url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="flex items-center gap-1 hover:text-blue-600 transition-colors"
-                                                        >
-                                                            <Linkedin className="h-3.5 w-3.5" />
-                                                            LinkedIn
-                                                        </a>
-                                                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                        <span className="flex items-center gap-1">
-                                                            <Calendar className="h-3.5 w-3.5" />
-                                                            {new Date(app.created_at).toLocaleDateString()}
-                                                        </span>
+                                                    <div className="space-y-1.5 sm:space-y-0">
+                                                        <div className="flex items-center gap-1.5 text-xs sm:text-sm text-foreground font-medium">
+                                                            <span className="truncate">{app.job?.title}</span>
+                                                        </div>
+                                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:text-sm text-muted-foreground">
+                                                            <a
+                                                                href={`mailto:${app.email}`}
+                                                                className="flex items-center gap-1 hover:text-foreground transition-colors truncate max-w-full"
+                                                                title={app.email}
+                                                            >
+                                                                <Mail className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+                                                                <span className="truncate">{app.email}</span>
+                                                            </a>
+                                                            {app.linkedin_url && (
+                                                                <>
+                                                                    <span className="hidden sm:inline w-1 h-1 bg-gray-300 rounded-full shrink-0"></span>
+                                                                    <a
+                                                                        href={app.linkedin_url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex items-center gap-1 hover:text-blue-600 transition-colors shrink-0"
+                                                                    >
+                                                                        <Linkedin className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                                                        <span className="hidden sm:inline">LinkedIn</span>
+                                                                    </a>
+                                                                </>
+                                                            )}
+                                                            <span className="hidden sm:inline w-1 h-1 bg-gray-300 rounded-full shrink-0"></span>
+                                                            <span className="flex items-center gap-1 shrink-0">
+                                                                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                                                <span className="hidden sm:inline">{new Date(app.created_at).toLocaleDateString()}</span>
+                                                                <span className="sm:hidden">{new Date(app.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}</span>
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                                <div className="flex items-center gap-2 shrink-0">
+                                            <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-2">
                                                 <Select
                                                     value={app.status}
                                                     onValueChange={(value) => handleStatusUpdate(app.id, value)}
                                                     disabled={isUpdating}
                                                 >
-                                                    <SelectTrigger className="w-[140px] h-8 text-xs">
+                                                    <SelectTrigger className="flex-1 sm:w-[140px] h-8 text-xs">
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -376,7 +512,7 @@ export function ApplicationsList({ company }: { company: any }) {
                                                     variant="outline"
                                                     size="sm"
                                                     asChild
-                                                    className="gap-2"
+                                                    className="flex-1 sm:flex-initial gap-2"
                                                 >
                                                     <a
                                                         href={getResumeUrl(app.resume_url)}
@@ -395,8 +531,8 @@ export function ApplicationsList({ company }: { company: any }) {
 
                             {/* Pagination */}
                             {totalPages > 1 && (
-                                <div className="mt-6 flex flex-col items-center gap-4">
-                                    <p className="text-sm text-muted-foreground">
+                                <div className="mt-4 md:mt-6 flex flex-col items-center gap-3 md:gap-4">
+                                    <p className="text-xs sm:text-sm text-muted-foreground text-center px-2">
                                         Showing {startIndex + 1}-{Math.min(endIndex, filteredApplications.length)} of {filteredApplications.length} {filteredApplications.length === 1 ? 'application' : 'applications'}
                                     </p>
                                     <Pagination
