@@ -20,6 +20,7 @@ export function JobManager({ companyId }: { companyId: string }) {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingJob, setEditingJob] = useState<any>(null);
     const [togglingJobId, setTogglingJobId] = useState<string | null>(null);
+    const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
 
     useEffect(() => {
         loadJobs();
@@ -84,8 +85,13 @@ export function JobManager({ companyId }: { companyId: string }) {
 
     async function handleDelete(id: string) {
         if (!confirm('Delete this job? This cannot be undone.')) return;
-        await deleteJob(id);
-        await loadJobs();
+        setDeletingJobId(id);
+        try {
+            await deleteJob(id);
+            await loadJobs();
+        } finally {
+            setDeletingJobId(null);
+        }
     }
 
     return (
@@ -107,13 +113,18 @@ export function JobManager({ companyId }: { companyId: string }) {
             ) : (
                 <div className="space-y-3">
                     {jobs.map(job => (
-                        <div key={job.id} className="flex items-center justify-between p-4 bg-white border rounded-lg shadow-sm hover:border-gray-300 transition-colors">
-                            <div>
-                                <h3 className="font-medium text-base">{job.title}</h3>
-                                <div className="flex gap-2 text-sm text-gray-500 mt-1 items-center">
-                                    <span>{job.location}</span>
-                                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                    <span className="capitalize">{job.job_type.replace('-', ' ')}</span>
+                        <div key={job.id} className={`flex items-center justify-between p-4 bg-white border rounded-lg shadow-sm hover:border-gray-300 transition-colors ${deletingJobId === job.id ? 'opacity-50' : ''}`}>
+                            <div className="flex items-center gap-2">
+                                {deletingJobId === job.id && (
+                                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                )}
+                                <div>
+                                    <h3 className="font-medium text-base">{job.title}</h3>
+                                    <div className="flex gap-2 text-sm text-gray-500 mt-1 items-center">
+                                        <span>{job.location}</span>
+                                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                        <span className="capitalize">{job.job_type.replace('-', ' ')}</span>
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -143,8 +154,21 @@ export function JobManager({ companyId }: { companyId: string }) {
                                         <DropdownMenuItem onClick={() => { setEditingJob(job); setDialogOpen(true); }}>
                                             <Pencil className="mr-2 h-4 w-4" /> Edit Details
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => handleDelete(job.id)}>
-                                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                        <DropdownMenuItem 
+                                            className="text-red-600 focus:text-red-600" 
+                                            onClick={() => handleDelete(job.id)}
+                                            disabled={deletingJobId === job.id}
+                                        >
+                                            {deletingJobId === job.id ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Deleting...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                </>
+                                            )}
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>

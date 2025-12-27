@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { deleteCompany } from '@/app/actions/companies';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -23,6 +24,7 @@ export function CompanySettings({ company }: { company: any }) {
     const [name, setName] = useState(company.name);
     const [saving, setSaving] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const router = useRouter();
 
     async function handleSave() {
@@ -37,13 +39,18 @@ export function CompanySettings({ company }: { company: any }) {
     }
 
     async function handleDelete() {
-        const res = await deleteCompany(company.id);
-        if (res?.error) {
-            toast.error(res.error);
-        } else {
-            toast.success('Company deleted');
-            router.push('/dashboard');
-            router.refresh();
+        setDeleting(true);
+        try {
+            const res = await deleteCompany(company.id);
+            if (res?.error) {
+                toast.error(res.error);
+            } else {
+                toast.success('Company deleted');
+                router.push('/dashboard');
+                router.refresh();
+            }
+        } finally {
+            setDeleting(false);
         }
     }
 
@@ -101,12 +108,20 @@ export function CompanySettings({ company }: { company: any }) {
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                         onClick={handleDelete}
+                                        disabled={deleting}
                                     >
-                                        Delete
+                                        {deleting ? (
+                                            <>
+                                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                Deleting...
+                                            </>
+                                        ) : (
+                                            'Delete'
+                                        )}
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>

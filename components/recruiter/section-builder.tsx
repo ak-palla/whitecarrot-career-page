@@ -79,6 +79,8 @@ function SectionItem({ section, onUpdate }: { section: any, onUpdate: () => void
     const [title, setTitle] = useState(section.title);
     const [content, setContent] = useState(section.content);
     const [hasChanges, setHasChanges] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [togglingVisibility, setTogglingVisibility] = useState(false);
 
     async function handleSave() {
         setSaving(true);
@@ -89,14 +91,24 @@ function SectionItem({ section, onUpdate }: { section: any, onUpdate: () => void
     }
 
     async function toggleVisibility() {
-        await updateSection(section.id, { visible: !section.visible });
-        onUpdate();
+        setTogglingVisibility(true);
+        try {
+            await updateSection(section.id, { visible: !section.visible });
+            onUpdate();
+        } finally {
+            setTogglingVisibility(false);
+        }
     }
 
     async function handleDelete() {
         if (!confirm('Are you sure you want to delete this section?')) return;
-        await deleteSection(section.id);
-        onUpdate();
+        setDeleting(true);
+        try {
+            await deleteSection(section.id);
+            onUpdate();
+        } finally {
+            setDeleting(false);
+        }
     }
 
     return (
@@ -106,11 +118,34 @@ function SectionItem({ section, onUpdate }: { section: any, onUpdate: () => void
                 <div className="flex-1 font-medium truncate">{section.title}</div>
                 {!section.visible && <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-500">Hidden</span>}
                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" onClick={toggleVisibility} title={section.visible ? "Hide" : "Show"}>
-                        {section.visible ? <Eye size={16} /> : <EyeOff size={16} className="text-muted-foreground" />}
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={toggleVisibility} 
+                        title={section.visible ? "Hide" : "Show"}
+                        disabled={togglingVisibility}
+                    >
+                        {togglingVisibility ? (
+                            <Loader2 size={16} className="animate-spin" />
+                        ) : section.visible ? (
+                            <Eye size={16} />
+                        ) : (
+                            <EyeOff size={16} className="text-muted-foreground" />
+                        )}
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={handleDelete} className="text-red-500 hover:text-red-600 hover:bg-red-50" title="Delete">
-                        <Trash2 size={16} />
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={handleDelete} 
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50" 
+                        title="Delete"
+                        disabled={deleting}
+                    >
+                        {deleting ? (
+                            <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                            <Trash2 size={16} />
+                        )}
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => setExpanded(!expanded)}>
                         {expanded ? 'Done' : 'Edit'}

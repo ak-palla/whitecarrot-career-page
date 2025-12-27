@@ -1,6 +1,8 @@
 import { DashboardNavbar } from "@/components/dashboard-navbar"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { NavigationLoadingProvider } from "@/components/recruiter/navigation-loading-context"
+import { DashboardMainWrapper } from "@/components/recruiter/dashboard-main-wrapper"
 
 export const dynamic = 'force-dynamic'
 
@@ -27,12 +29,14 @@ export default async function DashboardLayout({
         }
 
         return (
-            <div className="min-h-screen bg-muted-cream">
-                <DashboardNavbar user={user} />
-                <main className="mx-auto max-w-5xl p-6">
-                    {children}
-                </main>
-            </div>
+            <NavigationLoadingProvider>
+                <div className="min-h-screen bg-muted-cream">
+                    <DashboardNavbar user={user} />
+                    <DashboardMainWrapper>
+                        {children}
+                    </DashboardMainWrapper>
+                </div>
+            </NavigationLoadingProvider>
         )
     } catch (error) {
         console.error('Error in dashboard layout:', error);

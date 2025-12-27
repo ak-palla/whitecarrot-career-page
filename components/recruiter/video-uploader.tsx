@@ -1,9 +1,10 @@
 'use client';
 import { useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export function VideoUploader({
     label,
@@ -20,7 +21,9 @@ export function VideoUploader({
     const [error, setError] = useState<string | null>(null);
     const [validating, setValidating] = useState(false);
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+    const [removing, setRemoving] = useState(false);
     const videoRef = useRef<HTMLVideoElement | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     async function validateVideoDuration(file: File): Promise<boolean> {
         return new Promise((resolve) => {
@@ -140,13 +143,73 @@ export function VideoUploader({
         }
     }
 
-    function handleRemove() {
-        onUpload(null);
-        setSelectedFileName(null);
-        // Reset the file input
-        const fileInput = document.querySelector(`input[type="file"][data-uploader="${label}"]`) as HTMLInputElement;
-        if (fileInput) {
-            fileInput.value = '';
+    async function handleRemove() {
+        setRemoving(true);
+        try {
+            // If there's a current video, try to delete it from storage
+            if (currentVideoUrl) {
+                try {
+                    const supabase = createClient();
+                    // Extract the file path from the URL
+                    // URL format: https://[project].supabase.co/storage/v1/object/public/[bucket]/[path]
+                    // Or: https://[project].supabase.co/storage/v1/object/sign/[bucket]/[path]?...
+                    let filePath: string | null = null;
+                    
+                    // Try to find the bucket name in the URL
+                    const urlParts = currentVideoUrl.split('/');
+                    const bucketIndex = urlParts.findIndex(part => part === bucket);
+                    
+                    if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
+                        // Get everything after the bucket name, but before any query params
+                        const pathAfterBucket = urlParts.slice(bucketIndex + 1).join('/');
+                        // Remove query parameters if present
+                        filePath = pathAfterBucket.split('?')[0];
+                    } else {
+                        // Fallback: try to extract from public URL pattern
+                        const publicIndex = urlParts.findIndex(part => part === 'public');
+                        if (publicIndex !== -1 && publicIndex < urlParts.length - 2) {
+                            // Bucket should be at publicIndex + 1, path starts at publicIndex + 2
+                            if (urlParts[publicIndex + 1] === bucket) {
+                                const pathAfterBucket = urlParts.slice(publicIndex + 2).join('/');
+                                filePath = pathAfterBucket.split('?')[0];
+                            }
+                        }
+                    }
+                    
+                    if (filePath) {
+                        // Delete from storage
+                        const { error: deleteError } = await supabase.storage
+                            .from(bucket)
+                            .remove([filePath]);
+                        
+                        if (deleteError) {
+                            console.error('Error deleting file from storage:', deleteError);
+                        }
+                    }
+                } catch (err) {
+                    // Log error but continue with removal
+                    console.error('Error deleting file from storage:', err);
+                }
+            }
+            
+            onUpload(null);
+            setSelectedFileName(null);
+            // Reset the file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        } finally {
+            setRemoving(false);
+        }
+    }
+
+    function handleButtonClick() {
+        if (currentVideoUrl) {
+            // If asset exists, remove it
+            handleRemove();
+        } else {
+            // If no asset, trigger file input
+            fileInputRef.current?.click();
         }
     }
 
@@ -155,7 +218,7 @@ export function VideoUploader({
             <Label>{label}</Label>
             <div className="flex items-center gap-4">
                 {currentVideoUrl ? (
-                    <div className="relative group">
+                    <div className="relative">
                         <video
                             ref={videoRef}
                             src={currentVideoUrl}
@@ -163,38 +226,49 @@ export function VideoUploader({
                             preload="metadata"
                             muted
                         />
-                        <button
-                            type="button"
-                            onClick={handleRemove}
-                            className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-sm transition-colors"
-                            title="Remove video"
-                        >
-                            <X className="h-3 w-3" />
-                        </button>
                     </div>
                 ) : (
                     <div className="h-20 w-32 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-400">
                         None
                     </div>
                 )}
-                <div className="flex-1 max-w-xs">
+                <div className="flex-1 max-w-xs space-y-2">
                     <Input
+                        ref={fileInputRef}
                         type="file"
                         accept="video/mp4,video/webm,video/ogg"
                         onChange={handleFileChange}
                         disabled={uploading || validating}
-                        data-uploader={label}
+                        className="hidden"
                     />
+                    <Button
+                        type="button"
+                        onClick={handleButtonClick}
+                        disabled={uploading || validating || removing}
+                        variant={currentVideoUrl ? "destructive" : "default"}
+                    >
+                        {removing ? (
+                            <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Removing...
+                            </>
+                        ) : currentVideoUrl ? (
+                            'Remove'
+                        ) : (
+                            'Upload'
+                        )}
+                    </Button>
                     {selectedFileName && !error && (
-                        <p className="text-xs text-muted-foreground mt-1 truncate" title={selectedFileName}>
+                        <p className="text-xs text-muted-foreground truncate" title={selectedFileName}>
                             {selectedFileName}
                         </p>
                     )}
-                    {validating && <p className="text-xs text-muted-foreground mt-1">Validating video duration...</p>}
-                    {uploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
-                    {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-                    {!error && !uploading && !validating && !selectedFileName && (
-                        <p className="text-xs text-muted-foreground mt-1">Max 1 minute, MP4/WebM/OGG</p>
+                    {validating && <p className="text-xs text-muted-foreground">Validating video duration...</p>}
+                    {uploading && <p className="text-xs text-muted-foreground">Uploading...</p>}
+                    {removing && <p className="text-xs text-muted-foreground">Removing...</p>}
+                    {error && <p className="text-xs text-red-500">{error}</p>}
+                    {!error && !uploading && !validating && !removing && !selectedFileName && !currentVideoUrl && (
+                        <p className="text-xs text-muted-foreground">Max 1 minute, 100MB, MP4/WebM/OGG</p>
                     )}
                 </div>
             </div>

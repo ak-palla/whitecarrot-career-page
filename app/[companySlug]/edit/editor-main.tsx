@@ -160,7 +160,7 @@ function TabButton({
     return (
         <button
             onClick={onClick}
-            className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
+            className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'bg-background text-primary shadow-sm border border-black' : 'text-muted-foreground hover:bg-background/60 hover:text-foreground border border-transparent'
                 }`}
         >
             <Icon className="h-3.5 w-3.5" />

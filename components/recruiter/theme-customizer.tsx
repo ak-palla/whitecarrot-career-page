@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { updateCareerPage } from '@/app/actions/career-pages';
+import { updateCareerPage, publishPuckPage } from '@/app/actions/career-pages';
 import { ImageUploader } from './image-uploader';
 import { VideoUploader } from './video-uploader';
 
@@ -26,25 +26,55 @@ export function ThemeCustomizer({
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
 
+    // Sync state with careerPage prop when it changes (after refresh)
+    useEffect(() => {
+        setTheme(careerPage?.theme || { primaryColor: '#000000' });
+        setLogoUrl(careerPage?.logo_url ?? null);
+        setBannerUrl(careerPage?.banner_url ?? null);
+        setVideoUrl(careerPage?.video_url ?? null);
+    }, [careerPage?.theme, careerPage?.logo_url, careerPage?.banner_url, careerPage?.video_url]);
+
     const handleSave = useCallback(async () => {
         setSaving(true);
         setMessage(null);
-        const res = await updateCareerPage(careerPage.id, {
-            theme,
-            logo_url: logoUrl || null,
-            banner_url: bannerUrl || null,
-            video_url: videoUrl || null
-        }, company.slug);
+        
+        // First, save the theme and assets
+        // Explicitly set to null if undefined to ensure database is updated
+        const updates: any = {
+            theme
+        };
+        
+        // Explicitly set null values to ensure they're saved to database
+        updates.logo_url = logoUrl ?? null;
+        updates.banner_url = bannerUrl ?? null;
+        updates.video_url = videoUrl ?? null;
+        
+        const res = await updateCareerPage(careerPage.id, updates, company.slug);
 
         if (res.error) {
             setMessage(`Error: ${res.error}`);
-        } else {
-            setMessage('Saved successfully!');
-            // Auto-hide message after 3s
-            setTimeout(() => setMessage(null), 3000);
-            // Refresh the page to update the careerPage prop so theme assets appear in the editor
-            router.refresh();
+            setSaving(false);
+            return;
         }
+
+        // Then, publish the page to make changes visible
+        const publishRes = await publishPuckPage(careerPage.id, company.slug);
+        
+        if (publishRes.error) {
+            setMessage(`Saved but publish failed: ${publishRes.error}`);
+        } else {
+            setMessage('Saved and published successfully!');
+        }
+        
+        // Auto-hide message after 3s
+        setTimeout(() => setMessage(null), 3000);
+        
+        // Refresh the page to update the careerPage prop so theme assets appear in the editor
+        // Use a small delay to ensure server-side cache is cleared
+        setTimeout(() => {
+            router.refresh();
+        }, 100);
+        
         setSaving(false);
     }, [careerPage.id, company.slug, theme, logoUrl, bannerUrl, videoUrl, router]);
 

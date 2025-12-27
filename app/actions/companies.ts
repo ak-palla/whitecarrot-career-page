@@ -77,7 +77,7 @@ export async function getCompanies() {
 
     const { data, error } = await supabase
       .from('companies')
-      .select('*')
+      .select('*, career_pages(logo_url)')
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -86,7 +86,26 @@ export async function getCompanies() {
       return [];
     }
 
-    return data || [];
+    // Flatten the logo_url from career_pages array to the company object
+    const companiesWithLogo = (data || []).map(company => {
+      // Handle both array and single object cases
+      const careerPages = Array.isArray(company.career_pages) 
+        ? company.career_pages 
+        : company.career_pages 
+          ? [company.career_pages] 
+          : [];
+      
+      const logoUrl = careerPages[0]?.logo_url || null;
+      
+      // Remove career_pages from the returned object to keep it clean
+      const { career_pages, ...companyData } = company;
+      return {
+        ...companyData,
+        logo_url: logoUrl
+      };
+    });
+
+    return companiesWithLogo;
   } catch (error) {
     console.error('Error in getCompanies:', error);
     return [];
