@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ companySl
     const { companySlug } = await params;
     const supabase = await createClient();
 
-    // Fetch company and career page data for metadata
+    // Optimize: Only select fields needed for metadata
     const { data: company } = await supabase
         .from('companies')
         .select('name, career_pages(banner_url, logo_url)')
@@ -91,10 +91,10 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
     const { companySlug } = await params;
     const supabase = await createClient();
 
-    // Fetch all necessary data
+    // Optimize: Combine company and career_pages query, only select needed fields
     const { data: company } = await supabase
         .from('companies')
-        .select('*, career_pages(*)')
+        .select('id, name, slug, career_pages(id, company_id, theme, puck_data, draft_puck_data, logo_url, banner_url, video_url)')
         .eq('slug', companySlug)
         .single();
 
@@ -116,13 +116,16 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
     // If the joined relation didn't return anything (likely due to RLS on the relation),
     // fall back to an explicit query like the preview/edit pages do.
     if (!careerPage) {
+        // Optimize: Only select needed fields
         const { data: existingPage } = await supabase
             .from('career_pages')
-            .select('*')
+            .select('id, company_id, theme, puck_data, draft_puck_data, logo_url, banner_url, video_url')
             .eq('company_id', company.id)
             .single();
 
-        careerPage = existingPage;
+        if (existingPage) {
+            careerPage = existingPage;
+        }
     }
 
     // If there is still no career page at all, render a soft error instead of a 404.
@@ -136,21 +139,27 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
         );
     }
 
-    // Fetch sections (for legacy fallback)
-    const { data: sections } = await supabase
-        .from('page_sections')
-        .select('*')
-        .eq('career_page_id', careerPage.id)
-        .eq('visible', true)
-        .order('order', { ascending: true });
+    // Optimize: Fetch sections and jobs in parallel using Promise.all
+    // Also optimize field selection - only select needed fields
+    const [sectionsResult, jobsResult] = await Promise.all([
+        // Fetch sections (for legacy fallback) - only select needed fields
+        supabase
+            .from('page_sections')
+            .select('id, career_page_id, type, content, visible, order')
+            .eq('career_page_id', careerPage.id)
+            .eq('visible', true)
+            .order('order', { ascending: true }),
+        // Fetch published jobs - only select needed fields
+        supabase
+            .from('jobs')
+            .select('id, company_id, title, description, location, job_type, created_at, expires_at, employment_type, salary_range, currency, team, work_policy, experience_level, job_slug')
+            .eq('company_id', company.id)
+            .eq('published', true)
+            .order('created_at', { ascending: false })
+    ]);
 
-    // Fetch published jobs
-    const { data: jobs } = await supabase
-        .from('jobs')
-        .select('*')
-        .eq('company_id', company.id)
-        .eq('published', true)
-        .order('created_at', { ascending: false });
+    const sections = sectionsResult.data || [];
+    const jobs = jobsResult.data || [];
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
         (process.env.VERCEL_URL
@@ -167,7 +176,7 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
     };
 
     // Generate JobPosting structured data for each published job
-    const jobPostings = (jobs || []).map((job) => {
+    const jobPostings = jobs.map((job) => {
         const jobPosting: any = {
             "@context": "https://schema.org",
             "@type": "JobPosting",
@@ -231,7 +240,7 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
                 <PuckRenderer
                     data={puckData}
                     theme={careerPage.theme}
-                    jobs={jobs || []}
+                    jobs={jobs}
                     bannerUrl={careerPage.banner_url}
                     logoUrl={careerPage.logo_url}
                     videoUrl={careerPage.video_url}
@@ -241,8 +250,8 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
                 <CareerPageRenderer
                     company={company}
                     careerPage={careerPage}
-                    sections={sections || []}
-                    jobs={jobs || []}
+                    sections={sections}
+                    jobs={jobs}
                 />
             )}
         </>

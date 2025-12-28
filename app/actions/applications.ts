@@ -27,7 +27,8 @@ export interface ApplicationWithJob {
 export async function getApplications(companyId: string, filters?: ApplicationFilters) {
     const supabase = await createClient();
 
-    // First, get all job IDs for this company
+    // Optimize: First get job IDs (using index on jobs.company_id)
+    // Only select id and title to minimize data transfer
     const { data: jobsData, error: jobsError } = await supabase
         .from('jobs')
         .select('id, title')
@@ -40,14 +41,15 @@ export async function getApplications(companyId: string, filters?: ApplicationFi
     const jobIds = jobsData.map(j => j.id);
     const jobMap = new Map(jobsData.map(j => [j.id, j.title]));
 
-    // Build query for applications
+    // Optimize: Only select needed fields instead of *
+    // Use composite index on (job_id, status) for better performance
     let query = supabase
         .from('applications')
-        .select('*')
+        .select('id, first_name, last_name, email, linkedin_url, resume_url, created_at, job_id, status')
         .in('job_id', jobIds)
         .order('created_at', { ascending: false });
 
-    // Apply filters
+    // Apply filters - these will use the indexes we created
     if (filters?.jobId) {
         query = query.eq('job_id', filters.jobId);
     }
@@ -96,10 +98,13 @@ export async function getApplications(companyId: string, filters?: ApplicationFi
 export async function updateApplicationStatus(applicationId: string, status: string) {
     const supabase = await createClient();
 
+    // Optimize: Only select id on update to reduce response size
     const { error } = await supabase
         .from('applications')
         .update({ status })
-        .eq('id', applicationId);
+        .eq('id', applicationId)
+        .select('id')
+        .single();
 
     if (error) return { error: error.message };
     return { success: true };
@@ -108,7 +113,8 @@ export async function updateApplicationStatus(applicationId: string, status: str
 export async function getApplicationStats(companyId: string) {
     const supabase = await createClient();
 
-    // First, get all job IDs for this company
+    // Optimize: First get job IDs (using index on jobs.company_id)
+    // Only select id to minimize data transfer
     const { data: jobsData, error: jobsError } = await supabase
         .from('jobs')
         .select('id')
@@ -124,7 +130,8 @@ export async function getApplicationStats(companyId: string) {
 
     const jobIds = jobsData.map(j => j.id);
 
-    // Get all applications for this company's jobs
+    // Optimize: Only select fields needed for stats calculation
+    // Use composite index on (job_id, status) for better performance
     const { data, error } = await supabase
         .from('applications')
         .select('status, job_id')
@@ -139,20 +146,28 @@ export async function getApplicationStats(companyId: string) {
         };
     }
 
+    if (!data || data.length === 0) {
+        return {
+            total: 0,
+            byStatus: {},
+            byJob: {},
+        };
+    }
+
     const stats = {
-        total: data?.length || 0,
+        total: data.length,
         byStatus: {} as Record<string, number>,
         byJob: {} as Record<string, number>,
     };
 
     // Count by status
-    data?.forEach((app: any) => {
+    data.forEach((app: any) => {
         const status = app.status || 'new';
         stats.byStatus[status] = (stats.byStatus[status] || 0) + 1;
     });
 
     // Count by job
-    data?.forEach((app: any) => {
+    data.forEach((app: any) => {
         const jobId = app.job_id;
         stats.byJob[jobId] = (stats.byJob[jobId] || 0) + 1;
     });

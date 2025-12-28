@@ -75,9 +75,10 @@ export async function getCompanies() {
 
     if (!user) return [];
 
+    // Optimize: Only select needed fields instead of *
     const { data, error } = await supabase
       .from('companies')
-      .select('*, career_pages(logo_url)')
+      .select('id, name, slug, owner_id, created_at, updated_at, career_pages(logo_url)')
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -120,7 +121,7 @@ export async function deleteCompany(companyId: string) {
     redirect('/login');
   }
 
-  // Verify ownership before deleting
+  // Verify ownership before deleting - optimized: only select needed fields
   const { data: company, error: fetchError } = await supabase
     .from('companies')
     .select('id, slug')
@@ -136,6 +137,7 @@ export async function deleteCompany(companyId: string) {
   }
 
   // Get all career pages for this company (includes logo_url and banner_url)
+  // Optimized: Only select needed fields
   const { data: careerPages } = await supabase
     .from('career_pages')
     .select('id, logo_url, banner_url')

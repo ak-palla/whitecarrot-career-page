@@ -14,7 +14,7 @@ export function useCompanies() {
     queryKey: companiesQueryKey,
     queryFn: async () => {
       const companies = await getCompanies();
-      return companies;
+      return companies || [];
     },
     // Companies list changes infrequently, so we can cache longer
     staleTime: 1000 * 60 * 10, // 10 minutes

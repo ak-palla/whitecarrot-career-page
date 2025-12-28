@@ -95,9 +95,10 @@ export default async function EditorPage({ params }: { params: Promise<{ company
     }
 
     // Fetch published jobs for the company
+    // Optimize: Only select needed fields instead of *
     const { data: jobs } = await supabase
         .from('jobs')
-        .select('*')
+        .select('id, company_id, title, description, location, job_type, created_at, expires_at, employment_type, salary_range, currency, team, work_policy, experience_level, job_slug')
         .eq('company_id', company.id)
         .eq('published', true)
         .order('created_at', { ascending: false });

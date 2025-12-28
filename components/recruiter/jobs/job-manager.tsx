@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createJob, updateJob, deleteJob, bulkUpdateJobsPublished, bulkDeleteJobs } from '@/app/actions/jobs';
 import { useJobs, jobsQueryKey } from '@/lib/hooks/use-jobs';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ interface JobManagerProps {
 
 export function JobManager({ companyId }: JobManagerProps) {
   const queryClient = useQueryClient();
-  const { data: jobs = [], isLoading: loading, error } = useJobs(companyId);
+  const { data: jobs = [], isLoading: loading } = useJobs(companyId);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [csvImportOpen, setCsvImportOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);

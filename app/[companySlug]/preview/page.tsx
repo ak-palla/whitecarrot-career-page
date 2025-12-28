@@ -114,9 +114,10 @@ export default async function PreviewPage({ params }: { params: Promise<{ compan
         .order('order', { ascending: true });
 
     // For preview we stick to the same jobs visibility as public careers page (published only)
+    // Optimize: Only select needed fields instead of *
     const { data: jobs } = await supabase
         .from('jobs')
-        .select('*')
+        .select('id, company_id, title, description, location, job_type, created_at, expires_at, employment_type, salary_range, currency, team, work_policy, experience_level, job_slug')
         .eq('company_id', company.id)
         .eq('published', true)
         .order('created_at', { ascending: false });

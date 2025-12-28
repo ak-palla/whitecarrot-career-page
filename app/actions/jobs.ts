@@ -10,28 +10,34 @@ const jobSchema = {
 export async function createJob(companyId: string, data: any) {
     const supabase = await createClient();
 
-    const { error } = await supabase
+    // Optimize: Only select id on insert to reduce response size
+    const { data: job, error } = await supabase
         .from('jobs')
         .insert({
             company_id: companyId,
             ...data,
             published: false // Default to draft
-        });
+        })
+        .select('id')
+        .single();
 
     if (error) return { error: error.message };
 
     // Invalidate dashboard or lists?
     // We don't have a path for job list specifically, but company edit page has list.
-    return { success: true };
+    return { success: true, id: job?.id };
 }
 
 export async function updateJob(jobId: string, updates: any) {
     const supabase = await createClient();
 
+    // Optimize: Only select id on update to reduce response size
     const { error } = await supabase
         .from('jobs')
         .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', jobId);
+        .eq('id', jobId)
+        .select('id')
+        .single();
 
     if (error) return { error: error.message };
     return { success: true };
@@ -49,15 +55,37 @@ export async function deleteJob(jobId: string) {
     return { success: true };
 }
 
-export async function getJobs(companyId: string) {
+export interface GetJobsOptions {
+    limit?: number;
+    offset?: number;
+    published?: boolean;
+}
+
+export async function getJobs(companyId: string, options?: GetJobsOptions) {
     const supabase = await createClient();
 
-    // Owner view - see all
-    const { data, error } = await supabase
+    // Optimize: Only select needed fields instead of *
+    // Select all job fields but be explicit for clarity
+    let query = supabase
         .from('jobs')
-        .select('*')
+        .select('id, company_id, title, description, location, job_type, published, created_at, updated_at, team, work_policy, employment_type, experience_level, salary_range, job_slug, expires_at, currency')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
+
+    // Apply published filter if specified
+    if (options?.published !== undefined) {
+        query = query.eq('published', options.published);
+    }
+
+    // Apply pagination if specified
+    if (options?.limit) {
+        query = query.limit(options.limit);
+    }
+    if (options?.offset) {
+        query = query.range(options.offset, options.offset + (options.limit || 100) - 1);
+    }
+
+    const { data, error } = await query;
 
     if (error) return [];
     return data;
@@ -175,10 +203,11 @@ export async function bulkImportJobsFromCSV(companyId: string, csvFilePath: stri
         const errors: string[] = [];
 
         for (const batch of batches) {
+            // Optimize: Only select id on insert to reduce response size
             const { error: insertError, data } = await supabase
                 .from('jobs')
                 .insert(batch)
-                .select();
+                .select('id');
 
             if (insertError) {
                 errors.push(`Batch error: ${insertError.message}`);
