@@ -172,10 +172,14 @@ export function JobManager({ companyId }: JobManagerProps) {
     });
   }, []);
 
-  const selectAllJobs = useCallback(() => {
-    const allIds = new Set(filteredJobs.map((job) => job.id));
-    setSelectedJobIds(allIds);
-  }, [filteredJobs]);
+  const selectAllJobs = useCallback((jobIds: string[]) => {
+    // Select only the provided job IDs (should be from current page)
+    setSelectedJobIds((prev) => {
+      const newSet = new Set(prev);
+      jobIds.forEach(id => newSet.add(id));
+      return newSet;
+    });
+  }, []);
 
   const deselectAllJobs = useCallback(() => {
     setSelectedJobIds(new Set());

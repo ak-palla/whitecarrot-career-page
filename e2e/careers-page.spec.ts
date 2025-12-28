@@ -244,4 +244,232 @@ test.describe('Careers Page - Public View', () => {
     // Page should load in under 5 seconds
     expect(loadTime).toBeLessThan(5000);
   });
+
+  test.describe('Server-side Pagination', () => {
+    test('should display pagination controls when there are more than 20 jobs', async ({ page, company }) => {
+      // Create 25 published jobs to trigger pagination
+      await page.goto(`/${company.slug}/edit`);
+      await page.click('button:has-text("Jobs"), [role="tab"]:has-text("Jobs")');
+
+      const jobsToCreate = 25;
+      const createdJobTitles: string[] = [];
+
+      for (let i = 0; i < jobsToCreate; i++) {
+        const testJob = generateTestJob({ title: `Pagination Test Job ${i + 1}` });
+        createdJobTitles.push(testJob.title);
+
+        await page.click('button:has-text("Add Job"), button:has-text("Create Job"), button:has-text("New Job")');
+        await page.fill('input[name="title"], input[placeholder*="title"]', testJob.title);
+        await page.fill('input[name="location"], input[placeholder*="location"]', testJob.location);
+
+        const descriptionEditor = page.locator('[contenteditable="true"], textarea[name="description"]').first();
+        await descriptionEditor.click();
+        await descriptionEditor.fill(testJob.description);
+
+        await page.click('button:has-text("Save"), button:has-text("Create"), button[type="submit"]');
+        await page.waitForTimeout(500);
+
+        // Publish the job
+        const publishToggle = page.locator('input[type="checkbox"][name*="published"], button:has-text("Publish")');
+        if (await publishToggle.count() > 0) {
+          await publishToggle.first().click();
+          await page.waitForTimeout(300);
+        }
+      }
+
+      // Visit careers page
+      await page.goto(`/${company.slug}/careers`);
+
+      // Should see pagination controls
+      const pagination = page.locator('nav[aria-label="Pagination"]');
+      await expect(pagination).toBeVisible();
+
+      // Should show page 1 info
+      await expect(page.getByText(/Showing 1-20 of/)).toBeVisible();
+
+      // Should see first page jobs
+      await expect(page.getByText(createdJobTitles[0])).toBeVisible();
+    });
+
+    test('should navigate to next page and show different jobs', async ({ page, company }) => {
+      // Create 25 published jobs
+      await page.goto(`/${company.slug}/edit`);
+      await page.click('button:has-text("Jobs"), [role="tab"]:has-text("Jobs")');
+
+      const jobsToCreate = 25;
+      const createdJobTitles: string[] = [];
+
+      for (let i = 0; i < jobsToCreate; i++) {
+        const testJob = generateTestJob({ title: `Page Navigation Job ${i + 1}` });
+        createdJobTitles.push(testJob.title);
+
+        await page.click('button:has-text("Add Job"), button:has-text("Create Job"), button:has-text("New Job")');
+        await page.fill('input[name="title"], input[placeholder*="title"]', testJob.title);
+        await page.fill('input[name="location"], input[placeholder*="location"]', testJob.location);
+
+        const descriptionEditor = page.locator('[contenteditable="true"], textarea[name="description"]').first();
+        await descriptionEditor.click();
+        await descriptionEditor.fill(testJob.description);
+
+        await page.click('button:has-text("Save"), button:has-text("Create"), button[type="submit"]');
+        await page.waitForTimeout(500);
+
+        const publishToggle = page.locator('input[type="checkbox"][name*="published"], button:has-text("Publish")');
+        if (await publishToggle.count() > 0) {
+          await publishToggle.first().click();
+          await page.waitForTimeout(300);
+        }
+      }
+
+      // Visit careers page
+      await page.goto(`/${company.slug}/careers`);
+
+      // Should see first page job
+      await expect(page.getByText(createdJobTitles[0])).toBeVisible();
+
+      // Click next page button
+      const nextButton = page.locator('button[aria-label="Next page"]');
+      await expect(nextButton).toBeVisible();
+      await nextButton.click();
+
+      // Should navigate to page 2
+      await expect(page).toHaveURL(new RegExp(`/${company.slug}/careers\\?page=2`));
+
+      // Should show page 2 info
+      await expect(page.getByText(/Showing 21-25 of/)).toBeVisible();
+
+      // Should see a job from page 2 (not the first job)
+      // Note: The first job should not be visible on page 2
+      const firstJobVisible = await page.getByText(createdJobTitles[0]).isVisible().catch(() => false);
+      // On page 2, we should see jobs 21-25, so job 0 should not be visible
+      expect(firstJobVisible).toBe(false);
+    });
+
+    test('should update URL when clicking page numbers', async ({ page, company }) => {
+      // Create 25 published jobs
+      await page.goto(`/${company.slug}/edit`);
+      await page.click('button:has-text("Jobs"), [role="tab"]:has-text("Jobs")');
+
+      const jobsToCreate = 25;
+
+      for (let i = 0; i < jobsToCreate; i++) {
+        const testJob = generateTestJob({ title: `URL Test Job ${i + 1}` });
+
+        await page.click('button:has-text("Add Job"), button:has-text("Create Job"), button:has-text("New Job")');
+        await page.fill('input[name="title"], input[placeholder*="title"]', testJob.title);
+        await page.fill('input[name="location"], input[placeholder*="location"]', testJob.location);
+
+        const descriptionEditor = page.locator('[contenteditable="true"], textarea[name="description"]').first();
+        await descriptionEditor.click();
+        await descriptionEditor.fill(testJob.description);
+
+        await page.click('button:has-text("Save"), button:has-text("Create"), button[type="submit"]');
+        await page.waitForTimeout(500);
+
+        const publishToggle = page.locator('input[type="checkbox"][name*="published"], button:has-text("Publish")');
+        if (await publishToggle.count() > 0) {
+          await publishToggle.first().click();
+          await page.waitForTimeout(300);
+        }
+      }
+
+      // Visit careers page
+      await page.goto(`/${company.slug}/careers`);
+
+      // Click on page 2 button
+      const page2Button = page.locator('button:has-text("2")');
+      await expect(page2Button).toBeVisible();
+      await page2Button.click();
+
+      // Should update URL to include page=2
+      await expect(page).toHaveURL(new RegExp(`/${company.slug}/careers\\?page=2`));
+
+      // Click on page 1 button
+      const page1Button = page.locator('button:has-text("1")');
+      await expect(page1Button).toBeVisible();
+      await page1Button.click();
+
+      // Should remove page param or set to page=1
+      const url = page.url();
+      expect(url).not.toContain('page=2');
+    });
+
+    test('should show correct job count on each page', async ({ page, company }) => {
+      // Create exactly 25 jobs (so we have 2 pages: 20 on page 1, 5 on page 2)
+      await page.goto(`/${company.slug}/edit`);
+      await page.click('button:has-text("Jobs"), [role="tab"]:has-text("Jobs")');
+
+      const jobsToCreate = 25;
+
+      for (let i = 0; i < jobsToCreate; i++) {
+        const testJob = generateTestJob({ title: `Count Test Job ${i + 1}` });
+
+        await page.click('button:has-text("Add Job"), button:has-text("Create Job"), button:has-text("New Job")');
+        await page.fill('input[name="title"], input[placeholder*="title"]', testJob.title);
+        await page.fill('input[name="location"], input[placeholder*="location"]', testJob.location);
+
+        const descriptionEditor = page.locator('[contenteditable="true"], textarea[name="description"]').first();
+        await descriptionEditor.click();
+        await descriptionEditor.fill(testJob.description);
+
+        await page.click('button:has-text("Save"), button:has-text("Create"), button[type="submit"]');
+        await page.waitForTimeout(500);
+
+        const publishToggle = page.locator('input[type="checkbox"][name*="published"], button:has-text("Publish")');
+        if (await publishToggle.count() > 0) {
+          await publishToggle.first().click();
+          await page.waitForTimeout(300);
+        }
+      }
+
+      // Visit careers page
+      await page.goto(`/${company.slug}/careers`);
+
+      // Should show "Showing 1-20 of 25 jobs"
+      await expect(page.getByText(/Showing 1-20 of 25 jobs/)).toBeVisible();
+
+      // Navigate to page 2
+      const nextButton = page.locator('button[aria-label="Next page"]');
+      await nextButton.click();
+
+      // Should show "Showing 21-25 of 25 jobs"
+      await expect(page.getByText(/Showing 21-25 of 25 jobs/)).toBeVisible();
+    });
+
+    test('should not show pagination when there are 20 or fewer jobs', async ({ page, company }) => {
+      // Create exactly 20 jobs
+      await page.goto(`/${company.slug}/edit`);
+      await page.click('button:has-text("Jobs"), [role="tab"]:has-text("Jobs")');
+
+      const jobsToCreate = 20;
+
+      for (let i = 0; i < jobsToCreate; i++) {
+        const testJob = generateTestJob({ title: `No Pagination Job ${i + 1}` });
+
+        await page.click('button:has-text("Add Job"), button:has-text("Create Job"), button:has-text("New Job")');
+        await page.fill('input[name="title"], input[placeholder*="title"]', testJob.title);
+        await page.fill('input[name="location"], input[placeholder*="location"]', testJob.location);
+
+        const descriptionEditor = page.locator('[contenteditable="true"], textarea[name="description"]').first();
+        await descriptionEditor.click();
+        await descriptionEditor.fill(testJob.description);
+
+        await page.click('button:has-text("Save"), button:has-text("Create"), button[type="submit"]');
+        await page.waitForTimeout(500);
+
+        const publishToggle = page.locator('input[type="checkbox"][name*="published"], button:has-text("Publish")');
+        if (await publishToggle.count() > 0) {
+          await publishToggle.first().click();
+          await page.waitForTimeout(300);
+        }
+      }
+
+      // Visit careers page
+      await page.goto(`/${company.slug}/careers`);
+
+      // Should NOT see pagination controls
+      const pagination = page.locator('nav[aria-label="Pagination"]');
+      await expect(pagination).not.toBeVisible();
+    });
+  });
 });

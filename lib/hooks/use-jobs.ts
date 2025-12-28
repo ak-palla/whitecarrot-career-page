@@ -20,7 +20,7 @@ export function useJobs(companyId: string, options?: { enabled?: boolean }) {
     },
     // Jobs change frequently, so shorter cache
     staleTime: 1000 * 60 * 1, // 1 minute
-    enabled: options?.enabled !== false && !!companyId,
+    enabled: options?.enabled ?? true,
   });
 }
 

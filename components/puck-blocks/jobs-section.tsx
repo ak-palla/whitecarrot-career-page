@@ -159,6 +159,11 @@ export interface JobsSectionProps {
   // jobs will be injected at render time via PuckRenderer context/props
   jobs?: any;
   loading?: boolean;
+  serverSidePagination?: {
+    currentPage: number;
+    totalPages: number;
+    totalJobs: number;
+  };
 }
 
 export function JobsSection({
@@ -172,6 +177,7 @@ export function JobsSection({
   badgeVariant = 'secondary',
   align = 'center',
   loading = false,
+  serverSidePagination,
 }: JobsSectionProps) {
   const alignmentClasses = {
     left: 'text-left items-start',
@@ -204,9 +210,13 @@ export function JobsSection({
   });
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   
-  // Pagination state
+  // Pagination state - use server-side if provided, otherwise client-side
   const itemsPerPage = 20;
+  const isServerSidePagination = !!serverSidePagination;
   const [currentPage, setCurrentPage] = useState(() => {
+    if (isServerSidePagination) {
+      return serverSidePagination!.currentPage;
+    }
     const page = searchParams.get('page');
     return page ? parseInt(page, 10) : 1;
   });
@@ -285,14 +295,19 @@ export function JobsSection({
     return filtered;
   }, [jobsArray, searchLower, selectedLocation, selectedJobType, selectedTeam]);
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters change (only for client-side pagination)
   useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam]);
+    if (!isServerSidePagination) {
+      setCurrentPage(1);
+    }
+  }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, isServerSidePagination]);
 
   // Calculate pagination
-  // For team/location layouts, paginate groups; for others, paginate jobs
+  // For server-side pagination, use provided values; otherwise calculate from filtered jobs
   const totalItems = useMemo(() => {
+    if (isServerSidePagination) {
+      return serverSidePagination!.totalJobs;
+    }
     if (layout === 'team' || layout === 'location') {
       const grouped = layout === 'team' 
         ? groupBy(filteredJobs, (job) => job.team || 'Other')
@@ -300,24 +315,52 @@ export function JobsSection({
       return Object.keys(grouped).length;
     }
     return filteredJobs.length;
-  }, [filteredJobs, layout]);
+  }, [filteredJobs, layout, isServerSidePagination, serverSidePagination]);
 
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalPages = isServerSidePagination 
+    ? serverSidePagination!.totalPages 
+    : Math.ceil(totalItems / itemsPerPage);
+  
+  // For server-side pagination, jobs are already paginated, so just filter them
+  // For client-side pagination, slice the filtered jobs
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedJobs = useMemo(() => {
+    if (isServerSidePagination) {
+      // Server-side: jobs are already paginated, just apply client-side filters
+      return filteredJobs;
+    }
+    // Client-side: slice the filtered jobs
     return filteredJobs.slice(startIndex, endIndex);
-  }, [filteredJobs, startIndex, endIndex]);
+  }, [filteredJobs, startIndex, endIndex, isServerSidePagination]);
 
   // Handle page change
   const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-    // Scroll to top of jobs section
-    const jobsSection = document.getElementById('jobs');
-    if (jobsSection) {
-      jobsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (isServerSidePagination) {
+      // Server-side: navigate to new page via URL
+      const newParams = new URLSearchParams(searchParams.toString());
+      if (page > 1) {
+        newParams.set('page', page.toString());
+      } else {
+        newParams.delete('page');
+      }
+      const queryString = newParams.toString();
+      router.push(queryString ? `?${queryString}` : window.location.pathname);
+      // Scroll to top of jobs section
+      const jobsSection = document.getElementById('jobs');
+      if (jobsSection) {
+        jobsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      // Client-side: just update state
+      setCurrentPage(page);
+      // Scroll to top of jobs section
+      const jobsSection = document.getElementById('jobs');
+      if (jobsSection) {
+        jobsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
-  }, []);
+  }, [isServerSidePagination, router, searchParams]);
 
   // Update URL when filters change - simplified and optimized
   useEffect(() => {
@@ -329,7 +372,12 @@ export function JobsSection({
     if (selectedLocation !== 'all') newParams.set('location', selectedLocation);
     if (selectedJobType !== 'all') newParams.set('type', selectedJobType);
     if (selectedTeam !== 'all') newParams.set('team', selectedTeam);
-    if (currentPage > 1) newParams.set('page', currentPage.toString());
+    // Only update page param for client-side pagination
+    if (!isServerSidePagination && currentPage > 1) {
+      newParams.set('page', currentPage.toString());
+    } else if (isServerSidePagination && serverSidePagination!.currentPage > 1) {
+      newParams.set('page', serverSidePagination!.currentPage.toString());
+    }
 
     // Compare with current URL params from searchParams hook
     const currentSearch = searchParams.get('search') || '';
@@ -361,7 +409,7 @@ export function JobsSection({
         isUpdatingUrlRef.current = false;
       }, 50);
     }
-  }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, currentPage, router, searchParams]);
+  }, [debouncedSearchQuery, selectedLocation, selectedJobType, selectedTeam, currentPage, router, searchParams, isServerSidePagination, serverSidePagination]);
 
   // Check if any filters are active
   const hasActiveFilters = Boolean(debouncedSearchQuery) || (selectedLocation !== 'all') || (selectedJobType !== 'all') || (selectedTeam !== 'all');
@@ -525,7 +573,9 @@ export function JobsSection({
               {totalPages > 1 && (
                 <div className="mt-8 flex flex-col items-center gap-4">
                   <p className="text-sm text-muted-foreground">
-                    {layout === 'team' || layout === 'location' ? (
+                    {isServerSidePagination ? (
+                      <>Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} {totalItems === 1 ? 'job' : 'jobs'}</>
+                    ) : layout === 'team' || layout === 'location' ? (
                       <>Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} {totalItems === 1 ? 'group' : 'groups'}</>
                     ) : (
                       <>Showing {startIndex + 1}-{Math.min(endIndex, filteredJobs.length)} of {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'}</>

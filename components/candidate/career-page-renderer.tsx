@@ -1,19 +1,26 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { PuckRenderer } from '@/components/candidate/puck-renderer';
+import { ServerPagination } from '@/components/candidate/server-pagination';
 
 export function CareerPageRenderer({
     company,
     careerPage,
     sections = [],
     jobs = [],
-    preview = false
+    preview = false,
+    currentPage,
+    totalPages,
+    totalJobs
 }: {
     company: any,
     careerPage: any,
     sections?: any[],
     jobs?: any[],
-    preview?: boolean
+    preview?: boolean,
+    currentPage?: number,
+    totalPages?: number,
+    totalJobs?: number
 }) {
     // Theme application
     const theme = careerPage?.theme || {};
@@ -98,31 +105,41 @@ export function CareerPageRenderer({
                                             <p className="text-gray-500 text-lg">No open positions at the moment. Check back soon!</p>
                                         </div>
                                     ) : (
-                                        <div className="grid md:grid-cols-2 gap-6">
-                                            {jobs.map((job: any) => (
-                                                <div key={job.id} className="group border rounded-xl p-6 hover:shadow-md transition-all bg-white hover:border-[var(--primary)] relative">
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <div>
-                                                            <h3 className="font-bold text-xl mb-1 group-hover:text-[var(--primary)] transition-colors">{job.title}</h3>
-                                                            <div className="flex gap-2 text-sm text-gray-500 items-center">
-                                                                <span>{job.location}</span>
-                                                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                                <span className="capitalize">{job.job_type.replace('-', ' ')}</span>
+                                        <>
+                                            <div className="grid md:grid-cols-2 gap-6">
+                                                {jobs.map((job: any) => (
+                                                    <div key={job.id} className="group border rounded-xl p-6 hover:shadow-md transition-all bg-white hover:border-[var(--primary)] relative">
+                                                        <div className="flex justify-between items-start mb-4">
+                                                            <div>
+                                                                <h3 className="font-bold text-xl mb-1 group-hover:text-[var(--primary)] transition-colors">{job.title}</h3>
+                                                                <div className="flex gap-2 text-sm text-gray-500 items-center">
+                                                                    <span>{job.location}</span>
+                                                                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                                    <span className="capitalize">{job.job_type.replace('-', ' ')}</span>
+                                                                </div>
                                                             </div>
                                                         </div>
+                                                        <div className="mt-4 pt-4 border-t flex justify-end">
+                                                            <span className="text-sm font-medium text-[var(--primary)] group-hover:translate-x-1 transition-transform inline-flex items-center">
+                                                                View Details
+                                                                <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                                </svg>
+                                                            </span>
+                                                        </div>
+                                                        <Link href="#" className="absolute inset-0" aria-label={`View ${job.title}`} />
                                                     </div>
-                                                    <div className="mt-4 pt-4 border-t flex justify-end">
-                                                        <span className="text-sm font-medium text-[var(--primary)] group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                                            View Details
-                                                            <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                            </svg>
-                                                        </span>
-                                                    </div>
-                                                    <Link href="#" className="absolute inset-0" aria-label={`View ${job.title}`} />
-                                                </div>
-                                            ))}
-                                        </div>
+                                                ))}
+                                            </div>
+                                            {totalPages && totalPages > 1 && (
+                                                <ServerPagination
+                                                    currentPage={currentPage || 1}
+                                                    totalPages={totalPages}
+                                                    totalItems={totalJobs || jobs.length}
+                                                    itemsPerPage={20}
+                                                />
+                                            )}
+                                        </>
                                     )}
                                 </section>
                             </>
@@ -140,31 +157,41 @@ export function CareerPageRenderer({
                                     <p className="text-gray-500 text-lg">No open positions at the moment. Check back soon!</p>
                                 </div>
                             ) : (
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    {jobs.map((job: any) => (
-                                        <div key={job.id} className="group border rounded-xl p-6 hover:shadow-md transition-all bg-white hover:border-[var(--primary)] relative">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <h3 className="font-bold text-xl mb-1 group-hover:text-[var(--primary)] transition-colors">{job.title}</h3>
-                                                    <div className="flex gap-2 text-sm text-gray-500 items-center">
-                                                        <span>{job.location}</span>
-                                                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                        <span className="capitalize">{job.job_type.replace('-', ' ')}</span>
+                                <>
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        {jobs.map((job: any) => (
+                                            <div key={job.id} className="group border rounded-xl p-6 hover:shadow-md transition-all bg-white hover:border-[var(--primary)] relative">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div>
+                                                        <h3 className="font-bold text-xl mb-1 group-hover:text-[var(--primary)] transition-colors">{job.title}</h3>
+                                                        <div className="flex gap-2 text-sm text-gray-500 items-center">
+                                                            <span>{job.location}</span>
+                                                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                            <span className="capitalize">{job.job_type.replace('-', ' ')}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <div className="mt-4 pt-4 border-t flex justify-end">
+                                                    <span className="text-sm font-medium text-[var(--primary)] group-hover:translate-x-1 transition-transform inline-flex items-center">
+                                                        View Details
+                                                        <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                                <Link href="#" className="absolute inset-0" aria-label={`View ${job.title}`} />
                                             </div>
-                                            <div className="mt-4 pt-4 border-t flex justify-end">
-                                                <span className="text-sm font-medium text-[var(--primary)] group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                                    View Details
-                                                    <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                            <Link href="#" className="absolute inset-0" aria-label={`View ${job.title}`} />
-                                        </div>
-                                    ))}
-                                </div>
+                                        ))}
+                                    </div>
+                                    {totalPages && totalPages > 1 && (
+                                        <ServerPagination
+                                            currentPage={currentPage || 1}
+                                            totalPages={totalPages}
+                                            totalItems={totalJobs || jobs.length}
+                                            itemsPerPage={20}
+                                        />
+                                    )}
+                                </>
                             )}
                         </section>
                     );

@@ -1,11 +1,14 @@
 import { createClient } from '@/lib/supabase/server';
 import { CareerPageRenderer } from '@/components/candidate/career-page-renderer';
 import { PuckRenderer } from '@/components/candidate/puck-renderer';
+import { getJobs, getJobsCount } from '@/app/actions/jobs';
 
 export const dynamic = 'force-dynamic';
 
 // Revalidate this page every 5 minutes
 export const revalidate = 300;
+
+const JOBS_PER_PAGE = 20;
 
 export async function generateMetadata({ params }: { params: Promise<{ companySlug: string }> }) {
     const { companySlug } = await params;
@@ -63,7 +66,14 @@ export async function generateMetadata({ params }: { params: Promise<{ companySl
                     height: 630,
                     alt: `${company.name} Logo`,
                 }
-            ] : [],
+            ] : [
+                {
+                    url: `${baseUrl}/og?company=${encodeURIComponent(company.name)}&title=${encodeURIComponent(`Careers at ${company.name}`)}&description=${encodeURIComponent(`Join our team at ${company.name}. Browse available jobs and apply today.`)}`,
+                    width: 1200,
+                    height: 630,
+                    alt: `${company.name} Careers`,
+                }
+            ],
             locale: "en_US",
             type: "website",
         },
@@ -87,8 +97,15 @@ export async function generateMetadata({ params }: { params: Promise<{ companySl
     };
 }
 
-export default async function CareersPage({ params }: { params: Promise<{ companySlug: string }> }) {
+export default async function CareersPage({ 
+    params,
+    searchParams 
+}: { 
+    params: Promise<{ companySlug: string }>;
+    searchParams: Promise<{ page?: string; search?: string; location?: string; type?: string; team?: string }>;
+}) {
     const { companySlug } = await params;
+    
     const supabase = await createClient();
 
     // Optimize: Combine company and career_pages query, only select needed fields
@@ -140,8 +157,8 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
     }
 
     // Optimize: Fetch sections and jobs in parallel using Promise.all
-    // Also optimize field selection - only select needed fields
-    const [sectionsResult, jobsResult] = await Promise.all([
+    // Fetch ALL published jobs (no pagination) - client-side filtering and pagination like /edit page
+    const [sectionsResult, jobs] = await Promise.all([
         // Fetch sections (for legacy fallback) - only select needed fields
         supabase
             .from('page_sections')
@@ -149,17 +166,17 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
             .eq('career_page_id', careerPage.id)
             .eq('visible', true)
             .order('order', { ascending: true }),
-        // Fetch published jobs - only select needed fields
-        supabase
-            .from('jobs')
-            .select('id, company_id, title, description, location, job_type, created_at, expires_at, employment_type, salary_range, currency, team, work_policy, experience_level, job_slug')
-            .eq('company_id', company.id)
-            .eq('published', true)
-            .order('created_at', { ascending: false })
+        // Fetch ALL published jobs - no pagination, client-side filtering and pagination
+        getJobs(company.id, {
+            published: true
+        })
     ]);
 
     const sections = sectionsResult.data || [];
-    const jobs = jobsResult.data || [];
+    
+    // Ensure only published jobs are passed to the component (defensive filtering)
+    // This matches the /edit page strategy: fetch all needed data server-side, then filter client-side
+    const publishedJobs = (jobs || []).filter(job => job.published === true);
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
         (process.env.VERCEL_URL
@@ -167,16 +184,22 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
             : "http://localhost:3000");
     const careersUrl = `${baseUrl}/${companySlug}/careers`;
 
+    // Enhanced Organization schema with more properties
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": company.name,
-        "logo": careerPage.logo_url,
+        "logo": careerPage.logo_url ? {
+            "@type": "ImageObject",
+            "url": careerPage.logo_url,
+        } : undefined,
         "url": careersUrl,
+        "sameAs": careerPage.video_url ? [careerPage.video_url] : undefined,
+        "description": `Career opportunities at ${company.name}. Browse available job openings and apply today.`,
     };
 
     // Generate JobPosting structured data for each published job
-    const jobPostings = jobs.map((job) => {
+    const jobPostings = publishedJobs.map((job) => {
         const jobPosting: any = {
             "@context": "https://schema.org",
             "@type": "JobPosting",
@@ -224,6 +247,32 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
             };
         }
 
+        // Enhanced properties
+        if (job.job_type) {
+            jobPosting.jobType = job.job_type;
+        }
+
+        if (job.work_policy) {
+            jobPosting.workLocation = {
+                "@type": "Place",
+                "name": job.work_policy,
+            };
+        }
+
+        if (job.experience_level) {
+            jobPosting.qualifications = {
+                "@type": "EducationalOccupationalCredential",
+                "credentialCategory": job.experience_level,
+            };
+        }
+
+        if (job.team) {
+            jobPosting.department = job.team;
+        }
+
+        // Add application URL if available
+        jobPosting.url = `${careersUrl}?job=${job.id}`;
+
         return jobPosting;
     });
 
@@ -240,7 +289,7 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
                 <PuckRenderer
                     data={puckData}
                     theme={careerPage.theme}
-                    jobs={jobs}
+                    jobs={publishedJobs}
                     bannerUrl={careerPage.banner_url}
                     logoUrl={careerPage.logo_url}
                     videoUrl={careerPage.video_url}
@@ -251,7 +300,7 @@ export default async function CareersPage({ params }: { params: Promise<{ compan
                     company={company}
                     careerPage={careerPage}
                     sections={sections}
-                    jobs={jobs}
+                    jobs={publishedJobs}
                 />
             )}
         </>

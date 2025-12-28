@@ -15,9 +15,12 @@ interface PuckRendererProps {
   logoUrl?: string;
   videoUrl?: string;
   companyName?: string;
+  currentPage?: number;
+  totalPages?: number;
+  totalJobs?: number;
 }
 
-export function PuckRenderer({ data, theme, jobs, bannerUrl, logoUrl, videoUrl, companyName }: PuckRendererProps) {
+export function PuckRenderer({ data, theme, jobs, bannerUrl, logoUrl, videoUrl, companyName, currentPage, totalPages, totalJobs }: PuckRendererProps) {
   // If no Puck data, return empty
   if (!data || !data.content || data.content.length === 0) {
     return null;
@@ -93,7 +96,7 @@ export function PuckRenderer({ data, theme, jobs, bannerUrl, logoUrl, videoUrl, 
       ...careersPageConfig.components,
       JobsSection: {
         ...careersPageConfig.components.JobsSection,
-        render: (props: any) => <JobsSection {...props} jobs={jobs || []} />,
+        render: (props: any) => <JobsSection {...props} jobs={jobs || []} serverSidePagination={currentPage !== undefined && totalPages !== undefined && totalJobs !== undefined ? { currentPage, totalPages, totalJobs } : undefined} />,
       },
       HeroSection: {
         ...careersPageConfig.components.HeroSection,

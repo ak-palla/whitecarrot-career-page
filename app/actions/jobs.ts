@@ -81,7 +81,7 @@ export async function getJobs(companyId: string, options?: GetJobsOptions) {
     if (options?.limit) {
         query = query.limit(options.limit);
     }
-    if (options?.offset) {
+    if (options?.offset !== undefined) {
         query = query.range(options.offset, options.offset + (options.limit || 100) - 1);
     }
 
@@ -89,6 +89,24 @@ export async function getJobs(companyId: string, options?: GetJobsOptions) {
 
     if (error) return [];
     return data;
+}
+
+export async function getJobsCount(companyId: string, published?: boolean) {
+    const supabase = await createClient();
+
+    let query = supabase
+        .from('jobs')
+        .select('id', { count: 'exact', head: true })
+        .eq('company_id', companyId);
+
+    if (published !== undefined) {
+        query = query.eq('published', published);
+    }
+
+    const { count, error } = await query;
+
+    if (error) return 0;
+    return count || 0;
 }
 
 export async function bulkUpdateJobsPublished(jobIds: string[], published: boolean) {
@@ -130,17 +148,36 @@ export async function bulkImportJobsFromCSV(companyId: string, csvFilePath: stri
     const supabase = await createClient();
 
     try {
-        // Download CSV file from storage
-        const { data: fileData, error: downloadError } = await supabase.storage
-            .from('csv-uploads')
-            .download(csvFilePath);
+        let csvText: string;
+        
+        // Check if csvFilePath is a storage path or a local file path
+        // Storage paths are just filenames (e.g., "jobs_123.csv")
+        // Local file paths have path separators (e.g., "/path/to/file.csv" or "path/to/file.csv")
+        const path = await import('path');
+        const isAbsolutePath = path.isAbsolute(csvFilePath);
+        const hasPathSeparators = csvFilePath.includes('/') || csvFilePath.includes('\\');
+        const isLocalFile = isAbsolutePath || hasPathSeparators;
+        
+        if (isLocalFile) {
+            // Local file path - read directly from filesystem
+            const fs = await import('fs/promises');
+            const fullPath = isAbsolutePath 
+                ? csvFilePath 
+                : path.join(process.cwd(), csvFilePath);
+            csvText = await fs.readFile(fullPath, 'utf-8');
+        } else {
+            // Storage path - download from Supabase storage
+            const { data: fileData, error: downloadError } = await supabase.storage
+                .from('csv-uploads')
+                .download(csvFilePath);
 
-        if (downloadError) {
-            return { error: `Failed to download CSV file: ${downloadError.message}` };
+            if (downloadError) {
+                return { error: `Failed to download CSV file: ${downloadError.message}` };
+            }
+
+            // Convert blob to text
+            csvText = await fileData.text();
         }
-
-        // Convert blob to text
-        const csvText = await fileData.text();
 
         // Parse CSV (using the same utility)
         const { loadJobsFromCSV } = await import('@/lib/utils/csv-loader');

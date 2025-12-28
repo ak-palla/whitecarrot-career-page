@@ -35,7 +35,7 @@ interface JobListProps {
   onEdit: (job: Job) => void;
   onDelete: (jobId: string) => void;
   onToggleSelection: (jobId: string) => void;
-  onSelectAll: () => void;
+  onSelectAll: (jobIds: string[]) => void;
   onDeselectAll: () => void;
 }
 
@@ -123,7 +123,8 @@ export function JobList({
             checked={isAllSelected}
             onCheckedChange={(checked) => {
               if (checked) {
-                onSelectAll();
+                // Select only jobs on current page
+                onSelectAll(paginatedJobs.map(job => job.id));
               } else {
                 onDeselectAll();
               }
@@ -133,7 +134,8 @@ export function JobList({
             if (isAllSelected) {
               onDeselectAll();
             } else {
-              onSelectAll();
+              // Select only jobs on current page
+              onSelectAll(paginatedJobs.map(job => job.id));
             }
           }}>
             Select All
