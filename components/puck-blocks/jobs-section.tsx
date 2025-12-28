@@ -12,6 +12,8 @@ import { X, Search, MapPin, Clock } from 'lucide-react';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
 import { JobApplicationModal } from '@/components/candidate/job-application-modal';
 import { Pagination } from '@/components/ui/pagination';
+import { JobListSkeleton } from '@/components/skeletons/job-list-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Memoized filter component to reduce re-renders
 const JobsFilter = React.memo(function JobsFilter({
@@ -156,6 +158,7 @@ export interface JobsSectionProps {
   align?: 'left' | 'center';
   // jobs will be injected at render time via PuckRenderer context/props
   jobs?: any;
+  loading?: boolean;
 }
 
 export function JobsSection({
@@ -168,6 +171,7 @@ export function JobsSection({
   buttonVariant = 'ghost',
   badgeVariant = 'secondary',
   align = 'center',
+  loading = false,
 }: JobsSectionProps) {
   const alignmentClasses = {
     left: 'text-left items-start',
@@ -374,6 +378,65 @@ export function JobsSection({
   const formatJobType = (jobType: string) => {
     return jobType.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
+
+  // Show skeleton when loading
+  if (loading) {
+    const maxWidth = layout === 'cards' ? 'full' : '3xl';
+    const skeletonContent = (
+      <div className="space-y-6">
+        <div className={`flex flex-col space-y-4 mb-16 ${alignmentClasses[align]}`}>
+          <div className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+            Open Positions
+          </div>
+          <h2 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-balance text-black">
+            {heading}
+          </h2>
+        </div>
+        {layout === 'cards' ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="h-full">
+                <CardHeader>
+                  <Skeleton className="h-6 w-48 mb-2" />
+                  <Skeleton className="h-4 w-32" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-3/4 mb-4" />
+                  <Skeleton className="h-9 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <JobListSkeleton count={5} />
+        )}
+      </div>
+    );
+
+    if (background === 'card') {
+      return (
+        <SectionWrapper contentMaxWidth={maxWidth} verticalPadding="lg">
+          <section id="jobs" className="scroll-mt-20">
+            <Card>
+              <CardContent className="pt-6">
+                {skeletonContent}
+              </CardContent>
+            </Card>
+          </section>
+        </SectionWrapper>
+      );
+    }
+
+    return (
+      <SectionWrapper contentMaxWidth={maxWidth} verticalPadding="lg">
+        <section id="jobs" className="scroll-mt-20">
+          {skeletonContent}
+        </section>
+      </SectionWrapper>
+    );
+  }
 
   const sectionContent = (
     <>

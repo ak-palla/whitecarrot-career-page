@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RichTextEditor } from './rich-text-editor';
 import { Loader2, Plus, Trash2, Eye, EyeOff, GripVertical, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { SectionListSkeleton } from '@/components/skeletons/section-list-skeleton';
 import {
     Select,
     SelectContent,
@@ -57,7 +58,7 @@ export function SectionBuilder({ pageId }: { pageId: string }) {
             </div>
 
             {loading ? (
-                <div className="flex justify-center p-8"><Loader2 className="animate-spin text-muted-foreground" /></div>
+                <SectionListSkeleton count={3} />
             ) : sections.length === 0 ? (
                 <div className="text-center p-12 border border-dashed rounded-lg bg-gray-50 text-muted-foreground">
                     <p>No sections yet. Add one to get started.</p>

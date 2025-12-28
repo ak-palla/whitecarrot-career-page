@@ -9,16 +9,25 @@ import { CompanyCard } from '@/components/recruiter/company-card';
 import { EmptyState } from './empty-state';
 import { CreateCompanyDialog } from './create-company-dialog';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { CompanyCardsSkeleton } from '@/components/skeletons/company-cards-skeleton';
 
 export function CompaniesList() {
   const { data: companies = [], isLoading, error } = useCompanies();
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
+      <>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">Companies</h1>
+            <p className="text-lg text-muted-foreground">
+              Manage your career pages and job postings.
+            </p>
+          </div>
+        </div>
+        <CompanyCardsSkeleton count={2} />
+      </>
     );
   }
 

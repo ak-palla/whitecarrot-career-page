@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Loader2, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { JobListSkeleton } from '@/components/skeletons/job-list-skeleton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,11 +102,7 @@ export function JobList({
   }, [setCurrentPage]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center p-8">
-        <Loader2 className="animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <JobListSkeleton count={5} />;
   }
 
   if (jobs.length === 0) {

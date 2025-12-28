@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, FileText, Linkedin, Mail, Calendar, Search, X } from 'lucide-react';
 import { Pagination } from '@/components/ui/pagination';
+import { ApplicationListSkeleton } from '@/components/skeletons/application-list-skeleton';
 
 interface ApplicationStatus {
     value: string;
@@ -185,9 +186,7 @@ export function ApplicationsList({ company }: { company: any }) {
             </div>
 
             {loading ? (
-                <div className="flex justify-center p-8">
-                    <Loader2 className="animate-spin text-muted-foreground" />
-                </div>
+                <ApplicationListSkeleton count={5} />
             ) : applications.length === 0 && !hasActiveFilters ? (
                 <div className="text-center p-12 bg-gray-50 rounded-lg border border-dashed text-muted-foreground">
                     <p>No applications yet. Applications will appear here when candidates apply.</p>

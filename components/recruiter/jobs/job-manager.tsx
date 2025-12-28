@@ -17,6 +17,7 @@ import { CSVImportDialog } from './csv-import-dialog';
 import { JobFilters } from './job-filters';
 import { BulkActions } from './bulk-actions';
 import { JobList } from './job-list';
+import { JobListSkeleton } from '@/components/skeletons/job-list-skeleton';
 import { useJobFilters } from './hooks/use-job-filters';
 import type { Job, CreateJobInput, UpdateJobInput } from '@/lib/types';
 
@@ -237,9 +238,7 @@ export function JobManager({ companyId }: JobManagerProps) {
       </div>
 
       {loading ? (
-        <div className="flex justify-center p-8">
-          <Loader2 className="animate-spin text-muted-foreground" />
-        </div>
+        <JobListSkeleton count={5} />
       ) : jobs.length === 0 ? (
         <div className="text-center p-12 bg-gray-50 rounded-lg border border-dashed text-muted-foreground">
           <p>No jobs posted yet. Create your first listing.</p>
