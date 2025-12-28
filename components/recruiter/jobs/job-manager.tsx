@@ -148,8 +148,15 @@ export function JobManager({ companyId }: JobManagerProps) {
   }
 
   // Helper to invalidate and refetch jobs
-  const refetchJobs = () => {
+  const refetchJobs = async () => {
+    // Invalidate cache first, then force immediate refetch
     queryClient.invalidateQueries({ queryKey: jobsQueryKey(companyId) });
+    
+    // Force immediate refetch
+    await queryClient.refetchQueries({ 
+      queryKey: jobsQueryKey(companyId),
+      type: 'active'
+    });
   };
 
   // Selection helper functions

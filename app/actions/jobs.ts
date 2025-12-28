@@ -68,7 +68,7 @@ export async function getJobs(companyId: string, options?: GetJobsOptions) {
     // Select all job fields but be explicit for clarity
     let query = supabase
         .from('jobs')
-        .select('id, company_id, title, description, location, job_type, published, created_at, updated_at, team, work_policy, employment_type, experience_level, salary_range, job_slug, expires_at, currency')
+        .select('id, company_id, title, description, location, job_type, published, created_at, updated_at, team, work_policy, employment_type, experience_level, salary_range, job_slug')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
 
@@ -219,6 +219,15 @@ export async function bulkImportJobsFromCSV(companyId: string, csvFilePath: stri
         if (errors.length > 0 && totalInserted === 0) {
             return { error: `Failed to import jobs: ${errors.join(', ')}` };
         }
+
+        // Verify the insert by querying the database immediately
+        // This ensures the transaction is committed and data is visible
+        await supabase
+            .from('jobs')
+            .select('id')
+            .eq('company_id', companyId)
+            .order('created_at', { ascending: false })
+            .limit(1);
 
         return {
             success: true,

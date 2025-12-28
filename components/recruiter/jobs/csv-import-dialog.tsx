@@ -12,7 +12,7 @@ interface CSVImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   companyId: string;
-  onImportComplete: () => void;
+  onImportComplete: () => void | Promise<void>;
 }
 
 export function CSVImportDialog({
@@ -61,7 +61,7 @@ export function CSVImportDialog({
         toast.success(`Successfully imported ${result.imported} jobs!`);
         
         // Call callback to refresh job list
-        onImportComplete();
+        await onImportComplete();
         
         // Close dialog after a short delay
         setTimeout(() => {
