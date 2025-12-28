@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { PuckRenderer } from '@/components/candidate/puck-renderer';
 
 export function CareerPageRenderer({
@@ -46,11 +47,16 @@ export function CareerPageRenderer({
                 )}
                 <div className="relative z-10 max-w-4xl mx-auto">
                     {careerPage?.logo_url && (
-                        <img
-                            src={careerPage.logo_url}
-                            alt={`${company.name} Logo`}
-                            className="h-20 w-auto mx-auto mb-6 bg-white p-2 rounded-lg shadow-sm"
-                        />
+                        <div className="relative h-20 w-auto mx-auto mb-6 bg-white p-2 rounded-lg shadow-sm flex items-center justify-center">
+                            <Image
+                                src={careerPage.logo_url}
+                                alt={`${company.name} Logo`}
+                                width={80}
+                                height={80}
+                                className="h-auto w-auto max-h-16 object-contain"
+                                priority
+                            />
+                        </div>
                     )}
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
                         {company.name} Careers

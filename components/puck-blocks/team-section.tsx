@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -68,10 +69,12 @@ export function TeamSection({ heading, description, members, background = 'plain
               <div key={index} className="flex flex-col text-left group">
                 <div className="relative mb-4 overflow-hidden rounded-sm aspect-[4/3] bg-muted">
                   {member.image ? (
-                    <img
+                    <Image
                       src={member.image}
                       alt={name}
-                      className="object-contain w-full h-full transition-transform duration-500 group-hover:scale-105"
+                      fill
+                      className="object-contain transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   ) : (
                     <div className="flex items-center justify-center w-full h-full bg-secondary/30 text-secondary-foreground/50 text-4xl font-light">

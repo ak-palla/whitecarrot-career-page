@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
 import { SECTION_PADDING } from '@/lib/section-layout/constants';
@@ -89,11 +90,16 @@ export function HeroSection({
         )}
         <div className={`relative z-10 mx-auto flex max-w-3xl flex-col gap-6 ${alignmentClasses[alignment]}`}>
           {logoUrl && (
-            <img
-              src={logoUrl}
-              alt={logoAlt || 'Company Logo'}
-              className="h-20 w-auto mx-auto mb-6 bg-white p-2 rounded-lg shadow-sm"
-            />
+            <div className="relative h-20 w-auto mx-auto mb-6 bg-white p-2 rounded-lg shadow-sm flex items-center justify-center">
+              <Image
+                src={logoUrl}
+                alt={logoAlt || 'Company Logo'}
+                width={80}
+                height={80}
+                className="h-auto w-auto max-h-16 object-contain"
+                priority
+              />
+            </div>
           )}
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-balance" style={{ color: textColor }}>
             {title}

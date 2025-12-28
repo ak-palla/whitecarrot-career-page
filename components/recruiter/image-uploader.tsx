@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
+import { compressImageFile, isValidImageFile } from '@/lib/utils/image-optimization';
 
 export function ImageUploader({
     label,
@@ -37,18 +38,32 @@ export function ImageUploader({
                 throw new Error('File size must be less than 25MB');
             }
 
-            if (!file.type.startsWith('image/')) {
-                throw new Error('File must be an image');
+            if (!isValidImageFile(file)) {
+                throw new Error('File must be a valid image (JPG, PNG, GIF, or WebP)');
+            }
+
+            // Compress image before upload
+            let fileToUpload = file;
+            try {
+                fileToUpload = await compressImageFile(file, {
+                    maxWidth: 1920,
+                    maxHeight: 1920,
+                    quality: 0.85,
+                    maxSizeMB: 2,
+                });
+            } catch (compressError) {
+                // If compression fails, use original file
+                console.warn('Image compression failed, using original file:', compressError);
             }
 
             const supabase = createClient();
-            const fileExt = file.name.split('.').pop();
+            const fileExt = fileToUpload.name.split('.').pop();
             const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
             const filePath = `${fileName}`;
 
             const { error: uploadError } = await supabase.storage
                 .from(bucket)
-                .upload(filePath, file);
+                .upload(filePath, fileToUpload);
 
             if (uploadError) {
                 throw new Error(uploadError.message);
@@ -144,6 +159,7 @@ export function ImageUploader({
             <div className="flex items-center gap-4">
                 {currentImageUrl ? (
                     <div className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={currentImageUrl} alt="Preview" className="h-16 w-16 object-cover rounded border" />
                     </div>
                 ) : (
