@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useQueryClient } from '@tanstack/react-query';
 import { deleteCompany } from '@/app/actions/companies';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { companiesQueryKey } from '@/lib/hooks/use-companies';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -21,6 +23,7 @@ import {
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function CompanySettings({ company }: { company: any }) {
+    const queryClient = useQueryClient();
     const [name, setName] = useState(company.name);
     const [saving, setSaving] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -46,6 +49,8 @@ export function CompanySettings({ company }: { company: any }) {
                 toast.error(res.error);
             } else {
                 toast.success('Company deleted');
+                // Invalidate React Query cache
+                queryClient.invalidateQueries({ queryKey: companiesQueryKey });
                 router.push('/dashboard');
                 router.refresh();
             }

@@ -4,6 +4,9 @@ import { PuckRenderer } from '@/components/candidate/puck-renderer';
 
 export const dynamic = 'force-dynamic';
 
+// Revalidate this page every 5 minutes
+export const revalidate = 300;
+
 export async function generateMetadata({ params }: { params: Promise<{ companySlug: string }> }) {
     const { companySlug } = await params;
     const supabase = await createClient();

@@ -2,11 +2,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { Trash2, Share2, Check, Loader2 } from 'lucide-react';
 import { deleteCompany } from '@/app/actions/companies';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useNavigationLoading } from './navigation-loading-context';
+import { companiesQueryKey } from '@/lib/hooks/use-companies';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -29,6 +31,7 @@ interface Company {
 
 export function CompanyCard({ company }: { company: Company }) {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const [open, setOpen] = useState(false);
     const [linkCopied, setLinkCopied] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -43,6 +46,8 @@ export function CompanyCard({ company }: { company: Company }) {
             } else if (result?.success) {
                 setOpen(false);
                 toast.success('Company deleted successfully');
+                // Invalidate React Query cache
+                queryClient.invalidateQueries({ queryKey: companiesQueryKey });
                 router.refresh();
             } else {
                 toast.error('Failed to delete company. Please try again.');

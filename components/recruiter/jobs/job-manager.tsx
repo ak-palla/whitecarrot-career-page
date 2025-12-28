@@ -7,7 +7,9 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { getJobs, createJob, updateJob, deleteJob, bulkUpdateJobsPublished, bulkDeleteJobs } from '@/app/actions/jobs';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createJob, updateJob, deleteJob, bulkUpdateJobsPublished, bulkDeleteJobs } from '@/app/actions/jobs';
+import { useJobs, jobsQueryKey } from '@/lib/hooks/use-jobs';
 import { Button } from '@/components/ui/button';
 import { Loader2, Plus, Upload } from 'lucide-react';
 import { JobFormDialog } from './job-form-dialog';
@@ -23,15 +25,14 @@ interface JobManagerProps {
 }
 
 export function JobManager({ companyId }: JobManagerProps) {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: jobs = [], isLoading: loading, error } = useJobs(companyId);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [csvImportOpen, setCsvImportOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [togglingJobId, setTogglingJobId] = useState<string | null>(null);
   const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
   const [selectedJobIds, setSelectedJobIds] = useState<Set<string>>(new Set());
-  const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
   // Use the custom hook for filters
   const {
@@ -51,87 +52,104 @@ export function JobManager({ companyId }: JobManagerProps) {
     clearFilters,
   } = useJobFilters({ jobs });
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    // This will be handled by the pagination hook in JobList
-  }, [selectedLocation, selectedJobType, selectedTeam, selectedPublishedStatus]);
-
   // Clear selection when filters change
   useEffect(() => {
     setSelectedJobIds(new Set());
   }, [selectedLocation, selectedJobType, selectedTeam, selectedPublishedStatus]);
 
-  useEffect(() => {
-    loadJobs();
-  }, [companyId]);
+  // Mutations with React Query
+  const createMutation = useMutation({
+    mutationFn: (data: CreateJobInput) => createJob(companyId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: jobsQueryKey(companyId) });
+      setDialogOpen(false);
+    },
+  });
 
-  async function loadJobs() {
-    setLoading(true);
-    const data = await getJobs(companyId);
-    setJobs(data || []);
-    setLoading(false);
-  }
+  const updateMutation = useMutation({
+    mutationFn: ({ jobId, data }: { jobId: string; data: UpdateJobInput }) =>
+      updateJob(jobId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: jobsQueryKey(companyId) });
+      setEditingJob(null);
+      setDialogOpen(false);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (jobId: string) => deleteJob(jobId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: jobsQueryKey(companyId) });
+    },
+  });
+
+  const togglePublishMutation = useMutation({
+    mutationFn: ({ jobId, published }: { jobId: string; published: boolean }) =>
+      updateJob(jobId, { published }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: jobsQueryKey(companyId) });
+    },
+  });
+
+  const bulkPublishMutation = useMutation({
+    mutationFn: (jobIds: string[]) => bulkUpdateJobsPublished(jobIds, true),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: jobsQueryKey(companyId) });
+      setSelectedJobIds(new Set());
+    },
+  });
+
+  const bulkUnpublishMutation = useMutation({
+    mutationFn: (jobIds: string[]) => bulkUpdateJobsPublished(jobIds, false),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: jobsQueryKey(companyId) });
+      setSelectedJobIds(new Set());
+    },
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (jobIds: string[]) => bulkDeleteJobs(jobIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: jobsQueryKey(companyId) });
+      setSelectedJobIds(new Set());
+    },
+  });
 
   async function handleCreate(data: CreateJobInput) {
-    await createJob(companyId, data);
-    await loadJobs();
+    createMutation.mutate(data);
   }
 
   async function handleUpdate(data: UpdateJobInput) {
     if (!editingJob) return;
-    await updateJob(editingJob.id, data);
-    await loadJobs();
-    setEditingJob(null);
+    updateMutation.mutate({ jobId: editingJob.id, data });
   }
 
   async function togglePublish(job: Job) {
-    const newPublishedState = !job.published;
-    
-    // Optimistically update the UI
-    setJobs((prevJobs) =>
-      prevJobs.map((j) =>
-        j.id === job.id ? { ...j, published: newPublishedState } : j
-      )
-    );
-    
     setTogglingJobId(job.id);
-    
-    try {
-      const result = await updateJob(job.id, { published: newPublishedState });
-      
-      if (result?.error) {
-        // Revert on error
-        setJobs((prevJobs) =>
-          prevJobs.map((j) =>
-            j.id === job.id ? { ...j, published: !newPublishedState } : j
-          )
-        );
-      } else {
-        // Refresh to ensure we have the latest data
-        await loadJobs();
+    togglePublishMutation.mutate(
+      { jobId: job.id, published: !job.published },
+      {
+        onSettled: () => {
+          setTogglingJobId(null);
+        },
       }
-    } catch (error) {
-      // Revert on error
-      setJobs((prevJobs) =>
-        prevJobs.map((j) =>
-          j.id === job.id ? { ...j, published: !newPublishedState } : j
-        )
-      );
-    } finally {
-      setTogglingJobId(null);
-    }
+    );
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this job? This cannot be undone.')) return;
     setDeletingJobId(id);
-    try {
-      await deleteJob(id);
-      await loadJobs();
-    } finally {
-      setDeletingJobId(null);
-    }
+    deleteMutation.mutate(id, {
+      onSettled: () => {
+        setDeletingJobId(null);
+      },
+    });
   }
+
+  // Helper to invalidate and refetch jobs
+  const refetchJobs = () => {
+    queryClient.invalidateQueries({ queryKey: jobsQueryKey(companyId) });
+  };
 
   // Selection helper functions
   const toggleJobSelection = useCallback((jobId: string) => {
@@ -158,42 +176,22 @@ export function JobManager({ companyId }: JobManagerProps) {
   // Bulk action handlers
   async function handleBulkPublish() {
     if (selectedJobIds.size === 0) return;
-    
-    setBulkActionLoading(true);
-    try {
-      const result = await bulkUpdateJobsPublished(Array.from(selectedJobIds), true);
-      if (result?.error) {
-        alert(`Error: ${result.error}`);
-      } else {
-        setSelectedJobIds(new Set());
-        await loadJobs();
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to publish jobs';
-      alert(`Error: ${errorMessage}`);
-    } finally {
-      setBulkActionLoading(false);
-    }
+    bulkPublishMutation.mutate(Array.from(selectedJobIds), {
+      onError: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to publish jobs';
+        alert(`Error: ${errorMessage}`);
+      },
+    });
   }
 
   async function handleBulkUnpublish() {
     if (selectedJobIds.size === 0) return;
-    
-    setBulkActionLoading(true);
-    try {
-      const result = await bulkUpdateJobsPublished(Array.from(selectedJobIds), false);
-      if (result?.error) {
-        alert(`Error: ${result.error}`);
-      } else {
-        setSelectedJobIds(new Set());
-        await loadJobs();
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to unpublish jobs';
-      alert(`Error: ${errorMessage}`);
-    } finally {
-      setBulkActionLoading(false);
-    }
+    bulkUnpublishMutation.mutate(Array.from(selectedJobIds), {
+      onError: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to unpublish jobs';
+        alert(`Error: ${errorMessage}`);
+      },
+    });
   }
 
   async function handleBulkDelete() {
@@ -201,22 +199,18 @@ export function JobManager({ companyId }: JobManagerProps) {
     
     if (!confirm(`Delete ${selectedJobIds.size} job(s)? This cannot be undone.`)) return;
     
-    setBulkActionLoading(true);
-    try {
-      const result = await bulkDeleteJobs(Array.from(selectedJobIds));
-      if (result?.error) {
-        alert(`Error: ${result.error}`);
-      } else {
-        setSelectedJobIds(new Set());
-        await loadJobs();
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete jobs';
-      alert(`Error: ${errorMessage}`);
-    } finally {
-      setBulkActionLoading(false);
-    }
+    bulkDeleteMutation.mutate(Array.from(selectedJobIds), {
+      onError: (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to delete jobs';
+        alert(`Error: ${errorMessage}`);
+      },
+    });
   }
+
+  const bulkActionLoading =
+    bulkPublishMutation.isPending ||
+    bulkUnpublishMutation.isPending ||
+    bulkDeleteMutation.isPending;
 
   return (
     <div className="space-y-6">
@@ -321,7 +315,7 @@ export function JobManager({ companyId }: JobManagerProps) {
         open={csvImportOpen}
         onOpenChange={setCsvImportOpen}
         companyId={companyId}
-        onImportComplete={loadJobs}
+        onImportComplete={refetchJobs}
       />
     </div>
   );

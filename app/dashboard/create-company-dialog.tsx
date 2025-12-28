@@ -13,10 +13,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { createCompany } from '@/app/actions/companies';
 import { useFormStatus } from 'react-dom';
+import { companiesQueryKey } from '@/lib/hooks/use-companies';
 
 export function CreateCompanyDialog({ children }: { children?: React.ReactNode }) {
+    const queryClient = useQueryClient();
     const [open, setOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +29,8 @@ export function CreateCompanyDialog({ children }: { children?: React.ReactNode }
         if (result?.error) {
             setError(result.error);
         } else {
+            // Invalidate companies cache so the list refreshes
+            queryClient.invalidateQueries({ queryKey: companiesQueryKey });
             setOpen(false);
         }
     }

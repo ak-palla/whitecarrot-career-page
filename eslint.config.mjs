@@ -11,6 +11,24 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    ignores: [
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "build/**",
+      "dist/**",
+      "coverage/**",
+      "test-results/**",
+      "playwright-report/**",
+      "*.tsbuildinfo",
+      "next-env.d.ts",
+      ".env*.local",
+      ".env",
+      "Sample Jobs Data.*",
+      "jobs_apstic.csv",
+    ],
+  },
 ];
 
 export default eslintConfig;
