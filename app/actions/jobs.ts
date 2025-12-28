@@ -68,7 +68,7 @@ export async function getJobs(companyId: string, options?: GetJobsOptions) {
     // Select all job fields but be explicit for clarity
     let query = supabase
         .from('jobs')
-        .select('id, company_id, title, description, location, job_type, published, created_at, updated_at, team, work_policy, employment_type, experience_level, salary_range, job_slug')
+        .select('id, company_id, title, description, location, job_type, published, created_at, updated_at, team, work_policy, employment_type, experience_level, salary_range, job_slug, expires_at, currency')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
 

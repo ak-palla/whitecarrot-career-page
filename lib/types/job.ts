@@ -25,6 +25,8 @@ export interface Job {
   experience_level?: ExperienceLevel | null;
   salary_range?: string | null;
   job_slug?: string | null;
+  expires_at?: string | null;
+  currency?: string | null;
 }
 
 export interface CreateJobInput {
