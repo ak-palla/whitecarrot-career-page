@@ -13,6 +13,15 @@ export function JobFormDialog({ open, onOpenChange, onSubmit, initialData }: any
     const [type, setType] = useState(initialData?.job_type || 'full-time');
     const [description, setDescription] = useState(initialData?.description || '');
     const [requirements, setRequirements] = useState(initialData?.requirements || '');
+
+    // New fields
+    const [team, setTeam] = useState(initialData?.team || '');
+    const [workPolicy, setWorkPolicy] = useState(initialData?.work_policy || 'Remote');
+    const [employmentType, setEmploymentType] = useState(initialData?.employment_type || 'Full time');
+    const [experienceLevel, setExperienceLevel] = useState(initialData?.experience_level || 'Mid-level');
+    const [salaryRange, setSalaryRange] = useState(initialData?.salary_range || '');
+    const [currency, setCurrency] = useState(initialData?.currency || 'USD');
+    const [expiresAt, setExpiresAt] = useState(initialData?.expires_at ? new Date(initialData.expires_at).toISOString().split('T')[0] : '');
     const [submitting, setSubmitting] = useState(false);
 
     async function handleSubmit(e: React.FormEvent) {
@@ -23,7 +32,14 @@ export function JobFormDialog({ open, onOpenChange, onSubmit, initialData }: any
             location,
             job_type: type,
             description,
-            requirements
+            requirements,
+            team,
+            work_policy: workPolicy,
+            employment_type: employmentType,
+            experience_level: experienceLevel,
+            salary_range: salaryRange,
+            currency,
+            expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
         });
         setSubmitting(false);
         onOpenChange(false);
@@ -44,6 +60,61 @@ export function JobFormDialog({ open, onOpenChange, onSubmit, initialData }: any
                         <div className="space-y-2">
                             <Label>Location</Label>
                             <Input value={location} onChange={e => setLocation(e.target.value)} required placeholder="e.g. Remote, New York" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Team</Label>
+                            <Input value={team} onChange={e => setTeam(e.target.value)} placeholder="e.g. Engineering" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Work Policy</Label>
+                            <Select value={workPolicy} onValueChange={setWorkPolicy}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Remote">Remote</SelectItem>
+                                    <SelectItem value="Hybrid">Hybrid</SelectItem>
+                                    <SelectItem value="On-site">On-site</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Employment Type</Label>
+                            <Select value={employmentType} onValueChange={setEmploymentType}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Full time">Full time</SelectItem>
+                                    <SelectItem value="Part time">Part time</SelectItem>
+                                    <SelectItem value="Contract">Contract</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Experience Level</Label>
+                            <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Junior">Junior</SelectItem>
+                                    <SelectItem value="Mid-level">Mid-level</SelectItem>
+                                    <SelectItem value="Senior">Senior</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Salary Range</Label>
+                            <Input value={salaryRange} onChange={e => setSalaryRange(e.target.value)} placeholder="e.g. $100k - $120k" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Currency</Label>
+                            <Input value={currency} onChange={e => setCurrency(e.target.value)} placeholder="e.g. USD" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Expires At</Label>
+                            <Input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} />
                         </div>
                     </div>
                     <div className="space-y-2">

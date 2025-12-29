@@ -14,7 +14,7 @@ async function runMigration() {
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Read migration file
-  const migrationPath = path.join(__dirname, '../../migrations/add-puck-data.sql');
+  const migrationPath = path.join(__dirname, '../../migrations/fix-jobs-rls-policy.sql');
   const migrationSQL = fs.readFileSync(migrationPath, 'utf-8');
 
   console.log('Running migration: add-puck-data.sql');

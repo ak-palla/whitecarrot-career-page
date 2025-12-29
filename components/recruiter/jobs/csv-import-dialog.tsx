@@ -5,8 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { CSVUploader } from './csv-uploader';
 import { bulkImportJobsFromCSV } from '@/app/actions/jobs';
-import { importJobsFromCSVFile } from '@/app/actions/import-csv-jobs';
-import { Loader2, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CSVImportDialogProps {
@@ -80,46 +79,6 @@ export function CSVImportDialog({
     }
   };
 
-  const handleImportDefaultFile = async () => {
-    setImporting(true);
-    setImportResult(null);
-
-    try {
-      const result = await importJobsFromCSVFile(companyId);
-
-      if (result.error) {
-        setImportResult({
-          success: false,
-          error: result.error,
-        });
-        toast.error(result.error);
-      } else {
-        setImportResult({
-          success: true,
-          imported: result.imported,
-          total: result.total,
-        });
-        toast.success(`Successfully imported ${result.imported} jobs from jobs_apstic.csv!`);
-        
-        // Call callback to refresh job list
-        await onImportComplete();
-        
-        // Close dialog after a short delay
-        setTimeout(() => {
-          handleClose();
-        }, 2000);
-      }
-    } catch (error: any) {
-      setImportResult({
-        success: false,
-        error: error.message || 'Failed to import jobs',
-      });
-      toast.error('Failed to import jobs');
-    } finally {
-      setImporting(false);
-    }
-  };
-
   const handleClose = () => {
     setUploadedFilePath(null);
     setUploadedFileName(null);
@@ -138,45 +97,6 @@ export function CSVImportDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Option to import from default file */}
-          <div className="p-4 border rounded-lg bg-muted/50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Import from jobs_apstic.csv</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Import 151 sample jobs from the default CSV file
-                </p>
-              </div>
-              <Button
-                onClick={handleImportDefaultFile}
-                disabled={importing || !!uploadedFilePath}
-                size="sm"
-                variant="outline"
-              >
-                {importing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Importing...
-                  </>
-                ) : (
-                  <>
-                    <FileText className="mr-2 h-4 w-4" />
-                    Import Default
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or</span>
-            </div>
-          </div>
-
           <CSVUploader
             onUploadComplete={handleUploadComplete}
             onError={(error) => {

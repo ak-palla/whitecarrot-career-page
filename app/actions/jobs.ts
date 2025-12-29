@@ -118,7 +118,7 @@ export async function bulkUpdateJobsPublished(jobIds: string[], published: boole
 
     const { error } = await supabase
         .from('jobs')
-        .update({ 
+        .update({
             published,
             updated_at: new Date().toISOString()
         })
@@ -149,7 +149,7 @@ export async function bulkImportJobsFromCSV(companyId: string, csvFilePath: stri
 
     try {
         let csvText: string;
-        
+
         // Check if csvFilePath is a storage path or a local file path
         // Storage paths are just filenames (e.g., "jobs_123.csv")
         // Local file paths have path separators (e.g., "/path/to/file.csv" or "path/to/file.csv")
@@ -157,12 +157,12 @@ export async function bulkImportJobsFromCSV(companyId: string, csvFilePath: stri
         const isAbsolutePath = path.isAbsolute(csvFilePath);
         const hasPathSeparators = csvFilePath.includes('/') || csvFilePath.includes('\\');
         const isLocalFile = isAbsolutePath || hasPathSeparators;
-        
+
         if (isLocalFile) {
             // Local file path - read directly from filesystem
             const fs = await import('fs/promises');
-            const fullPath = isAbsolutePath 
-                ? csvFilePath 
+            const fullPath = isAbsolutePath
+                ? csvFilePath
                 : path.join(process.cwd(), csvFilePath);
             csvText = await fs.readFile(fullPath, 'utf-8');
         } else {
@@ -225,7 +225,7 @@ export async function bulkImportJobsFromCSV(companyId: string, csvFilePath: stri
                 // Generate slug from title as fallback
                 jobData.job_slug = job.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || null;
             }
-            
+
             return jobData;
         });
 

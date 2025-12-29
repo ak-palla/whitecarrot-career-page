@@ -82,7 +82,7 @@ export function CareerPageRenderer({
 
                     if (puckData) {
                         // PuckRenderer handles jobs internally, no need for separate jobs section
-                        return <PuckRenderer data={puckData} theme={theme} jobs={jobs} />;
+                        return <PuckRenderer data={puckData} theme={theme} jobs={jobs} currentPage={currentPage} totalPages={totalPages} totalJobs={totalJobs} />;
                     } else if (sections.length > 0) {
                         return (
                             <>

@@ -18,8 +18,9 @@ export function useJobs(companyId: string, options?: { enabled?: boolean }) {
       const jobs = await getJobs(companyId);
       return jobs || [];
     },
-    // Jobs change frequently, so shorter cache
-    staleTime: 1000 * 60 * 1, // 1 minute
+    // Jobs change frequently, but cache for 5 minutes to reduce refetches
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnMount: true, // Always refetch on mount to ensure fresh data after login
     enabled: options?.enabled ?? true,
   });
 }

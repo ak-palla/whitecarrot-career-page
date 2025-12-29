@@ -156,9 +156,13 @@ export default async function CareersPage({
         );
     }
 
-    // Optimize: Fetch sections and jobs in parallel using Promise.all
-    // Fetch ALL published jobs (no pagination) - client-side filtering and pagination like /edit page
-    const [sectionsResult, jobs] = await Promise.all([
+    // Parse pagination from URL
+    const resolvedSearchParams = await searchParams;
+    const currentPage = parseInt(resolvedSearchParams.page || '1', 10);
+    const offset = (currentPage - 1) * JOBS_PER_PAGE;
+
+    // Optimize: Fetch sections, jobs with pagination, and total count in parallel
+    const [sectionsResult, jobs, totalJobs] = await Promise.all([
         // Fetch sections (for legacy fallback) - only select needed fields
         supabase
             .from('page_sections')
@@ -166,16 +170,20 @@ export default async function CareersPage({
             .eq('career_page_id', careerPage.id)
             .eq('visible', true)
             .order('order', { ascending: true }),
-        // Fetch ALL published jobs - no pagination, client-side filtering and pagination
+        // Fetch published jobs with server-side pagination
         getJobs(company.id, {
-            published: true
-        })
+            published: true,
+            limit: JOBS_PER_PAGE,
+            offset: offset
+        }),
+        // Get total count for pagination metadata
+        getJobsCount(company.id, true)
     ]);
 
     const sections = sectionsResult.data || [];
+    const totalPages = Math.ceil((totalJobs || 0) / JOBS_PER_PAGE);
     
     // Ensure only published jobs are passed to the component (defensive filtering)
-    // This matches the /edit page strategy: fetch all needed data server-side, then filter client-side
     const publishedJobs = (jobs || []).filter(job => job.published === true);
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
@@ -294,6 +302,9 @@ export default async function CareersPage({
                     logoUrl={careerPage.logo_url}
                     videoUrl={careerPage.video_url}
                     companyName={company.name}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalJobs={totalJobs || 0}
                 />
             ) : (
                 <CareerPageRenderer
@@ -301,6 +312,9 @@ export default async function CareersPage({
                     careerPage={careerPage}
                     sections={sections}
                     jobs={publishedJobs}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalJobs={totalJobs || 0}
                 />
             )}
         </>
