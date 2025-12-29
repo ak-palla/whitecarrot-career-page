@@ -19,9 +19,21 @@ interface JobApplicationModalProps {
 export function JobApplicationModal({ job, trigger, open, onOpenChange }: JobApplicationModalProps) {
     const [isOpen, setIsOpen] = useState(false);
 
+    // #region agent log
+    if (typeof window !== 'undefined') {
+      fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'job-application-modal.tsx:19',message:'JobApplicationModal render',data:{open,isOpen,hasOnOpenChange:!!onOpenChange,hasTrigger:!!trigger,jobId:job?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    }
+    // #endregion
+
     // Controlled internal state if not controlled externally
     const show = open !== undefined ? open : isOpen;
     const setShow = onOpenChange || setIsOpen;
+
+    // #region agent log
+    if (typeof window !== 'undefined') {
+      fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'job-application-modal.tsx:25',message:'Computed show value',data:{show,open,isOpen},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    }
+    // #endregion
 
     const [loading, setLoading] = useState(false);
     const [file, setFile] = useState<File | null>(null);

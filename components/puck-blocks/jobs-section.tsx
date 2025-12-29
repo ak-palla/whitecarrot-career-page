@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { X, Search, MapPin, Clock } from 'lucide-react';
 import { SectionWrapper } from '@/lib/section-layout/section-wrapper';
 import { JobApplicationModal } from '@/components/candidate/job-application-modal';
+import { JobDetailsModal } from '@/components/candidate/job-details-modal';
 import { Pagination } from '@/components/ui/pagination';
 import { JobListSkeleton } from '@/components/skeletons/job-list-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -209,6 +210,15 @@ export function JobsSection({
     return team || 'all';
   });
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+  
+  // Job details modal state
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const selectedJob = selectedJobId ? jobsArray.find(job => job.id === selectedJobId) : null;
+  
+  // Application modal state (managed at parent level to persist after details modal closes)
+  const [applicationModalOpen, setApplicationModalOpen] = useState(false);
+  const [applicationJobId, setApplicationJobId] = useState<string | null>(null);
+  const applicationJob = applicationJobId ? jobsArray.find(job => job.id === applicationJobId) : null;
   
   // Pagination state - use server-side if provided, otherwise client-side
   const itemsPerPage = 20;
@@ -547,7 +557,7 @@ export function JobsSection({
                 return paginatedGroups.map(([team, teamJobs]) => (
                   <div key={team} className="space-y-4 mb-8">
                     <h3 className="text-xl font-semibold text-black">{team}</h3>
-                    <JobList jobs={teamJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                    <JobList jobs={teamJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} onJobClick={(jobId) => setSelectedJobId(jobId)} />
                   </div>
                 ));
               })()}
@@ -558,15 +568,15 @@ export function JobsSection({
                 return paginatedGroups.map(([location, locationJobs]) => (
                   <div key={location} className="space-y-4 mb-8">
                     <h3 className="text-xl font-semibold text-black">{location}</h3>
-                    <JobList jobs={locationJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                    <JobList jobs={locationJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} onJobClick={(jobId) => setSelectedJobId(jobId)} />
                   </div>
                 ));
               })()}
               {layout === 'cards' && (
-                <JobCards jobs={paginatedJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                <JobCards jobs={paginatedJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} onJobClick={(jobId) => setSelectedJobId(jobId)} />
               )}
               {layout === 'list' && (
-                <JobList jobs={paginatedJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} />
+                <JobList jobs={paginatedJobs} density={density} buttonVariant={buttonVariant} badgeVariant={badgeVariant} onJobClick={(jobId) => setSelectedJobId(jobId)} />
               )}
 
               {/* Pagination */}
@@ -612,11 +622,42 @@ export function JobsSection({
   }
 
   return (
-    <SectionWrapper contentMaxWidth={maxWidth} verticalPadding="lg">
-      <section id="jobs" className="scroll-mt-20">
-        {sectionContent}
-      </section>
-    </SectionWrapper>
+    <>
+      <SectionWrapper contentMaxWidth={maxWidth} verticalPadding="lg">
+        <section id="jobs" className="scroll-mt-20">
+          {sectionContent}
+        </section>
+      </SectionWrapper>
+      {selectedJob && (
+        <JobDetailsModal
+          job={selectedJob}
+          open={selectedJobId !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedJobId(null);
+            }
+          }}
+          onApplyClick={(jobId) => {
+            // Close details modal and open application modal
+            setSelectedJobId(null);
+            setApplicationJobId(jobId);
+            setApplicationModalOpen(true);
+          }}
+        />
+      )}
+      {applicationJob && (
+        <JobApplicationModal
+          job={applicationJob}
+          open={applicationModalOpen}
+          onOpenChange={(open) => {
+            setApplicationModalOpen(open);
+            if (!open) {
+              setApplicationJobId(null);
+            }
+          }}
+        />
+      )}
+    </>
   );
 }
 
@@ -630,18 +671,24 @@ const JobList = React.memo(function JobList({
   density = 'comfortable',
   buttonVariant = 'ghost',
   badgeVariant = 'secondary',
+  onJobClick,
 }: {
   jobs: any[];
   density?: 'comfortable' | 'compact';
   buttonVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
   badgeVariant?: 'default' | 'secondary' | 'outline' | 'destructive';
+  onJobClick?: (jobId: string) => void;
 }) {
   const densityClass = density === 'compact' ? 'p-3' : 'p-4';
   
   return (
     <div className="space-y-3">
       {jobs.map((job) => (
-        <Card key={job.id} className={`${densityClass} hover:border-primary transition-colors`}>
+        <Card 
+          key={job.id} 
+          className={`${densityClass} hover:border-primary transition-colors cursor-pointer`}
+          onClick={() => onJobClick?.(job.id)}
+        >
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
               <CardTitle className="text-base font-medium mb-2 text-black">{job.title}</CardTitle>
@@ -660,9 +707,16 @@ const JobList = React.memo(function JobList({
                 )}
               </div>
             </div>
-            <JobApplicationModal job={job} trigger={
-              <Button variant={buttonVariant} size="sm">Apply Now</Button>
-            } />
+            <Button 
+              variant={buttonVariant} 
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onJobClick?.(job.id);
+              }}
+            >
+              View Details
+            </Button>
           </div>
         </Card>
       ))}
@@ -675,16 +729,22 @@ const JobCards = React.memo(function JobCards({
   density = 'comfortable',
   buttonVariant = 'ghost',
   badgeVariant = 'secondary',
+  onJobClick,
 }: {
   jobs: any[];
   density?: 'comfortable' | 'compact';
   buttonVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
   badgeVariant?: 'default' | 'secondary' | 'outline' | 'destructive';
+  onJobClick?: (jobId: string) => void;
 }) {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {jobs.map((job) => (
-        <Card key={job.id} className="hover:border-primary transition-colors h-full flex flex-col">
+        <Card 
+          key={job.id} 
+          className="hover:border-primary transition-colors h-full flex flex-col cursor-pointer"
+          onClick={() => onJobClick?.(job.id)}
+        >
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-2">
@@ -711,9 +771,16 @@ const JobCards = React.memo(function JobCards({
             {job.description && (
               <p className="text-sm mb-4 leading-relaxed text-black line-clamp-3">{job.description}</p>
             )}
-            <JobApplicationModal job={job} trigger={
-              <Button variant={buttonVariant} className="w-full mt-auto">Apply Now</Button>
-            } />
+            <Button 
+              variant={buttonVariant} 
+              className="w-full mt-auto"
+              onClick={(e) => {
+                e.stopPropagation();
+                onJobClick?.(job.id);
+              }}
+            >
+              View Details
+            </Button>
           </CardContent>
         </Card>
       ))}

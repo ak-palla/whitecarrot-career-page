@@ -226,16 +226,9 @@ export function JobManager({ companyId }: JobManagerProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <h2 className="text-lg font-semibold">Job Postings</h2>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setCsvImportOpen(true)}
-            variant="outline"
-            className="text-black"
-          >
-            <Upload className="mr-2 h-4 w-4" /> Import CSV
-          </Button>
+        <div className="flex flex-col md:flex-row gap-2">
           <Button
             onClick={() => {
               setEditingJob(null);
@@ -244,6 +237,13 @@ export function JobManager({ companyId }: JobManagerProps) {
             className="bg-create-company hover:bg-create-company text-black"
           >
             <Plus className="mr-2 h-4 w-4" /> Add Job
+          </Button>
+          <Button
+            onClick={() => setCsvImportOpen(true)}
+            variant="outline"
+            className="text-black"
+          >
+            <Upload className="mr-2 h-4 w-4" /> Import CSV
           </Button>
         </div>
       </div>
