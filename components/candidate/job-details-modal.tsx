@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,29 +14,13 @@ interface JobDetailsModalProps {
 }
 
 export function JobDetailsModal({ job, open, onOpenChange, onApplyClick }: JobDetailsModalProps) {
-  // #region agent log
-  if (typeof window !== 'undefined') {
-    fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'job-details-modal.tsx:17',message:'JobDetailsModal render',data:{jobId:job?.id,open,jobTitle:job?.title,hasOnApplyClick:!!onApplyClick},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-  }
-  // #endregion
-
   const formatJobType = (jobType: string | null | undefined): string => {
     if (!jobType) return '';
     return jobType.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
   const handleApplyClick = () => {
-    // #region agent log
-    if (typeof window !== 'undefined') {
-      fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'job-details-modal.tsx:25',message:'handleApplyClick called',data:{jobId:job?.id,hasOnApplyClick:!!onApplyClick},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-    }
-    // #endregion
     if (onApplyClick) {
-      // #region agent log
-      if (typeof window !== 'undefined') {
-        fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'job-details-modal.tsx:29',message:'Calling onApplyClick callback',data:{jobId:job?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
-      }
-      // #endregion
       onApplyClick(job.id);
     } else {
       // Fallback: close details modal (for backward compatibility)
@@ -142,17 +125,7 @@ export function JobDetailsModal({ job, open, onOpenChange, onApplyClick }: JobDe
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Close
             </Button>
-            <Button 
-              onClick={(e) => {
-                // #region agent log
-                if (typeof window !== 'undefined') {
-                  fetch('http://127.0.0.1:7244/ingest/484ab544-b3d3-4b34-9f57-5d089fceb6aa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'job-details-modal.tsx:133',message:'Apply Now button clicked',data:{jobId:job?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                }
-                // #endregion
-                handleApplyClick();
-              }} 
-              className="min-w-[120px]"
-            >
+            <Button onClick={handleApplyClick} className="min-w-[120px]">
               Apply Now
             </Button>
           </div>

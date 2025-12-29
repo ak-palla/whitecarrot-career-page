@@ -1,6 +1,6 @@
 Careers Page Builder - WhiteCarrot Assignment
 
-Features
+What I have built?
 
 A. For Recruiters 
 
@@ -52,14 +52,15 @@ Tech Stack
    - Playwright
    - Vercel 
 
-Prerequisites
 
-   - Node.js
-   - npm/yarn/pnpm
-   - Supabase Account
+Steps to test the app: 
+   
+   Prerequisites
+
+      - Node.js
+      - npm/yarn/pnpm
+      - Supabase Account
  
-Actions to test the app: 
-
    1. Clone the Repository
 
       git clone <your-repo-url>
@@ -221,22 +222,39 @@ B. For Candidates: Finding Jobs
 
 Architecture 
 
-┌─────────────────┐
-│   Next.js App   │
-│   (Vercel)      │
-└────────┬────────┘
-         │
-         │ Server Actions
-         │ (RPC-style)
-         │
-         ▼
-┌─────────────────┐
-│    Supabase     │
-│   PostgreSQL    │
-│   + Auth        │
-│   + Storage     │
-└─────────────────┘
-NOTE: only diagram generated using ai.
+Overview:
+   ┌─────────────────┐
+   │   Next.js App   │
+   │   (Vercel)      │
+   └────────┬────────┘
+            │
+            │ Server Actions
+            │ (RPC-style)
+            │
+            ▼
+   ┌─────────────────┐
+   │    Supabase     │
+   │   PostgreSQL    │
+   │   + Auth        │
+   │   + Storage     │
+   └─────────────────┘
+   NOTE: only diagram is generated using ai.
+
+Security
+
+   - Supabase Auth (email/password)
+   - Row Level Security (RLS) policies
+   - Zod schemas on Server Actions
+   - Client-side: Type and size validation
+   - Storage: RLS policies on buckets
+   - Compression: Reduce attack surface
+
+Optimizations
+
+   - Careers pages cached for 5 minutes
+   - Lazy Loading: Components loaded on demand
+   - Image Optimization: Next.js `<Image>` with compression
+
 
 Arch Flow of data 
 
@@ -262,23 +280,6 @@ B. Candidate Viewing Careers Page
    6. Generate metadata (SEO)
    7. Cache (ISR 5min) 
    8. Serve to user
-
-Security
-
-   - Supabase Auth (email/password)
-   - Row Level Security (RLS) policies
-   - Zod schemas on Server Actions
-   - Client-side: Type and size validation
-   - Storage: RLS policies on buckets
-   - Compression: Reduce attack surface
-
-Optimizations
-
-   - Careers pages cached for 5 minutes
-   - Lazy Loading: Components loaded on demand
-   - Image Optimization: Next.js `<Image>` with compression
-
-
 
 Testing - Running E2E Tests
 
@@ -316,7 +317,7 @@ Improvements that can be made:
    6. Approval workflow for publishing
    7. Analytics Dashboard
    - PostHog analytics, custom dashboard
-   8. AI-Powered Features
+   8. AI-Powered Features (Very interesting and can be extrapolated to more)
    - AI job description generator
    - Input: Job title, requirements
    - Output: Professional description
@@ -328,7 +329,6 @@ Improvements that can be made:
 
 Fututre Scalability & Infrastructure
 
-   For 1,000+ companies:
    - Database optimizations
    - Partitioning large tables
    - Read replicas
