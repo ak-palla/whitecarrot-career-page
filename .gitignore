@@ -31,6 +31,8 @@ lerna-debug.log*
 *.log
 error.txt
 *.error.log
+build-logs.txt
+*.log.txt
 
 # Environment variables
 .env*.local
@@ -44,7 +46,9 @@ error.txt
 
 # TypeScript
 *.tsbuildinfo
+*.tsbuildinfo.*
 next-env.d.ts
+tsconfig.tsbuildinfo
 
 # Playwright
 /test-results/
@@ -60,6 +64,8 @@ next-env.d.ts
 .project
 .classpath
 .settings/
+.cursor/
+*.code-workspace
 
 # OS files
 .DS_Store
@@ -80,6 +86,17 @@ Desktop.ini
 *.swo
 *~
 *.pem
+*.key
+*.cert
+*.crt
+
+# Cache directories
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.stylelintcache
+.jest-cache/
 
 # Screenshots and temporary images (keep public assets)
 Screenshot*.png
