@@ -1,0 +1,37 @@
+Assumptions:
+- One recruiter can create and own multiple companies
+- Each company has exactly one owner
+- No team collaboration features implemented
+- No permission levels or role-based access control
+- Primary login uses Supabase Auth 
+- Session-based authentication via cookies
+
+File Upload Limits:
+- Images (logos/banners)**: 25MB limit, compressed before upload
+- Videos: 100MB limit, Direct upload to Supabase Storage
+- CSV files:10MB
+
+Considerations:
+- Jobs pagination: 20 items per page on frontend
+- Database indexes optimize common queries
+- Client-side filtering with memoization
+- Server-side pagination support 
+
+
+Recruiter Workflow:
+- Recruiters start with empty companies
+- Must add jobs manually via UI
+- Can use CSV upload feature for bulk import
+
+
+Architecture Decisions
+
+- Next.js
+- Supabase
+- Puck.js Visual Editor
+- Tailwind CSS - Utility-first styling
+- shadcn/ui - Accessible component library
+- Lucide React - Icon library
+
+
+

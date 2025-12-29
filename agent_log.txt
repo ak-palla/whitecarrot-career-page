@@ -1,0 +1,187 @@
+AI Tools Used
+
+- Cursor AI (Primary coding assistant)
+- Claude (Anthropic) (Architecture & planning)
+- ChatGPT (OpenAI)(Quick queries & debugging)
+- Perplexity for analysis and tool finding and opensource repo finder
+
+My Prompt to Cursor:
+Design a PostgreSQL schema for a multi-tenant careers page builder. Each company has one career page with customizable theme, multiple content sections, and job postings. Need to support both a legacy section system and a new Puck.js visual editor.
+
+What I Kept:
+- Core table structure (companies, career_pages, jobs)
+- JSONB approach for flexible data
+- RLS policy pattern
+
+What I Changed:
+- Added draft_puck_data column for preview mode (AI didn't suggest)
+- Added more composite indexes for performance (AI suggested single-column only)
+- Simplified some RLS policies (AI's were too complex)
+
+
+My Prompt to claude:
+In Next.js App Router, how should I decide which components should be Server Components vs Client Components for this careers page builder?
+
+AI Suggestion:
+- Server Components for: Data fetching, public pages, SEO
+- Client Components for: Forms, interactive UI, browser APIs
+- Provided decision tree
+
+Implementation:
+- Public careers page: Server Component (SEO, metadata)
+- Editor components: Client Components (forms, drag-and-drop)
+- Preview page: Server Component with Client sections
+
+Why This Worked:
+Clear separation improved:
+- SEO (server-rendered metadata)
+- Performance (less client JS)
+- User experience (instant page loads)
+
+To Cursor:
+Create a Next.js Server Action to create a company and automatically create its career page with default theme. Include Zod validation and handle duplicate slugs."
+
+
+What I Kept:
+- Basic structure and flow
+- Error handling pattern
+- Auth check approach
+
+Refinements:
+- Added Zod validation
+- Added redirect on success
+redirect(`/${company.slug}/edit`);
+
+
+Cursor:
+Write a TypeScript function to compress images client-side before uploading. Should handle large files, maintain aspect ratio, and reduce quality until file is under 2MB. Use Canvas API."
+
+Worked:
+- Basic Canvas API approach
+- Aspect ratio calculation
+- Initial compression logic
+
+Improvements:
+1. Added recursive compression
+
+
+Why Refinement Was Needed:
+- AI's single-pass compression didn't guarantee <2MB
+
+
+Impact:
+- Recursive compression: Handles 10MB+ images reliably
+- Format optimization: 30-50% smaller files
+- Better UX: Predictable file sizes
+
+Cursor AI:
+Create a CSV parser in TypeScript that handles quoted fields, escaped quotes (double quotes), and maps job data from CSV to my database format. Need to normalize job types like 'fulltime' to 'full-time'.
+
+What Didn't Work:
+- Simple `.split(',')` breaks on quoted fields with commas
+- No handling of escaped quotes (`""`)
+- No data normalization
+
+Why I Rewrote:
+- AI's solution too simplistic for real-world CSV files
+- Needed proper quote handling for fields like: `"Job Title, Senior"`
+- Required domain-specific normalization
+
+Impact:
+- Handles complex CSV exports from Excel, Google Sheets
+- Robust import for 100+ jobs at once
+- Better data quality (normalized types)
+
+Evidence: `lib/utils/csv-loader.ts`
+
+Claude:
+How do I integrate Puck.js with Next.js App Router and Supabase? Need to store content in JSONB and support draft/publish workflow.
+
+
+What I Implemented:
+- Followed JSONB storage pattern exactly
+- Added draft/publish columns as suggested
+- Created Server Actions for save/publish
+
+Additional Work I Did:
+- Data normalization utilities (AI didn't provide)
+- Backward compatibility with legacy sections
+- Migration utilities
+
+Why Additional Work Was Needed:
+- AI gave basic pattern
+- Needed backward compatibility (AI didn't consider)
+- Required data validation/normalization
+
+
+Cursor AI:
+I'm getting TypeScript errors in my Puck utilities. 'Type conversion failed' when normalizing Puck data. 
+
+AI Diagnosis:
+
+- AI identified the issue:
+- Missing null checks and improper type assertions
+
+Solution Applied:
+- Added proper type guards
+- Null checks before accessing refs
+- Created validation functions
+
+
+ChatGPT:
+My Supabase query is returning null for career_pages even though I can see the data in the database. Using RLS policies. Here's my query: `supabase.from('companies').select('*, career_pages(*)').eq('slug', slug).single()’
+
+AI Diagnosis:
+- RLS policy on `career_pages` blocking the join
+- Policies need to allow public read for published pages
+
+ChatGPT:
+Images over 5MB are failing to upload to Supabase Storage. No error message. How do I debug this?
+
+AI Diagnosis:
+- Supabase has default 5MB limit
+- Need to compress before upload
+- Add proper error handling
+
+
+ What AI Struggles With
+
+1. Project-Specific Context
+2. Edge Cases
+3. Performance Optimization
+4. Security Considerations
+- May suggest solutions that work but aren't secure
+
+AI suggested basic file upload without validation - I added size limits, type checks, and compression.
+
+What AI Excelled At
+
+1. Rapid Prototyping- Got from idea to working prototype in hours
+2. Learning Curve- Explained Puck.js, Supabase RLS without reading docs
+3. boilerplate Elimination- Generated 90% of Server Actions structure
+4. Debugging Assistant - Quickly diagnosed TypeScript and RLS errors
+5. Pattern Consistency - Helped maintain consistent code style
+
+My Interventions:
+
+1. Architecture Decisions - Final decisions needed context AI didn't have
+2. Security Review - Critical to manually review all AI security code
+3. Edge Cases - AI missed many edge cases in CSV parsing, file uploads
+4. Performance Tuning - Database indexes, caching required manual work
+5. UX Refinement - Error messages, loading states needed manual polish
+
+My Thoughts
+
+-  Accelerated development 
+- Reduced cognitive load on boilerplate
+- Helped learn new libraries quickly
+- Provided instant debugging assistance
+
+However, they were not sufficient alone. Critical thinking, manual refinement, and human judgment were essential for:
+- Security
+- Performance
+- Edge cases
+- Architecture decisions
+- Production quality
+
+Great for creating quick prototypes or mvps
